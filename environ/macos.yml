@@ -1,0 +1,16 @@
+name: freddy
+
+channels:
+  - conda-forge
+  - pytorch
+
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - scikit-learn
+  - pytorch
+  - torchdata
+  - torchvision
+  - tqdm
+  - wandb

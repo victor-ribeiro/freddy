@@ -61,7 +61,9 @@ def distribute_subset(subset, weight, ordering_time, similarity_time, pred_time,
         torch.Tensor([ordering_time, similarity_time, pred_time]).float().cuda()
     )
     dist.reduce(
-        reduced_times, 0, op=dist.ReduceOp.MAX,
+        reduced_times,
+        0,
+        op=dist.ReduceOp.MAX,
     )
 
     return subset, weight, reduced_times
@@ -170,7 +172,13 @@ class SubsetGenerator:
                 _,
                 ordering_time,
                 similarity_time,
-            ) = submodular.greedy_merge(preds, fl_labels, B, 5, "euclidean",)
+            ) = submodular.greedy_merge(
+                preds,
+                fl_labels,
+                B,
+                5,
+                "euclidean",
+            )
         else:
             if use_submodlib:
                 (

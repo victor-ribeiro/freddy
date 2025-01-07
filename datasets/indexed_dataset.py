@@ -1,4 +1,4 @@
-import torchdatasets as td
+from torch.utils import data as td
 from datasets.datasets import get_dataset
 
 

@@ -25,9 +25,7 @@ class AverageMeter:
         self.sum = 0
         self.count = 0
 
-    def update(
-        self, val, n=1
-    ):  # n is the number of samples in the batch, default to 1
+    def update(self, val, n=1):  # n is the number of samples in the batch, default to 1
         """Update statistics"""
         self.val = val
         self.sum += val * n
@@ -37,7 +35,7 @@ class AverageMeter:
 
 class BaseTrainer:
     def __init__(
-        self, 
+        self,
         args: argparse.Namespace,
         model: nn.Module,
         train_dataset: IndexedDataset,
@@ -68,7 +66,7 @@ class BaseTrainer:
             batch_size=self.args.batch_size,
             shuffle=True,
             num_workers=self.args.num_workers,
-            pin_memory=True
+            pin_memory=True,
         )
         self.val_loader = val_loader
         if train_weights is not None:
@@ -107,7 +105,6 @@ class BaseTrainer:
         self.batch_forward_time = AverageMeter()
         self.batch_backward_time = AverageMeter()
 
-
     def train(self):
         """
         Train the model
@@ -130,14 +127,14 @@ class BaseTrainer:
                         "val_loss": self.val_loss,
                         "val_acc": self.val_acc,
                         "lr": self.optimizer.param_groups[0]["lr"],
-                    })
-                
+                    }
+                )
+
             self.lr_scheduler.step()
 
-            if (epoch+1) % self.args.save_freq == 0:
+            if (epoch + 1) % self.args.save_freq == 0:
                 self._save_checkpoint(epoch)
         self._save_checkpoint()
-
 
     def _forward_and_backward(self, data, target, data_idx):
         self.optimizer.zero_grad()
@@ -170,7 +167,9 @@ class BaseTrainer:
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        pbar = tqdm(enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout)
+        pbar = tqdm(
+            enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
+        )
         for batch_idx, (data, target, data_idx) in enumerate(pbar):
 
             # load data to device and record data loading time
@@ -190,14 +189,13 @@ class BaseTrainer:
                     self.args.epochs,
                     batch_idx * self.args.batch_size + len(data),
                     len(self.train_loader.dataset),
-                    100.0 * (batch_idx+1) / len(self.train_loader),
+                    100.0 * (batch_idx + 1) / len(self.train_loader),
                     loss.item(),
                     train_acc,
                 )
             )
 
             data_start = time.time()
-
 
     def _val_epoch(self, epoch):
         self.model.eval()
@@ -236,11 +234,12 @@ class BaseTrainer:
                 "val_loss": self.val_loss,
                 "val_acc": self.val_acc,
                 "args": self.args,
-                }, 
-            save_path)
-        
+            },
+            save_path,
+        )
+
         self.args.logger.info("Checkpoint saved to {}".format(save_path))
-        
+
     def _load_checkpoint(self, epoch):
         save_path = self.args.save_dir + "/model_epoch_{}.pt".format(epoch)
         checkpoint = torch.load(save_path)
@@ -253,7 +252,6 @@ class BaseTrainer:
         self.args = checkpoint["args"]
 
         self.args.logger.info("Checkpoint loaded from {}".format(save_path))
-
 
     def _log_epoch(self, epoch):
         self.args.logger.info(
@@ -281,22 +279,21 @@ class BaseTrainer:
         self.batch_forward_time.reset()
         self.batch_backward_time.reset()
 
-
     def get_model(self):
         return self.model
-    
+
     def get_train_loss(self):
         return self.train_loss.avg
-    
+
     def get_train_acc(self):
         return self.train_acc.avg
-    
+
     def get_val_loss(self):
         return self.val_loss.avg
-    
+
     def get_val_acc(self):
         return self.val_acc.avg
-    
+
     def get_train_time(self):
         # return a dict of data loading, forward and backward time
         return {
@@ -304,4 +301,3 @@ class BaseTrainer:
             "forward_time": self.batch_forward_time.avg,
             "backward_time": self.batch_backward_time.avg,
         }
-    

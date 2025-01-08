@@ -294,7 +294,6 @@ class BaseTrainer:
         self.batch_data_time.reset()
         self.batch_forward_time.reset()
         self.batch_backward_time.reset()
-        self.hist = []
 
     def get_model(self):
         return self.model

@@ -14,8 +14,8 @@ np.seterr(all="ignore")
 
 args = get_args()
 
-if len(args.gpu) > 0 and ("CUDA_VISIBLE_DEVICES" not in os.environ): 
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" # so the IDs match nvidia-smi
+if len(args.gpu) > 0 and ("CUDA_VISIBLE_DEVICES" not in os.environ):
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # so the IDs match nvidia-smi
     device_str = ",".join(map(str, args.gpu))
     os.environ["CUDA_VISIBLE_DEVICES"] = device_str
     print("Using GPU: {}.".format(os.environ["CUDA_VISIBLE_DEVICES"]))
@@ -41,10 +41,13 @@ else:
 
 if args.use_wandb:
     import wandb
-    wandb.init(project="crest", config=args, name=args.save_dir.split('/')[-1])
+
+    wandb.init(project="crest", config=args, name=args.save_dir.split("/")[-1])
 
 # Set up logging and output locations
-logger = logging.getLogger(args.save_dir.split('/')[-1] + time.strftime("-%Y-%m-%d-%H-%M-%S"))
+logger = logging.getLogger(
+    args.save_dir.split("/")[-1] + time.strftime("-%Y-%m-%d-%H-%M-%S")
+)
 os.makedirs(args.save_dir, exist_ok=True)
 
 logging.basicConfig(
@@ -65,6 +68,7 @@ args.logger = logger
 args.logger.info("Arguments: {}".format(args))
 args.logger.info("Time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
 
+
 def main(args):
     train_dataset = IndexedDataset(args, train=True, train_transform=True)
     args.train_size = len(train_dataset)
@@ -75,18 +79,19 @@ def main(args):
         num_workers=args.num_workers,
         pin_memory=True,
     )
-    
-    if args.arch == 'resnet20':
+
+    if args.arch == "resnet20":
         model = ResNet20(num_classes=args.num_classes)
-    elif args.arch == 'resnet18':
+    elif args.arch == "resnet18":
         model = ResNet18(num_classes=args.num_classes)
-    elif args.arch == 'resnet50':
+    elif args.arch == "resnet50":
         model = torchvision.models.resnet50(num_classes=args.num_classes)
     else:
         raise NotImplementedError(f"Architecture {args.arch} not implemented.")
 
     if args.selection_method == "none":
         from trainers import BaseTrainer
+
         trainer = BaseTrainer(
             args,
             model,
@@ -95,6 +100,7 @@ def main(args):
         )
     elif args.selection_method == "random":
         from trainers import RandomTrainer
+
         trainer = RandomTrainer(
             args,
             model,
@@ -103,6 +109,7 @@ def main(args):
         )
     elif args.selection_method == "crest":
         from trainers import CRESTTrainer
+
         trainer = CRESTTrainer(
             args,
             model,
@@ -110,9 +117,12 @@ def main(args):
             val_loader,
         )
     else:
-        raise NotImplementedError(f"Selection method {args.selection_method} not implemented.")
-    
+        raise NotImplementedError(
+            f"Selection method {args.selection_method} not implemented."
+        )
+
     trainer.train()
+
 
 if __name__ == "__main__":
     main(args)

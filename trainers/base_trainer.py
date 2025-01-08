@@ -104,6 +104,11 @@ class BaseTrainer:
         self.batch_data_time = AverageMeter()
         self.batch_forward_time = AverageMeter()
         self.batch_backward_time = AverageMeter()
+        self.hist = []
+
+    @property
+    def device(self):
+        return self.args.device
 
     def train(self):
         """
@@ -117,6 +122,13 @@ class BaseTrainer:
         for epoch in range(self.args.resume_from_epoch, self.args.epochs):
             self._train_epoch(epoch)
             self._val_epoch(epoch)
+            hist = {
+                "train_loss": self.train_loss.avg,
+                "train_acc": self.train_acc.avg,
+                "val_loss": self.val_loss,
+                "val_acc": self.val_acc,
+            }
+            self.hist.append(hist)
 
             self._log_epoch(epoch)
 
@@ -134,6 +146,7 @@ class BaseTrainer:
 
             if (epoch + 1) % self.args.save_freq == 0:
                 self._save_checkpoint(epoch)
+        print(self.hist)
         self._save_checkpoint()
 
     def _forward_and_backward(self, data, target, data_idx):
@@ -173,7 +186,7 @@ class BaseTrainer:
         for batch_idx, (data, target, data_idx) in enumerate(pbar):
 
             # load data to device and record data loading time
-            data, target = data.to(self.args.device), target.to(self.args.device)
+            data, target = data.to(self.device), target.to(self.device)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)
 
@@ -205,7 +218,8 @@ class BaseTrainer:
 
         with torch.no_grad():
             for _, (data, target, _) in enumerate(self.val_loader):
-                data, target = data.cuda(), target.cuda()
+                # data, target = data.cuda(), target.cuda()
+                data, target = data.to(self.args.device), target.to(self.args.device)
 
                 output = self.model(data)
 
@@ -233,6 +247,7 @@ class BaseTrainer:
                 "train_acc": self.train_acc.avg,
                 "val_loss": self.val_loss,
                 "val_acc": self.val_acc,
+                "hist": self.hist,
                 "args": self.args,
             },
             save_path,
@@ -249,7 +264,8 @@ class BaseTrainer:
         self.train_acc = checkpoint["train_acc"]
         self.val_loss = checkpoint["val_loss"]
         self.val_acc = checkpoint["val_acc"]
-        self.args = checkpoint["args"]
+        self.args = (checkpoint["args"],)
+        self.hist = checkpoint["hist"]
 
         self.args.logger.info("Checkpoint loaded from {}".format(save_path))
 
@@ -278,6 +294,7 @@ class BaseTrainer:
         self.batch_data_time.reset()
         self.batch_forward_time.reset()
         self.batch_backward_time.reset()
+        self.hist = []
 
     def get_model(self):
         return self.model

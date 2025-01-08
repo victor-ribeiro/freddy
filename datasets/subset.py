@@ -9,17 +9,23 @@ from torch.utils.data import DataLoader, Dataset
 from utils import submodular, craig
 
 
-def distribute_subset(subset, weight, ordering_time, similarity_time, pred_time, args):
-    size = torch.Tensor([len(subset)]).int().cuda()
+def distribute_subset(
+    subset, weight, ordering_time, similarity_time, pred_time, args, device="cpu"
+):
+    # size = torch.Tensor([len(subset)]).int().cuda()
+    size = torch.Tensor([len(subset)]).int().to(device)
     subset_sizes = [
-        torch.zeros(size.shape, dtype=torch.int32).cuda()
+        # torch.zeros(size.shape, dtype=torch.int32).cuda()
+        torch.zeros(size.shape, dtype=torch.int32).to(device)
         for _ in range(args.world_size)
     ]
     dist.all_gather(subset_sizes, size)
     max_size = torch.max(torch.cat(subset_sizes)).item()
 
     subset_list = [
-        torch.zeros(max_size, dtype=torch.int64).cuda() for _ in range(args.world_size)
+        # torch.zeros(max_size, dtype=torch.int64).cuda() for _ in range(args.world_size)
+        torch.zeros(max_size, dtype=torch.int64).to(device)
+        for _ in range(args.world_size)
     ]
 
     subset = (
@@ -28,15 +34,21 @@ def distribute_subset(subset, weight, ordering_time, similarity_time, pred_time,
         else subset
     )
 
-    dist.all_gather(subset_list, torch.from_numpy(subset).cuda())
+    # dist.all_gather(subset_list, torch.from_numpy(subset).cuda())
+    dist.all_gather(subset_list, torch.from_numpy(subset).to(device))
     subset_list = [
         subset_list[i][: subset_sizes[i].item()] for i in range(args.world_size)
     ]
     subset = torch.cat(subset_list).cpu().numpy()
 
     if args.weighted and args.greedy:
+        # weight_list = [
+        #     torch.zeros(max_size, dtype=torch.float32).cuda()
+        #     for _ in range(args.world_size)
+        # ]
         weight_list = [
-            torch.zeros(max_size, dtype=torch.float32).cuda()
+            # torch.zeros(max_size, dtype=torch.float32).cuda()
+            torch.zeros(max_size, dtype=torch.float32).to(device)
             for _ in range(args.world_size)
         ]
 
@@ -44,7 +56,8 @@ def distribute_subset(subset, weight, ordering_time, similarity_time, pred_time,
             torch.cat(
                 [
                     weight,
-                    torch.zeros(max_size - len(weight), dtype=torch.float32).cuda(),
+                    # torch.zeros(max_size - len(weight), dtype=torch.float32).cuda(),
+                    torch.zeros(max_size - len(weight), dtype=torch.float32).to(device),
                 ]
             )
             if len(weight) != max_size
@@ -57,9 +70,12 @@ def distribute_subset(subset, weight, ordering_time, similarity_time, pred_time,
         ]
         weight = torch.cat(weight_list)
 
-    reduced_times = (
-        torch.Tensor([ordering_time, similarity_time, pred_time]).float().cuda()
-    )
+    # reduced_times = (
+    #     torch.Tensor([ordering_time, similarity_time, pred_time]).float().cuda()
+    # )
+    reduced_times = torch.Tensor([ordering_time, similarity_time, pred_time]).float()
+    reduced_times = reduced_times.to(device)
+
     dist.reduce(
         reduced_times,
         0,

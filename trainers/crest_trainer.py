@@ -129,7 +129,7 @@ class CRESTTrainer(SubsetTrainer):
         :param epoch: current epoch
         :param training_step: current training step
         """
-
+        device = self.args.device
         if self.args.approx_with_coreset:
             # Update the second-order approximation with the coreset
             approx_loader = DataLoader(
@@ -155,8 +155,10 @@ class CRESTTrainer(SubsetTrainer):
         curvature_norm = AverageMeter()
         self.start_loss = AverageMeter()
         for approx_batch, (input, target, idx) in enumerate(approx_loader):
-            target = target.cuda()
-            input_var = input.cuda()
+            # target = target.cuda()
+            # input_var = input.cuda()
+            target = target.to(device)
+            input_var = input.to(device)
             target_var = target
 
             # compute output

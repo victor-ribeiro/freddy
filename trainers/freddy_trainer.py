@@ -144,6 +144,7 @@ def freddy(
     np.random.shuffle(sset)
     if return_vals:
         return np.array(vals), sset
+
     return np.array(sset)
 
 

@@ -146,7 +146,6 @@ class BaseTrainer:
 
             if (epoch + 1) % self.args.save_freq == 0:
                 self._save_checkpoint(epoch)
-        print(self.hist)
         self._save_checkpoint()
 
     def _forward_and_backward(self, data, target, data_idx):
@@ -183,8 +182,7 @@ class BaseTrainer:
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
-        for batch_idx, (data, target, data_idx) in enumerate(pbar):
-
+        for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
             data, target = data.to(self.device), target.to(self.device)
             data_time = time.time() - data_start

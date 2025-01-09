@@ -53,6 +53,7 @@ class CRESTTrainer(SubsetTrainer):
                 self._check_approx_error(epoch, training_step)
 
             if training_step == self.reset_step:
+                print(f"select step {training_step} : {epoch}")
                 self._select_subset(epoch, training_step)
                 self._update_train_loader_and_weights()
                 self.train_iter = iter(self.train_loader)

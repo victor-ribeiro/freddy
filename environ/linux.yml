@@ -5,7 +5,7 @@ channels:
   - pytorch
 
 dependencies:
-  - python=3.11
+  - python=3.12
   - pip
   - numpy
   - scikit-learn
@@ -14,3 +14,4 @@ dependencies:
   - torchvision
   - tqdm
   - wandb
+  - pandas

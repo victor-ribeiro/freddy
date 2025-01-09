@@ -1,5 +1,6 @@
 #!/bin/bash
 
+home=$(pwd)
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     conda env create -f environ/macos.yml
@@ -16,7 +17,7 @@ if [ $? == 0 ]; then
     fi
     source ~/miniconda3/etc/profile.d/conda.sh
     conda activate freddy
-    cd submodlib
+    cd $home/submodlib
     pip install .
 fi
 

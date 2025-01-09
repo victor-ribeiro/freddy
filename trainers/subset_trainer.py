@@ -20,6 +20,7 @@ class SubsetTrainer(BaseTrainer):
         )
 
         self.num_selection = 0
+        self.train_val_loader = None
 
     def _update_train_loader_and_weights(self):
         self.args.logger.info(
@@ -45,6 +46,7 @@ class SubsetTrainer(BaseTrainer):
         self.subset_weights = (
             self.subset_weights / np.sum(self.subset_weights) * len(self.subset)
         )
+
         self.train_weights[self.subset] = self.subset_weights
         self.train_weights = (
             torch.from_numpy(self.train_weights).float().to(self.args.device)

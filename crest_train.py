@@ -29,6 +29,9 @@ from datasets import IndexedDataset
 from models import *
 
 # Use CUDA if available and set random seed for reproducibility
+if args.selection_method == "none":
+    args.train_frac = 1
+
 if torch.cuda.is_available():
     args.device = "cuda"
     torch.cuda.manual_seed(args.seed)
@@ -65,7 +68,7 @@ logger.addHandler(ch)
 args.logger = logger
 
 # Print arguments
-args.logger.info("Arguments: {}".format(args))
+# args.logger.info("Arguments: {}".format(args))
 args.logger.info("Time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
 
 
@@ -88,38 +91,28 @@ def main(args):
         model = torchvision.models.resnet50(num_classes=args.num_classes)
     else:
         raise NotImplementedError(f"Architecture {args.arch} not implemented.")
+    match args.selection_method:
+        case "none":
+            from trainers import BaseTrainer
 
-    if args.selection_method == "none":
-        from trainers import BaseTrainer
+            args.train_frac = 1
+            trainer = BaseTrainer(args, model, train_dataset, val_loader)
+        case "random":
+            from trainers import RandomTrainer
 
-        trainer = BaseTrainer(
-            args,
-            model,
-            train_dataset,
-            val_loader,
-        )
-    elif args.selection_method == "random":
-        from trainers import RandomTrainer
+            trainer = RandomTrainer(args, model, train_dataset, val_loader)
+        case "crest":
+            from trainers import CRESTTrainer
 
-        trainer = RandomTrainer(
-            args,
-            model,
-            train_dataset,
-            val_loader,
-        )
-    elif args.selection_method == "crest":
-        from trainers import CRESTTrainer
+            trainer = CRESTTrainer(args, model, train_dataset, val_loader)
+        case "freddy":
+            from trainers import FreddyTrainer
 
-        trainer = CRESTTrainer(
-            args,
-            model,
-            train_dataset,
-            val_loader,
-        )
-    else:
-        raise NotImplementedError(
-            f"Selection method {args.selection_method} not implemented."
-        )
+            trainer = FreddyTrainer(args, model, train_dataset, val_loader)
+        case _:
+            raise NotImplementedError(
+                f"Selection method {args.selection_method} not implemented."
+            )
 
     trainer.train()
 

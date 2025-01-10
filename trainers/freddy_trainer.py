@@ -163,7 +163,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = map(
             lambda x: (
                 # self.model(x[0]).cpu().detach().numpy(),
-                self.model(x[0]).cpu().detach().numpy(),
+                self.model.cpu()(x[0]).detach().numpy(),
                 one_hot_coding(x[1].cpu(), self.args.num_classes),
             ),
             dataset,

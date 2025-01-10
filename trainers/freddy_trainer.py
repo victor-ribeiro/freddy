@@ -176,10 +176,14 @@ class FreddyTrainer(SubsetTrainer):
         feat = map(lambda x: x[0] - x[1], feat)
         feat = map(np.abs, feat)
         feat = np.vstack([*feat])
-        # print(feat[:3])
-        # exit()
-        score, self.subset = freddy(feat, K=self.sample_size, return_vals=True)
-        print(len(score))
-        exit()
+
+        score, self.subset = freddy(
+            feat,
+            K=self.sample_size,
+            return_vals=True,
+            metric=self.args.freddy_similarity,
+        )
+        # score = np.concat(([0], np.diff(score))) / score
+
         # self.subset_weights = np.ones(self.sample_size)
-        self.subset_weights = np.ones(len(self.subset))
+        self.subset_weights = score

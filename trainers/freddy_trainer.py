@@ -17,8 +17,8 @@ METRICS = {}
 
 def one_hot_coding(target, classes):
     n = len(target)
-    coded = np.ones((n, classes))
-    coded[np.arange(n), target] = 0
+    coded = np.zeros((n, classes))
+    coded[np.arange(n), target] = 1
     return coded
 
 
@@ -169,7 +169,7 @@ class FreddyTrainer(SubsetTrainer):
             dataset,
         )
 
-        feat = map(lambda x: x[1] - x[0], feat)
+        feat = map(lambda x: 1 - (x[1] - x[0]), feat)
         feat = np.vstack([*feat])
         self.subset = freddy(feat, K=self.sample_size)
         # self.subset_weights = np.ones(self.sample_size)

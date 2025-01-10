@@ -17,8 +17,10 @@ METRICS = {}
 
 def one_hot_coding(target, classes):
     n = len(target)
-    coded = np.zeros((n, classes))
-    coded[np.arange(n), target] = 1
+    # coded = np.zeros((n, classes))
+    # coded[np.arange(n), target] = 1
+    coded = np.ones((n, classes))
+    coded[np.arange(n), target] = 0
     return coded
 
 
@@ -163,13 +165,14 @@ class FreddyTrainer(SubsetTrainer):
         feat = map(
             lambda x: (
                 # self.model(x[0]).cpu().detach().numpy(),
-                self.model.cpu()(x[0]).detach().numpy(),
                 one_hot_coding(x[1].cpu(), self.args.num_classes),
+                torch.nn.functional.softmax(self.model.cpu()(x[0])).detach().numpy(),
             ),
             dataset,
         )
 
-        feat = map(lambda x: 1 - (x[1] - x[0]), feat)
+        feat = map(lambda x: x[0] - x[1], feat)
+        feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         self.subset = freddy(feat, K=self.sample_size)
         # self.subset_weights = np.ones(self.sample_size)

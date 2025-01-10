@@ -1,15 +1,12 @@
-from .subset_trainer import *
-
-###############################################
-### |S| <= 1 + log max F( e | [] ) x | S* | ###
-###############################################
-
 import numpy as np
 import heapq
 import math
 from itertools import batched
 from sklearn.metrics import pairwise_distances
 
+import torch
+
+from .subset_trainer import *
 
 REDUCE = {"mean": np.mean, "sum": np.sum}
 __all__ = ["METRICS"]
@@ -148,10 +145,23 @@ def freddy(
 
 
 class FreddyTrainer(SubsetTrainer):
+    def __init__(self, args, model, train_dataset, val_loader, train_weights=None):
+        super().__init__(args, model, train_dataset, val_loader, train_weights)
+        self.sample_size = int(len(self.train_dataset) * self.args.train_frac)
+
     def _select_subset(self, epoch, training_step):
+        print(f"len dataset: {len(self.train_dataset)}")
+        dataset = self.train_dataset.dataset
+        dataset = DataLoader(
+            dataset,
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            num_workers=self.args.num_workers,
+            pin_memory=True,
+        )
+
         self.model.eval()
-        sample_size = int(len(self.train_dataset) * self.args.train_frac)
-        feat = (((data, target, _)) for data, target, _ in self.train_loader)
+        feat = (_ for _ in dataset)
         feat = map(
             lambda x: (
                 # self.model(x[0]).cpu().detach().numpy(),
@@ -163,5 +173,6 @@ class FreddyTrainer(SubsetTrainer):
 
         feat = map(lambda x: x[1] - x[0], feat)
         feat = np.vstack([*feat])
-        self.subset = freddy(feat, K=sample_size)
+        self.subset = freddy(feat, K=self.sample_size)
+        # self.subset_weights = np.ones(self.sample_size)
         self.subset_weights = np.ones(len(self.subset))

@@ -15,12 +15,8 @@ class SubsetTrainer(BaseTrainer):
     ):
         super().__init__(args, model, train_dataset, val_loader, train_weights)
         self.train_target = np.array(self.train_dataset.dataset.targets)
-        self.subset_generator = SubsetGenerator(
-            greedy=(args.selection_method != "rand"), smtk=args.smtk
-        )
-
         self.num_selection = 0
-        # self.subset = np.arange(len(train_dataset))
+        self.subset = np.arange(len(train_dataset))
         # self.train_val_loader = None
 
     def _update_train_loader_and_weights(self):

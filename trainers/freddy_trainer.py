@@ -166,14 +166,18 @@ class FreddyTrainer(SubsetTrainer):
             lambda x: (
                 # self.model(x[0]).cpu().detach().numpy(),
                 one_hot_coding(x[1].cpu(), self.args.num_classes),
-                torch.nn.functional.softmax(self.model.cpu()(x[0])).detach().numpy(),
+                torch.nn.functional.softmax(self.model.cpu()(x[0]), dim=1)
+                .detach()
+                .numpy(),
             ),
             dataset,
         )
 
         feat = map(lambda x: x[0] - x[1], feat)
         feat = map(np.abs, feat)
-        feat = 1 - np.vstack([*feat])
+        feat = np.vstack([*feat])
+        # print(feat[:3])
+        # exit()
         self.subset = freddy(feat, K=self.sample_size)
         # self.subset_weights = np.ones(self.sample_size)
         self.subset_weights = np.ones(len(self.subset))

@@ -159,9 +159,8 @@ class FreddyTrainer(SubsetTrainer):
     def _select_subset(self, epoch, training_step):
         self.model.eval()
         sample_size = int(len(self.train_dataset) * self.args.train_frac)
-
         feat = (((data, target, _)) for data, target, _ in self.train_loader)
-
+        self.model = self.model.cpu()
         feat = map(
             lambda x: (
                 self.model(x[0]).detach().numpy(),
@@ -174,3 +173,4 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         self.subset = freddy(feat, K=sample_size)
         self.subset_weights = np.ones(len(self.subset))
+        self.model = self.model.to(self.args.device)

@@ -157,7 +157,6 @@ class FreddyTrainer(SubsetTrainer):
             batch_size=self.args.batch_size,
             shuffle=True,
             num_workers=self.args.num_workers,
-            pin_memory=True,
         )
 
         self.model.eval()

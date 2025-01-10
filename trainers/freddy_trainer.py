@@ -157,6 +157,7 @@ class FreddyTrainer(SubsetTrainer):
         return self._size
 
     def _select_subset(self, epoch, training_step):
+        self._get_train_output()
         self.model.eval()
         sample_size = int(len(self.train_dataset) * self.args.train_frac)
 

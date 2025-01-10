@@ -52,7 +52,7 @@ class BaseTrainer:
         """
 
         self.args = args
-        self.model = model
+        self.model = model.to(self.device)
 
         # if more than one GPU is available, use DataParallel
         if torch.cuda.device_count() > 1:

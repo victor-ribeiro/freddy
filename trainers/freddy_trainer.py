@@ -173,7 +173,7 @@ class FreddyTrainer(SubsetTrainer):
 
         feat = map(lambda x: x[0] - x[1], feat)
         feat = map(np.abs, feat)
-        feat = np.vstack([*feat])
+        feat = 1 - np.vstack([*feat])
         self.subset = freddy(feat, K=self.sample_size)
         # self.subset_weights = np.ones(self.sample_size)
         self.subset_weights = np.ones(len(self.subset))

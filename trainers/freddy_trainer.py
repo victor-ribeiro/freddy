@@ -163,7 +163,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model = self.model.cpu()
         feat = map(
             lambda x: (
-                self.model(x[0]).detach().numpy(),
+                self.model(x[0]).cpu().detach().numpy(),
                 one_hot_coding(x[1], self.args.num_classes),
             ),
             feat,
@@ -173,4 +173,3 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         self.subset = freddy(feat, K=sample_size)
         self.subset_weights = np.ones(len(self.subset))
-        self.model = self.model.to(self.args.device)

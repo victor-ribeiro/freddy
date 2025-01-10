@@ -20,7 +20,8 @@ class SubsetTrainer(BaseTrainer):
         )
 
         self.num_selection = 0
-        self.train_val_loader = None
+        # self.subset = np.arange(len(train_dataset))
+        # self.train_val_loader = None
 
     def _update_train_loader_and_weights(self):
         self.args.logger.info(

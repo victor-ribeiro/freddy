@@ -68,7 +68,7 @@ logger.addHandler(ch)
 args.logger = logger
 
 # Print arguments
-args.logger.info("Arguments: {}".format(args))
+# args.logger.info("Arguments: {}".format(args))
 args.logger.info("Time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
 
 

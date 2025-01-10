@@ -152,7 +152,7 @@ class BaseTrainer:
 
         # train model with the current batch and record forward and backward time
         forward_start = time.time()
-        output = self.model(data)
+        output = self.model.to(self.device)(data)
         forward_time = time.time() - forward_start
         self.batch_forward_time.update(forward_time)
 

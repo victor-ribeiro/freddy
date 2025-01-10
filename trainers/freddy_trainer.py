@@ -17,10 +17,10 @@ METRICS = {}
 
 def one_hot_coding(target, classes):
     n = len(target)
-    # coded = np.zeros((n, classes))
-    # coded[np.arange(n), target] = 1
-    coded = np.ones((n, classes))
-    coded[np.arange(n), target] = 0
+    coded = np.zeros((n, classes))
+    coded[np.arange(n), target] = 1
+    # coded = np.ones((n, classes))
+    # coded[np.arange(n), target] = 0
     return coded
 
 

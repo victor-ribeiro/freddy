@@ -148,19 +148,10 @@ def freddy(
 
 
 class FreddyTrainer(SubsetTrainer):
-    def __init__(self, args, model, train_dataset, val_loader, train_weights=None):
-        super().__init__(args, model, train_dataset, val_loader, train_weights)
-        self._size = len(train_dataset)
-
-    @property
-    def size(self):
-        return self._size
-
     def _select_subset(self, epoch, training_step):
         self.model.eval()
         sample_size = int(len(self.train_dataset) * self.args.train_frac)
         feat = (((data, target, _)) for data, target, _ in self.train_loader)
-        self.model = self.model.cpu()
         feat = map(
             lambda x: (
                 # self.model(x[0]).cpu().detach().numpy(),

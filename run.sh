@@ -1,7 +1,7 @@
 #/bin/bash
 
 num_workers=20
-epochs=2000
+epochs=5000
 # num_workers=2
 # epochs=20
 

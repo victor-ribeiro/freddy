@@ -180,10 +180,11 @@ class FreddyTrainer(SubsetTrainer):
         score, self.subset = freddy(
             feat,
             K=self.sample_size,
-            return_vals=True,
             metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
+            beta=self.args.beta,
         )
         # score = np.concat(([0], np.diff(score))) / score
 
         # self.subset_weights = np.ones(self.sample_size)
-        self.subset_weights = score
+        self.subset_weights = score / score.max()

@@ -217,13 +217,17 @@ def get_args():
         type=int,
         help="decide whether an example is learned based on how many epochs",
     )
+    parser.add_argument("--drop_thresh", default=0.1, type=float, help="loss threshold")
+    parser.add_argument("--min_train_size", default=40000, type=int)
+    # freddy args
     parser.add_argument(
         "--freddy_similarity",
         default="similarity",
         choices=["codist", "similarity", "pdist"],
     )
-    parser.add_argument("--drop_thresh", default=0.1, type=float, help="loss threshold")
-    parser.add_argument("--min_train_size", default=40000, type=int)
+
+    parser.add_argument("--alpha", default=0.15, type=float)
+    parser.add_argument("--beta", default=0.75, type=float)
 
     # others
     parser.add_argument(

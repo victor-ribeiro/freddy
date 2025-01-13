@@ -183,7 +183,7 @@ class FreddyTrainer(SubsetTrainer):
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             beta=self.args.beta,
-            return_vals=False,
+            return_vals=True,
         )
         # score = np.concat(([0], np.diff(score))) / score
 

@@ -146,6 +146,59 @@ def freddy(
     return np.array(sset)
 
 
+@_register
+def grad_freddy(
+    dataset,
+    base_inc=base_inc,
+    alpha=0.15,
+    metric="similarity",
+    K=1,
+    batch_size=32,
+    beta=0.75,
+    return_vals=False,
+):
+    # basic config
+    base_inc = base_inc(alpha)
+    idx = np.arange(len(dataset))
+    idx = np.random.permutation(idx)
+    q = Queue()
+    sset = []
+    vals = []
+    argmax = 0
+    inc = 0
+    for ds, V in zip(
+        batched(dataset, batch_size),
+        batched(idx, batch_size),
+    ):
+        D = METRICS[metric](ds, batch_size=batch_size)
+        size = len(D)
+        # localmax = np.median(D, axis=0)
+        localmax = np.amax(D, axis=1)
+        argmax += localmax.sum()
+        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        while q and len(sset) < K:
+            score, idx_s = q.head
+            s = D[:, idx_s[1]]
+            s = score + (s * inc) + (np.gradient(s) * (inc**2) * 0.5)
+            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            inc = score_s - score
+            if (inc < 0) or (not q):
+                break
+            score_t, idx_t = q.head
+            if inc > score_t:
+                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+                localmax = np.maximum(localmax, s)
+                sset.append(idx_s[0])
+                vals.append(score)
+            else:
+                q.push(inc, idx_s)
+            q.push(score_t, idx_t)
+    np.random.shuffle(sset)
+    if return_vals:
+        return np.array(vals), sset
+    return np.array(sset)
+
+
 class FreddyTrainer(SubsetTrainer):
     def __init__(self, args, model, train_dataset, val_loader, train_weights=None):
         super().__init__(args, model, train_dataset, val_loader, train_weights)
@@ -164,11 +217,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = map(
             lambda x: (
-                # self.model(x[0]).cpu().detach().numpy(),
+                self.model.cpu()(x[0]).detach().numpy(),
                 one_hot_coding(x[1].cpu(), self.args.num_classes),
-                torch.nn.functional.softmax(self.model.cpu()(x[0]), dim=1)
-                .detach()
-                .numpy(),
             ),
             dataset,
         )
@@ -177,7 +227,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = map(np.abs, feat)
         feat = np.vstack([*feat])
 
-        score, self.subset = freddy(
+        self.subset = freddy(
             feat,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
@@ -187,5 +237,61 @@ class FreddyTrainer(SubsetTrainer):
         )
         # score = np.concat(([0], np.diff(score))) / score
 
-        # self.subset_weights = np.ones(self.sample_size)
-        self.subset_weights = score / score.max()
+        self.subset_weights = np.ones(self.sample_size)
+
+
+class FreddyTrainer(SubsetTrainer):
+    def __init__(
+        self,
+        args,
+        model,
+        train_dataset,
+        val_loader,
+        train_weights=None,
+        grad_freddy=False,
+    ):
+        super().__init__(args, model, train_dataset, val_loader, train_weights)
+        self.sample_size = int(len(self.train_dataset) * self.args.train_frac)
+        self.grad_freddy = grad_freddy
+
+    def _select_subset(self, epoch, training_step):
+        print(f"len dataset: {len(self.train_dataset)}")
+        dataset = self.train_dataset.dataset
+        dataset = DataLoader(
+            dataset,
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            num_workers=self.args.num_workers,
+        )
+
+        self.model.eval()
+        feat = map(
+            lambda x: (
+                self.model.cpu()(x[0]).detach().numpy(),
+                one_hot_coding(x[1].cpu(), self.args.num_classes),
+            ),
+            dataset,
+        )
+
+        feat = map(lambda x: x[0] - x[1], feat)
+        feat = map(np.abs, feat)
+        feat = np.vstack([*feat])
+
+        if self.grad_freddy:
+            self.subset = grad_freddy(
+                feat,
+                K=self.sample_size,
+                metric=self.args.freddy_similarity,
+                alpha=self.args.alpha,
+                beta=self.args.beta,
+            )
+        else:
+            self.subset = freddy(
+                feat,
+                K=self.sample_size,
+                metric=self.args.freddy_similarity,
+                alpha=self.args.alpha,
+                beta=self.args.beta,
+            )
+        # score = np.concat(([0], np.diff(score))) / score
+        self.subset_weights = np.ones(self.sample_size)

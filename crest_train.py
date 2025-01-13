@@ -109,6 +109,12 @@ def main(args):
             from trainers import FreddyTrainer
 
             trainer = FreddyTrainer(args, model, train_dataset, val_loader)
+        case "grad_freddy":
+            from trainers import FreddyTrainer
+
+            trainer = FreddyTrainer(
+                args, model, train_dataset, val_loader, grad_freddy=True
+            )
         case _:
             raise NotImplementedError(
                 f"Selection method {args.selection_method} not implemented."

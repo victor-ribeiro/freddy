@@ -200,47 +200,6 @@ def grad_freddy(
 
 
 class FreddyTrainer(SubsetTrainer):
-    def __init__(self, args, model, train_dataset, val_loader, train_weights=None):
-        super().__init__(args, model, train_dataset, val_loader, train_weights)
-        self.sample_size = int(len(self.train_dataset) * self.args.train_frac)
-
-    def _select_subset(self, epoch, training_step):
-        print(f"len dataset: {len(self.train_dataset)}")
-        dataset = self.train_dataset.dataset
-        dataset = DataLoader(
-            dataset,
-            batch_size=self.args.batch_size,
-            shuffle=True,
-            num_workers=self.args.num_workers,
-        )
-
-        self.model.eval()
-        feat = map(
-            lambda x: (
-                self.model.cpu()(x[0]).detach().numpy(),
-                one_hot_coding(x[1].cpu(), self.args.num_classes),
-            ),
-            dataset,
-        )
-
-        feat = map(lambda x: x[0] - x[1], feat)
-        feat = map(np.abs, feat)
-        feat = np.vstack([*feat])
-
-        self.subset = freddy(
-            feat,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            beta=self.args.beta,
-            return_vals=True,
-        )
-        # score = np.concat(([0], np.diff(score))) / score
-
-        self.subset_weights = np.ones(self.sample_size)
-
-
-class FreddyTrainer(SubsetTrainer):
     def __init__(
         self,
         args,

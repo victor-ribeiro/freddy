@@ -13,6 +13,9 @@ class CRESTTrainer(SubsetTrainer):
         train_weights: torch.Tensor = None,
     ):
         super().__init__(args, model, train_dataset, val_loader, train_weights)
+        self.subset_generator = SubsetGenerator(
+            greedy=(args.selection_method != "rand"), smtk=args.smtk
+        )
         self.train_indices = np.arange(len(self.train_dataset))
         self.steps_per_epoch = np.ceil(
             int(len(self.train_dataset) * self.args.train_frac) / self.args.batch_size

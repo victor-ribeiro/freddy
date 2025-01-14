@@ -17,4 +17,4 @@ do
     # python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method random &
 done
 
-python crest_train.py --num_workers $num_workers --selection_method none &
+# python crest_train.py --num_workers $num_workers --selection_method none &

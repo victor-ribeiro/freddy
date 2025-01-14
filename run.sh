@@ -11,10 +11,10 @@ beta=.6
 for size in 0.1 0.25 0.5 0.75;
 # for size in 0.1;
 do
-    python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method grad_freddy --alpha $alpha --beta $beta &
-    python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method freddy --alpha $alpha --beta $beta &
+    # python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method grad_freddy --alpha $alpha --beta $beta &
+    # python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method freddy --alpha $alpha --beta $beta &
     python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method crest &
-    python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method random &
+    # python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method random &
 done
 
 python crest_train.py --num_workers $num_workers --selection_method none &

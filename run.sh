@@ -16,7 +16,7 @@ size=.1
 # python crest_train.py --num_workers $num_workers --selection_method none --resume_from_epoch $e
 
 
-for alpha in 0 .5 .75 1 1.25 1.5 1.75;
+for alpha in .5 .75 1 1.25 1.5 1.75;
 # for alpha in 2 3 4 5 6 7 8 9 10 15 20;
 # for alpha in 25 30 40 50;
 

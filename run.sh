@@ -1,10 +1,10 @@
 #/bin/bash
 
 num_workers=20
-epochs=20
+epochs=150
 # alpha=.95
 beta=0
-e=0
+e=20
 size=.1
 # for size in 0.1 0.25 0.5 0.75;
 # do
@@ -16,8 +16,8 @@ size=.1
 # python crest_train.py --num_workers $num_workers --selection_method none --resume_from_epoch $e
 
 
-# for alpha in .5 .75 1 1.25 1.5 1.75;
-for alpha in 2 3 4 5 6 7 8 9 10 15 20;
+for alpha in .5 .75 1 1.25 1.5 1.75;
+# for alpha in 2 3 4 5 6 7 8 9 10 15 20;
 # for alpha in 25 30 40 50;
 
 do

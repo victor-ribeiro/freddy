@@ -39,7 +39,7 @@ def pdist(dataset, metric="euclidean", batch_size=1):
 @_register
 def codist(dataset, batch_size=1):
     d = pairwise_distances(dataset, dataset, metric="cosine")
-    return d.max() - d
+    return 1 - d
 
 
 @_register

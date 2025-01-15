@@ -2,7 +2,7 @@
 
 num_workers=20
 epochs=50
-alpha=.75
+alpha=.95
 beta=.05
 # num_workers=2
 # epochs=20

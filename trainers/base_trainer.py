@@ -241,18 +241,21 @@ class BaseTrainer:
             save_path = self.args.save_dir + "/model_epoch_{}.pt".format(epoch)
         else:
             save_path = self.args.save_dir + "/model_final.pt"
-        checkpoint = dict()
-        checkpoint["model_state_dict"] = self.model.state_dict()
-        checkpoint["optimizer_state_dict"] = self.optimizer.state_dict()
-        checkpoint["train_loss"] = self.train_loss.avg
-        checkpoint["train_acc"] = self.train_acc.avg
-        checkpoint["val_loss"] = self.val_loss
-        checkpoint["val_acc"] = self.val_acc
-        checkpoint["hist"] = self.hist
-        checkpoint["args"] = self.args
-        checkpoint["grad_norm"] = self.grad_norm
 
-        torch.save(checkpoint, save_path)
+        torch.save(
+            {
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
+                "train_loss": self.train_loss.avg,
+                "train_acc": self.train_acc.avg,
+                "val_loss": self.val_loss,
+                "val_acc": self.val_acc,
+                "hist": self.hist,
+                "args": self.args,
+                "grad_norm": self.grad_norm,
+            },
+            save_path,
+        )
 
         self.args.logger.info("Checkpoint saved to {}".format(save_path))
 
@@ -267,6 +270,7 @@ class BaseTrainer:
         self.val_acc = checkpoint["val_acc"]
         self.args = (checkpoint["args"],)
         self.hist = checkpoint["hist"]
+        self.grad_norm = checkpoint["grad_norm"]
 
         self.args.logger.info("Checkpoint loaded from {}".format(save_path))
 

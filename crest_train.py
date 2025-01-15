@@ -92,6 +92,10 @@ def main(args):
     else:
         raise NotImplementedError(f"Architecture {args.arch} not implemented.")
     match args.selection_method:
+        case "craig":
+            from trainers import SubsetTrainer
+
+            trainer = SubsetTrainer(args, model, train_dataset, val_loader)
         case "none":
             from trainers import BaseTrainer
 

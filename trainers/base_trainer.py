@@ -104,6 +104,7 @@ class BaseTrainer:
         self.batch_forward_time = AverageMeter()
         self.batch_backward_time = AverageMeter()
         self.hist = []
+        self.grad_norm = []
 
     @property
     def device(self):
@@ -204,6 +205,10 @@ class BaseTrainer:
                     train_acc,
                 )
             )
+            grad_norm = [*self.model.modules()]
+            grad_norm = grad_norm[-2]
+            grad_norm = grad_norm.weight.grad.data.norm(2)
+            self.grad_norm.append(grad_norm.item())
 
             data_start = time.time()
 
@@ -236,19 +241,18 @@ class BaseTrainer:
             save_path = self.args.save_dir + "/model_epoch_{}.pt".format(epoch)
         else:
             save_path = self.args.save_dir + "/model_final.pt"
-        torch.save(
-            {
-                "model_state_dict": self.model.state_dict(),
-                "optimizer_state_dict": self.optimizer.state_dict(),
-                "train_loss": self.train_loss.avg,
-                "train_acc": self.train_acc.avg,
-                "val_loss": self.val_loss,
-                "val_acc": self.val_acc,
-                "hist": self.hist,
-                "args": self.args,
-            },
-            save_path,
-        )
+        checkpoint = dict()
+        checkpoint["model_state_dict"] = self.model.state_dict()
+        checkpoint["optimizer_state_dict"] = self.optimizer.state_dict()
+        checkpoint["train_loss"] = self.train_loss.avg
+        checkpoint["train_acc"] = self.train_acc.avg
+        checkpoint["val_loss"] = self.val_loss
+        checkpoint["val_acc"] = self.val_acc
+        checkpoint["hist"] = self.hist
+        checkpoint["args"] = self.args
+        checkpoint["grad_norm"] = self.grad_norm
+
+        torch.save(checkpoint, save_path)
 
         self.args.logger.info("Checkpoint saved to {}".format(save_path))
 

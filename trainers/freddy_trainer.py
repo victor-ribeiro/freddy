@@ -19,8 +19,6 @@ def one_hot_coding(target, classes):
     n = len(target)
     coded = np.zeros((n, classes))
     coded[np.arange(n), target] = 1
-    # coded = np.ones((n, classes))
-    # coded[np.arange(n), target] = 0
     return coded
 
 
@@ -51,7 +49,7 @@ def kdist(dataset, centroids):
 @_register
 def similarity(dataset, metric="euclidean", batch_size=1):
     d = pdist(dataset, metric)
-    return (d.max(axis=1) - d) / d.max(axis=1)
+    return d.max(axis=1) - d
 
 
 def base_inc(alpha=1):
@@ -120,7 +118,6 @@ def freddy(
     ):
         D = METRICS[metric](ds, batch_size=batch_size)
         size = len(D)
-        # localmax = np.median(D, axis=0)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]

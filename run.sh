@@ -17,8 +17,8 @@ size=.1
 
 
 for alpha in 0 .5 .75 1 1.25 1.5 1.75;
-for alpha in 2 3 4 5 6 7 8 9 10 15 20;
-for alpha in 25 30 40 50;
+# for alpha in 2 3 4 5 6 7 8 9 10 15 20;
+# for alpha in 25 30 40 50;
 
 do
     python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method grad_freddy --alpha $alpha --beta $beta &

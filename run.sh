@@ -16,7 +16,7 @@ size=.1
 # python crest_train.py --num_workers $num_workers --selection_method none --resume_from_epoch $e
 
 
-for alpha in 0.1 0.25 0.5 0.75 1 1.5 2;
+for alpha in 1 2 3 5 10;
 do
     python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'codist' --train_frac $size --selection_method grad_freddy --alpha $alpha
     python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'codist' --train_frac $size --selection_method freddy --alpha $alpha 

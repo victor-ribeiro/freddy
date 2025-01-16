@@ -205,8 +205,8 @@ class BaseTrainer:
                     train_acc,
                 )
             )
-            grad_norm = [*self.model.cpu().modules()]
-            grad_norm = grad_norm[-2]
+            grad_norm = [*self.model.to(self.args.device).modules()]
+            grad_norm = grad_norm[-1]
             grad_norm = grad_norm.weight.grad.data.norm(2)
             self.grad_norm.append(grad_norm.item())
 

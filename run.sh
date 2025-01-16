@@ -15,6 +15,8 @@ size=.1
 # done
 # python crest_train.py --num_workers $num_workers --selection_method none --resume_from_epoch $e
 
+python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method crest
+python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method random
 
 for alpha in 1 1.25 1.5 1.75 2;
 # for alpha in 2 3 4 5 6 7 8 9 10 15 20;

@@ -124,7 +124,7 @@ class BaseTrainer:
 
             grad_norm = [*self.model.to(self.args.device).modules()]
             grad_norm = grad_norm.pop()
-            grad_norm = grad_norm.weight.grad.data.norm(2)
+            grad_norm = grad_norm.weight.grad.data.norm(2).item()
 
             hist = {
                 "train_loss": self.train_loss.avg,

@@ -63,7 +63,7 @@ def utility_score(e, sset, /, acc=0, alpha=0.1, beta=1.1):
     argmax = np.maximum(e, sset)
     f_norm = alpha / (sset.sum() + acc + 1)
     util = norm * math.log(1 + (argmax.sum() + acc) * f_norm)
-    return util + (math.log(1 + ((sset.sum() + acc) ** gamma)) * beta)
+    return util + (math.log(1 + (sset.sum() + acc)) * beta)
 
 
 class Queue(list):

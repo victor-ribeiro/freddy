@@ -1,7 +1,7 @@
 #/bin/bash
 
 num_workers=20
-epochs=150
+epochs=30
 # alpha=.95
 beta=0
 e=20

@@ -104,7 +104,6 @@ class BaseTrainer:
         self.batch_forward_time = AverageMeter()
         self.batch_backward_time = AverageMeter()
         self.hist = []
-        self.grad_norm = []
 
     @property
     def device(self):
@@ -122,11 +121,17 @@ class BaseTrainer:
         for epoch in range(self.args.resume_from_epoch, self.args.epochs):
             self._train_epoch(epoch)
             self._val_epoch(epoch)
+
+            grad_norm = [*self.model.to(self.args.device).modules()]
+            grad_norm = grad_norm.pop()
+            grad_norm = grad_norm.weight.grad.data.norm(2)
+
             hist = {
                 "train_loss": self.train_loss.avg,
                 "train_acc": self.train_acc.avg,
                 "val_loss": self.val_loss,
                 "val_acc": self.val_acc,
+                "grad_norm": grad_norm,
             }
             self.hist.append(hist)
 
@@ -205,10 +210,6 @@ class BaseTrainer:
                     train_acc,
                 )
             )
-            grad_norm = [*self.model.to(self.args.device).modules()]
-            grad_norm = grad_norm[-1]
-            grad_norm = grad_norm.weight.grad.data.norm(2)
-            self.grad_norm.append(grad_norm.item())
 
             data_start = time.time()
 
@@ -252,7 +253,6 @@ class BaseTrainer:
                 "val_acc": self.val_acc,
                 "hist": self.hist,
                 "args": self.args,
-                "grad_norm": self.grad_norm,
             },
             save_path,
         )
@@ -270,7 +270,6 @@ class BaseTrainer:
         self.val_acc = checkpoint["val_acc"]
         self.args = (checkpoint["args"],)
         self.hist = checkpoint["hist"]
-        self.grad_norm = checkpoint["grad_norm"]
 
         self.args.logger.info("Checkpoint loaded from {}".format(save_path))
 

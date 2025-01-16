@@ -1,6 +1,6 @@
 def get_exp_name(args):
     grd = ""
-    grd += args.selection_method if args.selection_method != "none" else ""
+    grd += args.selection_method if args.selection_method != "none" else "full-dataset"
     grd += f"-batchnummul{args.batch_num_mul}-interalmul{args.interval_mul}"
     grd += f"_thresh-factor{args.check_thresh_factor}"
     folder = f"/{args.dataset}"

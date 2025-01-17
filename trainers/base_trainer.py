@@ -98,6 +98,7 @@ class BaseTrainer:
 
         self.train_loss = AverageMeter()
         self.train_acc = AverageMeter()
+        self.val_loss = AverageMeter()
 
         # record data loading and training time for each batch using average meter
         self.batch_data_time = AverageMeter()

@@ -201,7 +201,8 @@ class BaseTrainer:
 
             # update progress bar
             pbar.set_description(
-                "Train Epoch: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAcc: {:.6f}".format(
+                "{}: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAcc: {:.6f}".format(
+                    self.__class__.__name__,
                     epoch,
                     self.args.epochs,
                     batch_idx * self.args.batch_size + len(data),

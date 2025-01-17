@@ -99,7 +99,7 @@ def freddy(
     alpha=0.15,
     metric="similarity",
     K=1,
-    batch_size=32,
+    batch_size=128,
     beta=0.75,
     return_vals=False,
 ):

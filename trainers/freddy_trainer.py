@@ -300,5 +300,5 @@ class FreddyTrainer(SubsetTrainer):
             self._update_train_loader_and_weights()
 
     def train(self):
-        self._select_subset(0, 0)
+        # self._select_subset(0, 0)
         return super().train()

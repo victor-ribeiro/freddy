@@ -298,3 +298,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
             self._update_train_loader_and_weights()
+
+    def train(self):
+        self._select_subset(0, 0)
+        return super().train()

@@ -1,6 +1,6 @@
 #/bin/bash
 
-num_workers=4
+num_workers=12
 epochs=20
 beta=0.
 e=0

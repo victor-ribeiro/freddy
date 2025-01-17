@@ -14,7 +14,7 @@ size=.1
 # done
 
 # CONTROLE
-python crest_train.py --num_workers $num_workers --selection_method none  &
+python crest_train.py --num_workers $num_workers --selection_method none --epochs $epochs &
 python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method crest  &
 python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method random &
 python crest_train.py --num_workers $num_workers --epochs $epochs --train_frac $size --selection_method craig &

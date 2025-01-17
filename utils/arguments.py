@@ -74,7 +74,7 @@ def get_args():
     parser.add_argument(
         "--selection_method",
         default="crest",
-        choices=["none", "random", "crest", "freddy", "grad_freddy"],
+        choices=["none", "random", "crest", "freddy", "grad_freddy", "craig"],
         help="subset selection method",
     )
     parser.add_argument("--smtk", type=int, help="smtk", default=0)

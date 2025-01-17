@@ -223,8 +223,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = map(
             lambda x: (
-                self.model.cpu()(x[0]).detach().numpy(),
                 one_hot_coding(x[1].cpu(), self.args.num_classes),
+                self.model.cpu()(x[0]).detach().numpy(),
             ),
             dataset,
         )
@@ -295,7 +295,7 @@ class FreddyTrainer(SubsetTrainer):
         self._val_epoch(epoch)
         rel_err = abs(prev_loss - self.get_val_loss())
         # if abs(rel_err) < 10e-4:
-        if prev_loss < self.get_val_loss():
+        if prev_loss < self.get_val_loss() and epoch > 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

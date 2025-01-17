@@ -252,3 +252,47 @@ class FreddyTrainer(SubsetTrainer):
             )
         # score = np.concat(([0], np.diff(score))) / score
         self.subset_weights = np.ones(self.sample_size)
+
+    def _train_epoch(self, epoch):
+        prev_loss = self.val_loss
+
+        self.model.train()
+        self._reset_metrics()
+
+        data_start = time.time()
+        # use tqdm to display a smart progress bar
+        pbar = tqdm(
+            enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
+        )
+        for batch_idx, (data, target, data_idx) in pbar:
+
+            # load data to device and record data loading time
+            data, target = data.to(self.args.device), target.to(self.args.device)
+            data_time = time.time() - data_start
+            self.batch_data_time.update(data_time)
+
+            self.optimizer.zero_grad()
+
+            # train model with the current batch and record forward and backward time
+            loss, train_acc = self._forward_and_backward(data, target, data_idx)
+
+            data_start = time.time()
+
+            # update progress bar
+            pbar.set_description(
+                "{}: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAcc: {:.6f}".format(
+                    self.__class__.__name__,
+                    epoch,
+                    self.args.epochs,
+                    batch_idx * self.args.batch_size + len(data),
+                    len(self.train_loader.dataset),
+                    100.0 * (batch_idx + 1) / len(self.train_loader),
+                    loss.item(),
+                    train_acc,
+                )
+            )
+        if abs(prev_loss - self.val_loss) < 10e-3:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+        if self.args.cache_dataset and self.args.clean_cache_iteration:
+            self.train_dataset.clean()
+            self._update_train_loader_and_weights()

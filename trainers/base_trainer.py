@@ -227,7 +227,7 @@ class BaseTrainer:
                 # data, target = data.cuda(), target.cuda()
                 data, target = data.to(self.args.device), target.to(self.args.device)
 
-                output = self.model(data)
+                output = self.model.to(self.args.device)(data)
 
                 loss = self.val_criterion(output, target)
 

@@ -2,7 +2,7 @@
 
 num_workers=12
 epochs=20
-beta=.0
+beta=1
 alpha=1
 e=0
 size=.1

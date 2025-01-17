@@ -1,10 +1,10 @@
 #/bin/bash
 
 num_workers=12
-epochs=20
+epochs=40
 beta=1
 alpha=1
-e=0
+e=20
 size=.1
 # for size in 0.1 0.25 0.5 0.75;
 # do

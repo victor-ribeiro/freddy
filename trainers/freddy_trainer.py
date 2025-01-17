@@ -293,7 +293,8 @@ class FreddyTrainer(SubsetTrainer):
             )
         self._val_epoch(epoch)
         rel_err = abs(prev_loss - self.train_loss.avg)
-        if abs(rel_err) < 10e-3:
+        # if abs(rel_err) < 10e-3:
+        if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

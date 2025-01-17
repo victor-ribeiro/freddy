@@ -2,7 +2,8 @@
 
 num_workers=12
 epochs=20
-beta=0.
+beta=0.75
+alpha=.15
 e=0
 size=.1
 # for size in 0.1 0.25 0.5 0.75;
@@ -26,8 +27,8 @@ size=.1
 # feitos (alpha):
 
 
-for alpha in .25 .5 .75 1 2 3 5 10 20;
-do
-    python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method grad_freddy --resume_from_epoch $e  --alpha $alpha --beta $beta &
-    python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method freddy --resume_from_epoch $e  --alpha $alpha  --beta $beta &
-done
+# for alpha in .25 .5 .75 1 2 3 5 10 20;
+# do
+python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method grad_freddy --resume_from_epoch $e  --alpha $alpha --beta $beta &
+python crest_train.py --num_workers $num_workers --epochs $epochs --freddy_similarity 'similarity' --train_frac $size --selection_method freddy --resume_from_epoch $e  --alpha $alpha  --beta $beta &
+# done

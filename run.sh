@@ -4,7 +4,7 @@ num_workers=12
 epochs=20
 beta=.0
 alpha=1
-e=20
+e=0
 size=.1
 # for size in 0.1 0.25 0.5 0.75;
 # do

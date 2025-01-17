@@ -313,7 +313,7 @@ class BaseTrainer:
         return self.train_acc.avg
 
     def get_val_loss(self):
-        return self.val_loss.avg
+        return self.val_loss
 
     def get_val_acc(self):
         return self.val_acc.avg

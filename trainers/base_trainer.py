@@ -132,6 +132,7 @@ class BaseTrainer:
                 "val_loss": self.val_loss,
                 "val_acc": self.val_acc,
                 "grad_norm": grad_norm,
+                "epoch": epoch,
             }
             self.hist.append(hist)
 

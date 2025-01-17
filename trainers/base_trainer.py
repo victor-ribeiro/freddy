@@ -277,7 +277,8 @@ class BaseTrainer:
 
     def _log_epoch(self, epoch):
         self.args.logger.info(
-            "Epoch {}:\tTrain Loss: {:.6f}\tTrain Acc: {:.6f}\tVal Loss: {:.6f}\tVal Acc: {:.6f}".format(
+            "Epoch {} {}:\tTrain Loss: {:.6f}\tTrain Acc: {:.6f}\tVal Loss: {:.6f}\tVal Acc: {:.6f}".format(
+                self.__class__.__name__,
                 epoch,
                 self.train_loss.avg,
                 self.train_acc.avg,

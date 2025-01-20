@@ -75,7 +75,10 @@ class BaseTrainer:
         self.train_weights = self.train_weights.to(self.args.device)
 
         # the default optimizer is SGD
-        self.optimizer = torch.optim.SGD(
+        # self.optimizer = torch.optim.SGD(
+        #     self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay
+        # )
+        self.optimizer = torch.optim.Adam(
             self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay
         )
 

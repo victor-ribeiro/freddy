@@ -301,11 +301,16 @@ class BaseTrainer:
         )
 
     def _reset_metrics(self):
-        self.train_loss.reset()
-        self.train_acc.reset()
-        self.batch_data_time.reset()
-        self.batch_forward_time.reset()
-        self.batch_backward_time.reset()
+        # self.train_loss.reset()
+        # self.train_acc.reset()
+        # self.batch_data_time.reset()
+        # self.batch_forward_time.reset()
+        # self.batch_backward_time.reset()
+        self.train_loss = AverageMeter()
+        self.train_acc = AverageMeter()
+        self.batch_data_time = AverageMeter()
+        self.batch_forward_time = AverageMeter()
+        self.batch_backward_time = AverageMeter()
 
     def get_model(self):
         return self.model

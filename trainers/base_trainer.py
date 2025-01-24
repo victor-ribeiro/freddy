@@ -267,6 +267,7 @@ class BaseTrainer:
 
     def _load_checkpoint(self, epoch):
         save_path = self.args.save_dir + "/model_epoch_{}.pt".format(epoch)
+        print(save_path)
         checkpoint = torch.load(save_path)
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
@@ -274,7 +275,7 @@ class BaseTrainer:
         self.train_acc = checkpoint["train_acc"]
         self.val_loss = checkpoint["val_loss"]
         self.val_acc = checkpoint["val_acc"]
-        self.args = (checkpoint["args"],)
+        self.args = checkpoint["args"]
         self.hist = checkpoint["hist"]
 
         self.args.logger.info("Checkpoint loaded from {}".format(save_path))

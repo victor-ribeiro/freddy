@@ -238,7 +238,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         # if epoch % 5 == 0:
         #     feat = feat * self.importance_score.reshape(-1, 1)
-        feat = feat * self.importance_score.reshape(-1, 1)
+        # feat = feat * self.importance_score.reshape(-1, 1)
 
         if self.grad_freddy:
             sset = grad_freddy(

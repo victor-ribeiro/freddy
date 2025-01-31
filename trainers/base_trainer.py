@@ -75,12 +75,12 @@ class BaseTrainer:
         self.train_weights = self.train_weights.to(self.args.device)
 
         # the default optimizer is SGD
-        # self.optimizer = torch.optim.SGD(
-        #     self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay
-        # )
-        self.optimizer = torch.optim.Adam(
+        self.optimizer = torch.optim.SGD(
             self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay
         )
+        # self.optimizer = torch.optim.Adam(
+        #     self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay
+        # )
 
         lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
             self.optimizer,
@@ -108,6 +108,7 @@ class BaseTrainer:
         self.batch_forward_time = AverageMeter()
         self.batch_backward_time = AverageMeter()
         self.hist = []
+        self.train_checkpoint = {}
 
     @property
     def device(self):
@@ -249,26 +250,35 @@ class BaseTrainer:
         else:
             save_path = self.args.save_dir + "/model_final.pt"
 
-        torch.save(
-            {
-                "model_state_dict": self.model.state_dict(),
-                "optimizer_state_dict": self.optimizer.state_dict(),
-                "train_loss": self.train_loss.avg,
-                "train_acc": self.train_acc.avg,
-                "val_loss": self.val_loss,
-                "val_acc": self.val_acc,
-                "hist": self.hist,
-                "args": self.args,
-            },
-            save_path,
-        )
+        self.train_checkpoint["model_state_dict"] = self.model.state_dict()
+        self.train_checkpoint["optimizer_state_dict"] = self.optimizer.state_dict()
+        self.train_checkpoint["train_loss"] = self.train_loss.avg
+        self.train_checkpoint["train_acc"] = self.train_acc.avg
+        self.train_checkpoint["val_loss"] = self.val_loss
+        self.train_checkpoint["val_acc"] = self.val_acc
+        self.train_checkpoint["hist"] = self.hist
+        self.train_checkpoint["args"] = self.args
+        torch.save(self.train_checkpoint, save_path)
+        # torch.save(
+        #     {
+        #         "model_state_dict": self.model.state_dict(),
+        #         "optimizer_state_dict": self.optimizer.state_dict(),
+        #         "train_loss": self.train_loss.avg,
+        #         "train_acc": self.train_acc.avg,
+        #         "val_loss": self.val_loss,
+        #         "val_acc": self.val_acc,
+        #         "hist": self.hist,
+        #         "args": self.args,
+        #     },
+        #     save_path,
+        # )
 
         self.args.logger.info("Checkpoint saved to {}".format(save_path))
 
     def _load_checkpoint(self, epoch):
         save_path = self.args.save_dir + "/model_epoch_{}.pt".format(epoch)
         print(save_path)
-        checkpoint = torch.load(save_path)
+        checkpoint = torch.load(save_path, map_location=torch.device(self.args.device))
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         self.train_loss = checkpoint["train_loss"]

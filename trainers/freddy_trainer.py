@@ -19,7 +19,7 @@ def one_hot_coding(target, classes):
     n = len(target)
     coded = np.zeros((n, classes))
     coded[np.arange(n), target] = 1
-    return coded
+    return torch.Tensor(coded)
 
 
 def _register(fn):
@@ -208,9 +208,14 @@ class FreddyTrainer(SubsetTrainer):
         super().__init__(args, model, train_dataset, val_loader, train_weights)
         self.sample_size = int(len(self.train_dataset) * self.args.train_frac)
         self.grad_freddy = grad_freddy
+        self.selected = np.zeros(len(train_dataset))
+        #
+        self.epoch_selection = []
+        self.importance_score = np.ones(len(train_dataset))
 
     def _select_subset(self, epoch, training_step):
-        print(f"len dataset: {len(self.train_dataset)}")
+        if self.epoch_selection:
+            print(f"RESELECTING: {self.epoch_selection[-1]}")
         dataset = self.train_dataset.dataset
         dataset = DataLoader(
             dataset,
@@ -223,18 +228,20 @@ class FreddyTrainer(SubsetTrainer):
         feat = map(
             lambda x: (
                 self.model.cpu()(x[0]).detach().numpy(),
-                one_hot_coding(x[1].cpu(), self.args.num_classes),
+                one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
             ),
             dataset,
         )
 
-        # feat = map(lambda x: x[0] - x[1], feat)
         feat = map(lambda x: x[1] - x[0], feat)
-        feat = map(np.abs, feat)
+        # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
+        # if epoch % 5 == 0:
+        #     feat = feat * self.importance_score.reshape(-1, 1)
+        feat = feat * self.importance_score.reshape(-1, 1)
 
         if self.grad_freddy:
-            self.subset = grad_freddy(
+            sset = grad_freddy(
                 feat,
                 K=self.sample_size,
                 metric=self.args.freddy_similarity,
@@ -242,19 +249,26 @@ class FreddyTrainer(SubsetTrainer):
                 beta=self.args.beta,
             )
         else:
-            self.subset = freddy(
+            sset = freddy(
                 feat,
                 K=self.sample_size,
                 metric=self.args.freddy_similarity,
                 alpha=self.args.alpha,
                 beta=self.args.beta,
             )
+        self.subset = sset
+        self.selected[sset] += 1
+        self.train_checkpoint["selected"] = self.selected
+        self.train_checkpoint["importance"] = self.importance_score
+        self.train_checkpoint["epoch_selection"] = self.epoch_selection
         # score = np.concat(([0], np.diff(score))) / score
         self.subset_weights = np.ones(self.sample_size)
 
     def _train_epoch(self, epoch):
-        # prev_loss = self.val_loss
-        prev_loss = self.train_loss.avg
+
+        # if epoch % 5 == 0:
+        #     self._select_subset(epoch, len(self.train_loader) * epoch)
+        # self._select_subset(epoch, len(self.train_loader) * epoch)
 
         self.model.train()
         self._reset_metrics()
@@ -292,14 +306,36 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
         self._val_epoch(epoch)
-        rel_err = abs(prev_loss - self.train_loss.avg)
-        # if abs(rel_err) < 10e-3:
-        if epoch % 5 == 0:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
+
+        if self.hist:
+            self.hist[-1]["avg_importance"] = self.importance_score.mean()
+            # if self.hist[-1]["avg_importance"] < 10e-3:
+            if self.hist[-1]["avg_importance"] < 10e-3:
+                self.epoch_selection.append(epoch)
+                self._select_subset(epoch, len(self.train_loader) * epoch)
+
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
             self._update_train_loader_and_weights()
 
+    def _forward_and_backward(self, data, target, data_idx):
+        pred = self.model.to(self.args.device)(data)
+        loss_t1 = self.train_criterion(pred, target).detach().numpy()
+        train_acc_t1 = self.train_acc.avg
+
+        loss, train_acc = super()._forward_and_backward(data, target, data_idx)
+
+        pred = self.model.to(self.args.device)(data)
+        loss_t2 = self.train_criterion(pred, target).detach().numpy()
+        train_acc_t2 = self.train_acc.avg
+
+        # print(type(loss_t2), type(loss_t1), type(train_acc_t2))
+
+        importance = (loss_t2 - loss_t1) / self.train_acc.avg
+        self.importance_score[data_idx] += importance
+        # self.importance_score[data_idx] -= importance
+        return loss, train_acc
+
     def train(self):
-        # self._select_subset(0, 0)
-        return super().train()
+        self._select_subset(0, 0)
+        super().train()

@@ -320,7 +320,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def _forward_and_backward(self, data, target, data_idx):
         pred = self.model.to(self.args.device)(data)
-        loss_t1 = self.train_criterion(pred, target).detach().numpy()
+        loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
         train_acc_t1 = self.train_acc.avg
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)

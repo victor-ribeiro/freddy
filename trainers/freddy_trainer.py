@@ -212,10 +212,13 @@ class FreddyTrainer(SubsetTrainer):
         #
         self.epoch_selection = []
         self.importance_score = np.ones(len(train_dataset))
+        self.select_flag = True
 
     def _select_subset(self, epoch, training_step):
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
+        # flag
+        self.select_flag = False
         dataset = self.train_dataset.dataset
         dataset = DataLoader(
             dataset,
@@ -269,6 +272,8 @@ class FreddyTrainer(SubsetTrainer):
         # if epoch % 5 == 0:
         #     self._select_subset(epoch, len(self.train_loader) * epoch)
         # self._select_subset(epoch, len(self.train_loader) * epoch)
+        if self.select_flag:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
 
         self.model.train()
         self._reset_metrics()
@@ -307,12 +312,12 @@ class FreddyTrainer(SubsetTrainer):
             )
         self._val_epoch(epoch)
 
-        if self.hist:
-            self.hist[-1]["avg_importance"] = self.importance_score.mean()
-            # if self.hist[-1]["avg_importance"] < 10e-3:
-            if self.hist[-1]["avg_importance"] < 10e-3:
-                self.epoch_selection.append(epoch)
-                self._select_subset(epoch, len(self.train_loader) * epoch)
+        # if self.hist:
+        #     self.hist[-1]["avg_importance"] = self.importance_score.mean()
+        #     # if self.hist[-1]["avg_importance"] < 10e-3:
+        #     if self.hist[-1]["avg_importance"] < 10e-3:
+        #         self.epoch_selection.append(epoch)
+        #         self._select_subset(epoch, len(self.train_loader) * epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
@@ -332,10 +337,15 @@ class FreddyTrainer(SubsetTrainer):
         # print(type(loss_t2), type(loss_t1), type(train_acc_t2))
 
         importance = (loss_t2 - loss_t1) / self.train_acc.avg
+        # flag
+        if importance.mean() < 10e-3:
+            self.select_flag = True
+
         self.importance_score[data_idx] += importance
         # self.importance_score[data_idx] -= importance
+
         return loss, train_acc
 
     def train(self):
-        self._select_subset(0, 0)
+        # self._select_subset(0, 0)
         super().train()

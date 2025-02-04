@@ -330,7 +330,7 @@ class FreddyTrainer(SubsetTrainer):
         train_acc_t1 = self.train_acc.avg
         # [*self.model.to(self.args.device).modules()]
         grad1 = [*self.model.to(self.device).modules()]
-        if len(grad1):
+        if len(grad1) > 0:
             grad1 = grad1.pop()
             grad1 = grad1.weight.grad.data.norm(2).item()
         else:

@@ -344,7 +344,7 @@ class FreddyTrainer(SubsetTrainer):
         importance = (loss_t2 - loss_t1) / self.train_acc.avg
         # flag
         grad_diff = None
-        grad_norm = grad_norm.weight.grad.data.norm(2).item()
+        # grad_norm = grad_norm.weight.grad.data.norm(2).item()
         relative_error = (grad2 - grad1).weight.grad.data.norm(2).item()
         relative_error = abs(relative_error)
         if relative_error < 10e-3:

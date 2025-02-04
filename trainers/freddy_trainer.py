@@ -336,13 +336,13 @@ class FreddyTrainer(SubsetTrainer):
         except:
             grad1 = 0
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
-
-        grad2 = [*self.model.to(self.device).modules()]
-        if len(grad1):
+        try:
+            grad2 = [*self.model.to(self.device).modules()]
             grad2 = grad2.pop()
             grad2 = grad2.weight.grad.data.norm(2).item()
-        else:
+        except:
             grad2 = 0
+
         pred = self.model.to(self.args.device)(data)
         loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
         train_acc_t2 = self.train_acc.avg

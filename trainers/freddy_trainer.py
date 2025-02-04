@@ -341,7 +341,8 @@ class FreddyTrainer(SubsetTrainer):
         if importance.mean() < 10e-3:
             self.select_flag = True
 
-        self.importance_score[data_idx] += importance
+        # self.importance_score[data_idx] += importance
+        self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
 
         return loss, train_acc

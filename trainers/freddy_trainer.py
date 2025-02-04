@@ -330,11 +330,11 @@ class FreddyTrainer(SubsetTrainer):
         train_acc_t1 = self.train_acc.avg
         # [*self.model.to(self.args.device).modules()]
         grad1 = [*self.model.to(self.device).modules()]
-        grad1 = grad1.pop()
+        grad1 = grad1.pop().weight.grad.data.norm(2).item()
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
 
         grad2 = [*self.model.to(self.device).modules()]
-        grad2 = grad2.pop()
+        grad2 = grad2.pop().weight.grad.data.norm(2).item()
         pred = self.model.to(self.args.device)(data)
         loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
         train_acc_t2 = self.train_acc.avg
@@ -345,7 +345,7 @@ class FreddyTrainer(SubsetTrainer):
         # flag
         grad_diff = None
         # grad_norm = grad_norm.weight.grad.data.norm(2).item()
-        relative_error = (grad2 - grad1).weight.grad.data.norm(2).item()
+        relative_error = grad2 - grad1
         relative_error = abs(relative_error)
         if relative_error < 10e-3:
             self.select_flag = True

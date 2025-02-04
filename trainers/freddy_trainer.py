@@ -331,7 +331,7 @@ class FreddyTrainer(SubsetTrainer):
         # [*self.model.to(self.args.device).modules()]
         grad1 = [*self.model.to(self.device).modules()]
         grad1 = grad1.pop()
-        grad1 = grad1.weight.grad.data.norm(2).item() if grad1 else 0
+        grad1 = 0 if not grad1 else grad1.weight.grad.data.norm(2).item()
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
 
         grad2 = [*self.model.to(self.device).modules()]

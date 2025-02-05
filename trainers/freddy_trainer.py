@@ -277,9 +277,9 @@ class FreddyTrainer(SubsetTrainer):
         if self.select_flag:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
-            if 1 > self.importance_score[self.subset].mean() < 10e-3:
-                self.select_flag = True
-                print(f"reselect: {self.select_flag}")
+        if self.importance_score[self.subset].mean() < 10e-3:
+            self.select_flag = True
+            print(f"reselect: {self.select_flag}")
 
         self.model.train()
         self._reset_metrics()

@@ -266,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         self.select_flag = False
 
     def _train_epoch(self, epoch):
-        if self.importance_score and self.importance_score.mean() < 10e-3:
+        if self.importance_score.mean() < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
         self.model.train()

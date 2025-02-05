@@ -340,7 +340,7 @@ class FreddyTrainer(SubsetTrainer):
 
         importance = (loss_t2 - loss_t1) / self.train_acc.avg
         # flag
-        if importance[self.subset].mean() < 10e-3:
+        if importance.mean() < 10e-3:
             self.select_flag = True
         # [*self.model.to(self.args.device).modules()]
 

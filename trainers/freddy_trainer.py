@@ -262,7 +262,8 @@ class FreddyTrainer(SubsetTrainer):
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self.importance_score
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
-        self.subset_weights = np.ones(self.sample_size)
+        # self.subset_weights = np.ones(self.sample_size)
+        self.subset_weights = self.importance_score[self.subset]
 
         self.select_flag = False
 
@@ -321,13 +322,11 @@ class FreddyTrainer(SubsetTrainer):
         grad2 = [*self.model.to(self.args.device).modules()]
         grad2 = grad2.pop()
         grad2 = grad2.weight.grad.data.norm(2).item()
-        error = abs(grad2 - grad1 / self.importance_score[self.subset].mean())
-        print(f"relative error [{error}]")
-        # if not epoch or error < 10e-2:
-        # if not epoch or self.cur_error < 10e-2:
-        if self.cur_error < error:
+        error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
+        print(f"relative error [{abs(self.cur_error-error)}]")
+        self.cur_error = error
+        if abs(self.cur_error - error) < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self.cur_error = error
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():
@@ -339,8 +338,8 @@ class FreddyTrainer(SubsetTrainer):
             pred = self.model.to(self.args.device)(data)
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        # importance = (loss_t2 - loss_t1) / self.train_acc.avg
-        importance = loss_t2 - loss_t1
+        importance = (loss_t2 - loss_t1) / self.train_acc.avg
+        # importance = loss_t2 - loss_t1
         self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] = importance
 

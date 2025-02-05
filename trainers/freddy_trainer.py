@@ -340,11 +340,11 @@ class FreddyTrainer(SubsetTrainer):
 
         importance = (loss_t2 - loss_t1) / self.train_acc.avg
         # flag
-        if importance.mean() < 10e-3:
-            self.select_flag = True
+        # if importance.mean() < 10e-3:
+        #     self.select_flag = True
         # [*self.model.to(self.args.device).modules()]
 
-        # self.subset_weights[data_idx] *= importance.reshape(-1, 1)
+        self.subset_weights[data_idx] = importance.reshape(-1, 1)
 
         self.importance_score[data_idx] += importance
         # self.importance_score[data_idx] = importance

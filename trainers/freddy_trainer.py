@@ -271,9 +271,12 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        grad1 = [*self.model.to(self.args.device).modules()]
-        grad1 = grad1.pop()
-        grad1 = grad1.weight.grad.data.norm(2).item()
+        try:
+            grad1 = [*self.model.to(self.args.device).modules()]
+            grad1 = grad1.pop()
+            grad1 = grad1.weight.grad.data.norm(2).item()
+        except:
+            grad1 = 0
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout

@@ -328,6 +328,9 @@ class FreddyTrainer(SubsetTrainer):
             self.train_dataset.clean()
             self._update_train_loader_and_weights()
 
+        if self.importance_score[self.subset].mean() < 10e-3:
+            self.select_flag = True
+
     def _forward_and_backward(self, data, target, data_idx):
         pred = self.model.to(self.args.device)(data)
         loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()

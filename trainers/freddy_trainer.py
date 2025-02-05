@@ -274,6 +274,8 @@ class FreddyTrainer(SubsetTrainer):
         # if epoch % 5 == 0:
         #     self._select_subset(epoch, len(self.train_loader) * epoch)
         # self._select_subset(epoch, len(self.train_loader) * epoch)
+        print(self.select_flag)
+        exit()
         if self.select_flag:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 

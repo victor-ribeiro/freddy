@@ -349,7 +349,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # self.subset_weights[data_idx] *= importance.reshape(-1, 1)
 
-        # self.importance_score[data_idx] += importance
+        self.importance_score[data_idx] += importance
         # self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
 

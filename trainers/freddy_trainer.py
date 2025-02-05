@@ -320,9 +320,9 @@ class FreddyTrainer(SubsetTrainer):
         grad2 = [*self.model.to(self.args.device).modules()]
         grad2 = grad2.pop()
         grad2 = grad2.weight.grad.data.norm(2).item()
-        error = (grad2 - grad1) / 10e-4
+        error = abs((grad2 - grad1) / 10e-4)
 
-        if error < 10e-3:
+        if error > 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
     def _forward_and_backward(self, data, target, data_idx):

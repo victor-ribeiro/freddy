@@ -240,7 +240,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         # if epoch % 5 == 0:
         #     feat = feat * self.importance_score.reshape(-1, 1)
-        # feat = feat * self.importance_score.reshape(-1, 1)
+        # feat *= self.importance_score.reshape(-1, 1)
 
         if self.grad_freddy:
             sset = grad_freddy(
@@ -266,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         # score = np.concat(([0], np.diff(score))) / score
         # self.subset_weights = np.ones(self.sample_size)
         # self.subset_weights = np.ones(self.sample_size)
-        self.select_flag = False
+        self.select_flag = True if self.importance_score[sset].mean() < 10e-3 else False
 
     def _train_epoch(self, epoch):
 
@@ -300,7 +300,7 @@ class FreddyTrainer(SubsetTrainer):
 
             # update progress bar
             pbar.set_description(
-                "{}: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAcc: {:.6f}".format(
+                "{}: {}/{} [{}/{} ({:.0f}%)] Loss: {:.6f}\tAcc: {:.6f}".format(
                     self.__class__.__name__,
                     epoch,
                     self.args.epochs,
@@ -339,8 +339,8 @@ class FreddyTrainer(SubsetTrainer):
 
         importance = (loss_t2 - loss_t1) / self.train_acc.avg
         # flag
-        if importance.mean() < 10e-3:
-            self.select_flag = True
+        # if importance.mean() < 10e-3:
+        #     self.select_flag = True
         # [*self.model.to(self.args.device).modules()]
 
         self.subset_weights[data_idx] *= importance.reshape(-1, 1)

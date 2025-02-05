@@ -277,10 +277,6 @@ class FreddyTrainer(SubsetTrainer):
         if self.select_flag:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
-        if self.importance_score[self.subset].mean() < 10e-3:
-            self.select_flag = True
-            print(f"reselect: {self.select_flag}")
-
         self.model.train()
         self._reset_metrics()
 
@@ -344,8 +340,10 @@ class FreddyTrainer(SubsetTrainer):
 
         importance = (loss_t2 - loss_t1) / self.train_acc.avg
         # flag
-        # if importance.mean() < 10e-3:
-        #     self.select_flag = True
+        print(len(self.subset))
+        exit()
+        if importance[self.subset].mean() < 10e-3:
+            self.select_flag = True
         # [*self.model.to(self.args.device).modules()]
 
         # self.subset_weights[data_idx] *= importance.reshape(-1, 1)

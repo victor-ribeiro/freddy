@@ -265,8 +265,8 @@ class FreddyTrainer(SubsetTrainer):
         self.train_checkpoint["importance"] = self.importance_score
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
         # score = np.concat(([0], np.diff(score))) / score
-        # self.subset_weights = np.ones(self.sample_size)
-        # self.subset_weights = np.ones(self.sample_size)
+        self.subset_weights = np.ones(self.sample_size)
+
         self.select_flag = False
 
     def _train_epoch(self, epoch):

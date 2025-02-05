@@ -323,7 +323,8 @@ class FreddyTrainer(SubsetTrainer):
             pred = self.model.to(self.args.device)(data)
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        importance = (loss_t2 - loss_t1) / self.train_acc.avg
+        # importance = (loss_t2 - loss_t1) / self.train_acc.avg
+        importance = loss_t2 - loss_t1
         self.importance_score[data_idx] += importance
 
         return loss, train_acc

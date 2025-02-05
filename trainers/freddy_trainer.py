@@ -340,3 +340,7 @@ class FreddyTrainer(SubsetTrainer):
         self.importance_score[data_idx] += importance
 
         return loss, train_acc
+
+    def train(self):
+        self._select_subset(0, 0)
+        return super().train()

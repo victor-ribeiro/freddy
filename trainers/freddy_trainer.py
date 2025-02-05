@@ -266,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         # score = np.concat(([0], np.diff(score))) / score
         # self.subset_weights = np.ones(self.sample_size)
         # self.subset_weights = np.ones(self.sample_size)
-        self.select_flag = True if self.importance_score[sset].mean() < 10e-3 else False
+        self.select_flag = False
 
     def _train_epoch(self, epoch):
 
@@ -275,6 +275,10 @@ class FreddyTrainer(SubsetTrainer):
         # self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.select_flag:
             self._select_subset(epoch, len(self.train_loader) * epoch)
+
+        if self.importance_score[self.subset].mean() < 10e-3:
+            self.select_flag = True
+            print(f"reselect: {self.select_flag}")
 
         self.model.train()
         self._reset_metrics()

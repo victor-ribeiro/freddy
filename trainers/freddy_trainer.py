@@ -337,7 +337,7 @@ class FreddyTrainer(SubsetTrainer):
 
         pred = self.model.to(self.args.device)(data)
         loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
-        train_acc_t2 = self.train_acc.avg
+        # train_acc_t2 = self.train_acc.avg
 
         # print(type(loss_t2), type(loss_t1), type(train_acc_t2))
 

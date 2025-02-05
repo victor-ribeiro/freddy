@@ -346,8 +346,8 @@ class FreddyTrainer(SubsetTrainer):
         # [*self.model.to(self.args.device).modules()]
         # self.subset_weights = importance
 
-        self.importance_score[data_idx] += importance
+        # self.importance_score[data_idx] += importance
         # self.importance_score[data_idx] = importance
-        # self.importance_score[data_idx] -= importance
+        self.importance_score[data_idx] -= importance
 
         return loss, train_acc

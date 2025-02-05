@@ -344,6 +344,6 @@ class FreddyTrainer(SubsetTrainer):
 
         return loss, train_acc
 
-    def train(self):
-        self._select_subset(0, 0)
-        return super().train()
+    # def train(self):
+    #     self._select_subset(0, 0)
+    #     return super().train()

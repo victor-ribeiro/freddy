@@ -215,6 +215,7 @@ class FreddyTrainer(SubsetTrainer):
         self.select_flag = True
 
     def _select_subset(self, epoch, training_step):
+        print(f"selecting subset on epoch {epoch}")
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
         # flag

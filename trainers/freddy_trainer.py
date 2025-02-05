@@ -322,7 +322,8 @@ class FreddyTrainer(SubsetTrainer):
         grad2 = [*self.model.to(self.args.device).modules()]
         grad2 = grad2.pop()
         grad2 = grad2.weight.grad.data.norm(2).item()
-        error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
+        # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
+        error = grad2 - grad1 / self.importance_score[self.subset].mean()
         print(f"relative error [{abs(self.cur_error-error)}]")
         if not epoch or abs(self.cur_error - error) < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)

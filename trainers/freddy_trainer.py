@@ -266,7 +266,6 @@ class FreddyTrainer(SubsetTrainer):
         # score = np.concat(([0], np.diff(score))) / score
         # self.subset_weights = np.ones(self.sample_size)
         self.subset_weights = self.importance_score[sset]
-        self.select_flag = False
 
     def _train_epoch(self, epoch):
 
@@ -355,8 +354,10 @@ class FreddyTrainer(SubsetTrainer):
         # grad_norm = grad_norm.weight.grad.data.norm(2).item()
         relative_error = grad2 - grad1
         relative_error = abs(relative_error)
-        if relative_error < 10e-3:
+        if relative_error > 10e-3:
             self.select_flag = True
+        else:
+            self.select_flag = False
         # if importance.mean() < 10e-3:
         #     self.select_flag = True
 

@@ -276,9 +276,11 @@ class FreddyTrainer(SubsetTrainer):
 
         # if epoch % 5 == 0:
         #     self._select_subset(epoch, len(self.train_loader) * epoch)
-        # self._select_subset(epoch, len(self.train_loader) * epoch)
-        if self.select_flag:
+        if self.importance_score and self.importance_score.mean() < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
+        # self._select_subset(epoch, len(self.train_loader) * epoch)
+        # if self.select_flag:
+        #     self._select_subset(epoch, len(self.train_loader) * epoch)
 
         self.model.train()
         self._reset_metrics()
@@ -317,12 +319,12 @@ class FreddyTrainer(SubsetTrainer):
             )
         self._val_epoch(epoch)
 
-        # if self.hist:
-        #     self.hist[-1]["avg_importance"] = self.importance_score.mean()
-        #     # if self.hist[-1]["avg_importance"] < 10e-3:
-        #     if self.hist[-1]["avg_importance"] < 10e-3:
-        #         self.epoch_selection.append(epoch)
-        #         self._select_subset(epoch, len(self.train_loader) * epoch)
+        if self.hist:
+            self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
+            # if self.hist[-1]["avg_importance"] < 10e-3:
+            # if self.hist[-1]["avg_importance"] < 10e-3:
+            # self.epoch_selection.append(epoch)
+            # self._select_subset(epoch, len(self.train_loader) * epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

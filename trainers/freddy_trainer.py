@@ -274,9 +274,9 @@ class FreddyTrainer(SubsetTrainer):
         # if epoch % 5 == 0:
         #     self._select_subset(epoch, len(self.train_loader) * epoch)
         # self._select_subset(epoch, len(self.train_loader) * epoch)
-        print(self.select_flag)
-        exit()
         if self.select_flag:
+            print("select subset")
+            exit()
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
         if self.importance_score[self.subset].mean() < 10e-3:

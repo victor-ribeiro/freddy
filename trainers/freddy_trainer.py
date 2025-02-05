@@ -324,9 +324,9 @@ class FreddyTrainer(SubsetTrainer):
         grad2 = grad2.weight.grad.data.norm(2).item()
         error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
         print(f"relative error [{abs(self.cur_error-error)}]")
-        self.cur_error = error
         if abs(self.cur_error - error) < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)
+        self.cur_error = error
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():

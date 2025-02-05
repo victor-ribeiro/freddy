@@ -266,14 +266,15 @@ class FreddyTrainer(SubsetTrainer):
         self.select_flag = False
 
     def _train_epoch(self, epoch):
-        if self.importance_score[self.subset].mean() < 10e-3:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-
         self.model.train()
         self._reset_metrics()
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
+        grad1 = [*self.model.to(self.args.device).modules()]
+        grad1 = grad1.pop()
+        grad1 = grad1.weight.grad.data.norm(2).item()
+
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
@@ -312,6 +313,14 @@ class FreddyTrainer(SubsetTrainer):
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
+
+        grad2 = [*self.model.to(self.args.device).modules()]
+        grad2 = grad2.pop()
+        grad2 = grad2.weight.grad.data.norm(2).item()
+        error = (grad2 - grad1) / 103 - 4
+
+        if error < 10e-3:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():

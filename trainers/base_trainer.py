@@ -206,7 +206,7 @@ class BaseTrainer:
 
             # update progress bar
             pbar.set_description(
-                "{}: {}/{} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAcc: {:.6f}".format(
+                "{}: {}/{} [{}/{} ({:.0f}%)] Loss: {:.6f}\tAcc: {:.6f}".format(
                     self.__class__.__name__,
                     epoch,
                     self.args.epochs,

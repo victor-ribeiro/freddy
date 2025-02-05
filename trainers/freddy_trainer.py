@@ -267,8 +267,6 @@ class FreddyTrainer(SubsetTrainer):
         self.select_flag = False
 
     def _train_epoch(self, epoch):
-        if not epoch:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
         self.model.train()
         self._reset_metrics()
 
@@ -323,11 +321,9 @@ class FreddyTrainer(SubsetTrainer):
         grad2 = [*self.model.to(self.args.device).modules()]
         grad2 = grad2.pop()
         grad2 = grad2.weight.grad.data.norm(2).item()
-        # error = abs((grad2 - grad1) / self.importance_score[self.subset].mean())
-        error = abs((grad2 - grad1)) / self.importance_score.mean()
-        print(f"relative error [{error:.4f}]")
+        error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
         self.cur_error = error
-        # if error / self.cur_error > error > 10e-2:
+        print(f"relative error [{error}]")
         if error < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
@@ -343,11 +339,11 @@ class FreddyTrainer(SubsetTrainer):
 
         # importance = (loss_t2 - loss_t1) / self.train_acc.avg
         importance = loss_t2 - loss_t1
-        # self.importance_score[data_idx] -= importance
-        self.importance_score[data_idx] += importance
+        # self.importance_score[data_idx] += importance
+        self.importance_score[data_idx] = importance
 
         return loss, train_acc
 
-    # def train(self):
-    #     self._select_subset(0, 0)
-    #     return super().train()
+    def train(self):
+        self._select_subset(0, 0)
+        return super().train()

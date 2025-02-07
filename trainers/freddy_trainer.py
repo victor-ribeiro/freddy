@@ -273,12 +273,13 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        try:
-            grad1 = [*self.model.to(self.args.device).modules()]
-            grad1 = grad1.pop()
-            grad1 = grad1.weight.grad.data.norm(2).item()
-        except:
-            grad1 = 0
+        # try:
+        #     grad1 = [*self.model.to(self.args.device).modules()]
+        #     grad1 = grad1.pop()
+        #     grad1 = grad1.weight.grad.data.norm(2).item()
+        # except:
+        #     grad1 = 0
+        importance = self.importance_score.mean()
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -319,16 +320,21 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        grad2 = [*self.model.to(self.args.device).modules()]
-        grad2 = grad2.pop()
-        grad2 = grad2.weight.grad.data.norm(2).item()
-        # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
-        error = grad2 - grad1 / self.importance_score[self.subset].mean()
+        # grad2 = [*self.model.to(self.args.device).modules()]
+        # grad2 = grad2.pop()
+        # grad2 = grad2.weight.grad.data.norm(2).item()
+        # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
+        # error = grad2 - grad1 / self.importance_score[self.subset].mean()
+        error = (self.importance_score.mean() - importance) / self.importance_score[
+            self.subset
+        ].mean()
+        error = abs(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
         # if not epoch or abs(self.cur_error - error) < 10e-2:
-        if not epoch or abs(self.cur_error / error) > 1:
+        # if not epoch or abs(self.cur_error / error) > 1:
+        if error < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-        self.cur_error = error
+        # self.cur_error = error
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():

@@ -206,7 +206,7 @@ class BaseTrainer:
 
             # update progress bar
             pbar.set_description(
-                "{}: {}/{} [{}/{} ({:.0f}%)] Loss: {:.6f}\tAcc: {:.6f}".format(
+                "{}: {}/{} [{}/{} ({:.0f}%)] Loss: {:.6f} Acc: {:.6f}".format(
                     self.__class__.__name__,
                     epoch,
                     self.args.epochs,
@@ -292,7 +292,7 @@ class BaseTrainer:
 
     def _log_epoch(self, epoch):
         self.args.logger.info(
-            "Epoch {} {}:\tTrain Loss: {:.6f}\tTrain Acc: {:.6f}\tVal Loss: {:.6f}\tVal Acc: {:.6f}".format(
+            "Epoch {} {}: Train Loss: {:.6f} Train Acc: {:.6f} Val Loss: {:.6f} Val Acc: {:.6f}".format(
                 self.__class__.__name__,
                 epoch,
                 self.train_loss.avg,
@@ -302,7 +302,7 @@ class BaseTrainer:
             )
         )
         self.args.logger.info(
-            "Epoch {}:\tData Loading Time: {:.6f}\tForward Time: {:.6f}\tBackward Time: {:.6f}".format(
+            "Epoch {}:\tData Loading Time: {:.6f}Forward Time: {:.6f} Backward Time: {:.6f}".format(
                 epoch,
                 self.batch_data_time.avg,
                 self.batch_forward_time.avg,

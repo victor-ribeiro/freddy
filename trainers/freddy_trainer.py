@@ -325,9 +325,9 @@ class FreddyTrainer(SubsetTrainer):
         # grad2 = grad2.weight.grad.data.norm(2).item()
         # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
         # error = grad2 - grad1 / self.importance_score[self.subset].mean()
-        error = (self.importance_score.mean() - importance) / self.importance_score[
-            self.subset
-        ].mean()
+        error = self.importance_score[self.subset].mean() / (
+            self.importance_score.mean() - importance
+        )
         error = abs(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
         # if not epoch or abs(self.cur_error - error) < 10e-2:

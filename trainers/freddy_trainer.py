@@ -212,6 +212,7 @@ class FreddyTrainer(SubsetTrainer):
         #
         self.epoch_selection = []
         self.importance_score = np.ones(len(train_dataset))
+        # self.importance_score = np.zeros(len(train_dataset))
         self.select_flag = True
         self.cur_error = 1
 
@@ -273,12 +274,12 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        # try:
-        #     grad1 = [*self.model.to(self.args.device).modules()]
-        #     grad1 = grad1.pop()
-        #     grad1 = grad1.weight.grad.data.norm(2).item()
-        # except:
-        #     grad1 = 0
+        try:
+            grad1 = [*self.model.to(self.args.device).modules()]
+            grad1 = grad1.pop()
+            grad1 = grad1.weight.grad.data.norm(2).item()
+        except:
+            grad1 = 0
         importance = self.importance_score.mean()
 
         pbar = tqdm(
@@ -320,14 +321,15 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        # grad2 = [*self.model.to(self.args.device).modules()]
-        # grad2 = grad2.pop()
-        # grad2 = grad2.weight.grad.data.norm(2).item()
+        grad2 = [*self.model.to(self.args.device).modules()]
+        grad2 = grad2.pop()
+        grad2 = grad2.weight.grad.data.norm(2).item()
         # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
         # error = grad2 - grad1 / self.importance_score[self.subset].mean()
-        error = self.importance_score[self.subset].mean() / (
-            self.importance_score.mean() - importance
-        )
+        # error = self.importance_score[self.subset].mean() / (
+        #     self.importance_score.mean() - importance
+        # )
+        error = self.importance_score[self.subset].mean() / (grad2 - grad1)
         error = abs(error)
         error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
@@ -347,8 +349,8 @@ class FreddyTrainer(SubsetTrainer):
             pred = self.model.to(self.args.device)(data)
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        # importance = np.abs(loss_t2 - loss_t1)
-        importance = np.abs(loss_t2 + loss_t1)
+        importance = np.abs(loss_t2 - loss_t1)
+        # importance = np.abs(loss_t2 + loss_t1)
         self.importance_score[data_idx] += importance
 
         return loss, train_acc

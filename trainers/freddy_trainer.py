@@ -268,6 +268,8 @@ class FreddyTrainer(SubsetTrainer):
         self.select_flag = False
 
     def _train_epoch(self, epoch):
+        if not epoch:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
         self.model.train()
         self._reset_metrics()
 

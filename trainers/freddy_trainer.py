@@ -220,10 +220,10 @@ class FreddyTrainer(SubsetTrainer):
         print(f"selecting subset on epoch {epoch}")
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
-        # flag
-        print(np.unique(self.importance_score > 1))
-        exit()
-        dataset = self.train_dataset.dataset[self.importance_score > 1]
+        if epoch % 10 == 0:
+            dataset = self.train_dataset.dataset[self.importance_score > 1]
+        else:
+            dataset = self.train_dataset.dataset
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,

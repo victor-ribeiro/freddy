@@ -334,7 +334,7 @@ class FreddyTrainer(SubsetTrainer):
             grad2 - grad1
         )
         error = abs(error)
-        # error = np.log(error)
+        error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
         # if not epoch or abs(self.cur_error - error) < 10e-2:
         # if not epoch or abs(self.cur_error / error) > 1:

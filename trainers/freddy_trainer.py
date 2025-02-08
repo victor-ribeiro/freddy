@@ -279,6 +279,8 @@ class FreddyTrainer(SubsetTrainer):
             modules = [*self.model.to(self.args.device).modules()]
             grad1 = modules.pop()
             grad1 = modules.pop()
+            print(gra1)
+            exit()
             grad1 = grad1.weight.grad.data.norm(2).item()
         except:
             grad1 = 0

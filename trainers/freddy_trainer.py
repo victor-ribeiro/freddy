@@ -221,7 +221,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
         # flag
-        dataset = self.train_dataset.dataset
+        dataset = self.train_dataset.dataset[self.importance_score < 1]
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,
@@ -331,7 +331,7 @@ class FreddyTrainer(SubsetTrainer):
         # )
         error = self.importance_score[self.subset].mean() / (grad2 - grad1)
         error = abs(error)
-        error = np.log(error)
+        # error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
         # if not epoch or abs(self.cur_error - error) < 10e-2:
         # if not epoch or abs(self.cur_error / error) > 1:

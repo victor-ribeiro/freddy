@@ -221,7 +221,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
         # flag
-        dataset = self.train_dataset.dataset[self.importance_score < 1]
+        dataset = self.train_dataset.dataset[self.importance_score > 1]
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,

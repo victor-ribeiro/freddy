@@ -279,12 +279,12 @@ class FreddyTrainer(SubsetTrainer):
             modules = [*self.model.to(self.args.device).modules()]
             grad1 = modules.pop()
             grad1 = modules.pop()
-            print(gra1)
-            exit()
             grad1 = grad1.weight.grad.data.norm(2).item()
         except:
             grad1 = 0
         importance = self.importance_score.mean()
+        print(grad1)
+        exit()
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout

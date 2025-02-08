@@ -283,8 +283,6 @@ class FreddyTrainer(SubsetTrainer):
         except:
             grad1 = 0
         importance = self.importance_score.mean()
-        print(grad1)
-        exit()
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -328,6 +326,8 @@ class FreddyTrainer(SubsetTrainer):
         modules = [*self.model.to(self.args.device).modules()]
         grad2 = modules.pop()
         grad2 = modules.pop()
+        print(grad2)
+        exit()
         grad2 = grad2.weight.grad.data.norm(2).item()
         # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
         # error = grad2 - grad1 / self.importance_score[self.subset].mean()

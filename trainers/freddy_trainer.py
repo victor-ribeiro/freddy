@@ -276,8 +276,9 @@ class FreddyTrainer(SubsetTrainer):
         data_start = time.time()
         # use tqdm to display a smart progress bar
         try:
-            grad1 = [*self.model.to(self.args.device).modules()]
-            grad1 = grad1.pop()
+            modules = [*self.model.to(self.args.device).modules()]
+            grad1 = modules.pop()
+            grad1 = modules.pop()
             grad1 = grad1.weight.grad.data.norm(2).item()
         except:
             grad1 = 0
@@ -322,8 +323,9 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        grad2 = [*self.model.to(self.args.device).modules()]
-        grad2 = grad2.pop()
+        modules = [*self.model.to(self.args.device).modules()]
+        grad2 = modules.pop()
+        grad2 = modules.pop()
         grad2 = grad2.weight.grad.data.norm(2).item()
         # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
         # error = grad2 - grad1 / self.importance_score[self.subset].mean()

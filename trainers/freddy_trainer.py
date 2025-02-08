@@ -279,7 +279,7 @@ class FreddyTrainer(SubsetTrainer):
             modules = [*self.model.to(self.args.device).modules()]
             grad1 = modules.pop()
             grad1 = modules.pop()
-            grad1 = grad1.weight.grad.data.norm(2).item()
+            grad1 = grad1[0].weight.grad.data.norm(2).item()
         except:
             grad1 = 0
         importance = self.importance_score.mean()
@@ -326,9 +326,7 @@ class FreddyTrainer(SubsetTrainer):
         modules = [*self.model.to(self.args.device).modules()]
         grad2 = modules.pop()
         grad2 = modules.pop()
-        print(grad2)
-        exit()
-        grad2 = grad2.weight.grad.data.norm(2).item()
+        grad2 = grad2[0].weight.grad.data.norm(2).item()
         # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
         # error = grad2 - grad1 / self.importance_score[self.subset].mean()
         # error = self.importance_score[self.subset].mean() / (

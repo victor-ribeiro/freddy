@@ -340,7 +340,7 @@ class FreddyTrainer(SubsetTrainer):
         # if not epoch or abs(self.cur_error / error) > 1:
         # if not epoch or abs(self.cur_error - error) < 10e-2:
         # if abs(self.cur_error - error) < 10e-2:
-        if abs(self.cur_error - error) > 10e2:
+        if abs(self.cur_error - error) > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
 

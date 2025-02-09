@@ -214,7 +214,7 @@ class FreddyTrainer(SubsetTrainer):
         self.importance_score = np.ones(len(train_dataset))
         # self.importance_score = np.zeros(len(train_dataset))
         self.select_flag = True
-        self.cur_error = 1
+        self.cur_error = 0
 
     def _select_subset(self, epoch, training_step):
         print(f"selecting subset on epoch {epoch}")
@@ -341,6 +341,7 @@ class FreddyTrainer(SubsetTrainer):
         if abs(self.cur_error - error) > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
+        self.hist[-1]["reaL_error"] = error
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():
@@ -353,7 +354,7 @@ class FreddyTrainer(SubsetTrainer):
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         # importance = np.abs(loss_t2 - loss_t1)
-        importance = np.abs(loss_t2 + loss_t1)
+        importance = np.abs(loss_t2 - loss_t1)
         self.importance_score[data_idx] -= importance
 
         return loss, train_acc

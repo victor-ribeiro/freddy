@@ -331,7 +331,7 @@ class FreddyTrainer(SubsetTrainer):
         #     self.importance_score.mean() - importance
         # )
         error = (grad2 - grad1) / grad2
-        error = abs(error)
+        # error = abs(error)
         # error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
         # if not epoch or abs(self.cur_error - error) < 10e-2:
@@ -354,7 +354,7 @@ class FreddyTrainer(SubsetTrainer):
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         # importance = np.abs(loss_t2 - loss_t1)
-        importance = np.abs(loss_t2 - loss_t1)
+        importance = loss_t2 - loss_t1
         self.importance_score[data_idx] -= importance
 
         return loss, train_acc

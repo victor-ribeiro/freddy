@@ -341,7 +341,8 @@ class FreddyTrainer(SubsetTrainer):
         if abs(self.cur_error - error) > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
-        self.hist[-1]["reaL_error"] = error
+        if self.hist:
+            self.hist[-1]["reaL_error"] = error
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():

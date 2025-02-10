@@ -322,7 +322,7 @@ class FreddyTrainer(SubsetTrainer):
         #     self.importance_score.mean() - importance
         # )
 
-        print(f"relative error [{abs(error)}]")
+        # print(f"relative error [{abs(error)}]")
         # print(f"relative error [{error}]")
 
         # if abs(self.cur_error - error) < 10e-3:

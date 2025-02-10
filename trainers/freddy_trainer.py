@@ -326,7 +326,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error [{error}]")
 
         # if abs(self.cur_error - error) < 10e-3:
-        if error < 10e-3:
+        if abs(self.cur_error - error) < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
         if self.hist:

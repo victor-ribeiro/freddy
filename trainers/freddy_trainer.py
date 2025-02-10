@@ -315,9 +315,11 @@ class FreddyTrainer(SubsetTrainer):
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
-        error = (self.importance_score[self.subset].mean()) - local_importance / (
-            self.importance_score.mean() - importance
-        )
+        error = abs(self.importance_score[self.subset].mean() - local_importance)
+        # error = (self.importance_score[self.subset].mean()) - local_importance / (
+        #     self.importance_score.mean() - importance
+        # )
+
         # print(f"relative error [{abs(self.cur_error-error)}]")
         print(f"relative error [{error}]")
 
@@ -339,7 +341,7 @@ class FreddyTrainer(SubsetTrainer):
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         importance = loss_t2 - loss_t1
-        # self.importance_score[data_idx] += importance
-        self.importance_score[data_idx] -= importance
+        self.importance_score[data_idx] += importance
+        # self.importance_score[data_idx] -= importance
 
         return loss, train_acc

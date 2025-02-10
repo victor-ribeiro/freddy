@@ -324,6 +324,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # print(f"relative error [{abs(error)}]")
         # print(f"relative error [{error}]")
+        print(f"relative error [{self.cur_error}]")
 
         # if abs(self.cur_error - error) < 10e-3:
         if self.cur_error < 10e-3:

@@ -211,8 +211,8 @@ class FreddyTrainer(SubsetTrainer):
         self.selected = np.zeros(len(train_dataset))
         #
         self.epoch_selection = []
-        self.importance_score = np.ones(len(train_dataset))
-        # self.importance_score = np.zeros(len(train_dataset))
+        # self.importance_score = np.ones(len(train_dataset))
+        self.importance_score = np.zeros(len(train_dataset))
         self.select_flag = True
         self.cur_error = 0
 

@@ -322,11 +322,11 @@ class FreddyTrainer(SubsetTrainer):
         #     self.importance_score.sum() - importance
         # )
 
-        print(f"relative error [{abs(self.cur_error-error)}]")
+        print(f"relative error [{abs(self.cur_error/error)}]")
         # print(f"relative error [{error}]")
 
         # if abs(self.cur_error - error) < 10e-3:
-        if abs(self.cur_error - error) < 10e-2:
+        if abs(self.cur_error / error) > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
         if self.hist:

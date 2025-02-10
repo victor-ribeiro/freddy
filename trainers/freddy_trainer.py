@@ -317,6 +317,7 @@ class FreddyTrainer(SubsetTrainer):
             # self.hist[-1]["avg_importance"] = self.importance_score[self.subset].sum()
             self.hist[-1]["avg_importance"] = self.importance_score.sum()
         error = abs(self.importance_score.sum() - importance)
+        error = np.log(error)
         # error = (self.importance_score[self.subset].sum()) - local_importance / (
         #     self.importance_score.sum() - importance
         # )

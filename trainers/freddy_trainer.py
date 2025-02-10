@@ -239,6 +239,7 @@ class FreddyTrainer(SubsetTrainer):
 
             feat = map(lambda x: x[1] - x[0], feat)
             feat = np.vstack([*feat])
+            feat = feat * self.importance_score.reshape(-1, 1)
 
         if self.grad_freddy:
             sset = grad_freddy(
@@ -319,7 +320,7 @@ class FreddyTrainer(SubsetTrainer):
         )
         print(f"relative error [{abs(self.cur_error-error)}]")
 
-        if abs(self.cur_error - error) < 10e-2:
+        if abs(self.cur_error - error) < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
         if self.hist:

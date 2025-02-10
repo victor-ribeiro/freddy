@@ -106,7 +106,7 @@ def freddy(
     # basic config
     base_inc = base_inc(alpha)
     idx = np.arange(len(dataset))
-    idx = np.random.permutation(idx)
+    # idx = np.random.permutation(idx)
     q = Queue()
     sset = []
     vals = []
@@ -189,7 +189,7 @@ def grad_freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
-    # np.random.shuffle(sset)
+    np.random.shuffle(sset)
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)
@@ -356,7 +356,8 @@ class FreddyTrainer(SubsetTrainer):
 
         # importance = np.abs(loss_t2 - loss_t1)
         importance = loss_t2 - loss_t1
-        self.importance_score[data_idx] -= importance
+        # self.importance_score[data_idx] -= importance
+        self.importance_score[data_idx] += importance
 
         return loss, train_acc
 

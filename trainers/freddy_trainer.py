@@ -355,7 +355,7 @@ class FreddyTrainer(SubsetTrainer):
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         # importance = np.abs(loss_t2 - loss_t1)
-        importance = loss_t2 - loss_t1
+        importance = (loss_t2 - loss_t1) / loss_t2
         # self.importance_score[data_idx] -= importance
         self.importance_score[data_idx] += importance
 

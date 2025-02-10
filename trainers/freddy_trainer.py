@@ -211,8 +211,7 @@ class FreddyTrainer(SubsetTrainer):
         self.selected = np.zeros(len(train_dataset))
         #
         self.epoch_selection = []
-        # self.importance_score = np.ones(len(train_dataset))
-        self.importance_score = np.zeros(len(train_dataset))
+        self.importance_score = np.ones(len(train_dataset))
         self.select_flag = True
         self.cur_error = 0
 
@@ -338,7 +337,7 @@ class FreddyTrainer(SubsetTrainer):
         # if not epoch or abs(self.cur_error / error) > 1:
         # if not epoch or abs(self.cur_error - error) < 10e-2:
         # if abs(self.cur_error - error) < 10e-2:
-        if abs(self.cur_error - error) > 1:
+        if abs(self.cur_error - error) < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
         if self.hist:
@@ -355,7 +354,7 @@ class FreddyTrainer(SubsetTrainer):
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         # importance = np.abs(loss_t2 - loss_t1)
-        importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
+        # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
         importance -= loss_t2 - loss_t1
         # self.importance_score[data_idx] -= importance
         self.importance_score[data_idx] += importance

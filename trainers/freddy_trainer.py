@@ -239,10 +239,8 @@ class FreddyTrainer(SubsetTrainer):
             )
 
             feat = map(lambda x: x[1] - x[0], feat)
-            feat = (
-                np.vstack([*feat])
-                + self.importance_score.reshape(-1, 1)
-                + self.cur_error
+            feat = np.vstack([*feat]) * (
+                self.importance_score.reshape(-1, 1) - self.cur_error
             )
 
         if self.grad_freddy:
@@ -334,7 +332,7 @@ class FreddyTrainer(SubsetTrainer):
         # error = self.importance_score[self.subset].mean() / (
         #     self.importance_score.mean() - importance
         # )
-        error = (grad2 - grad1) / grad2
+        error = grad2 - grad1
         # error = abs(error)
         # error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
@@ -360,7 +358,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
-        importance = np.log(loss_t2 - loss_t1)
+        importance = loss_t2 - loss_t1
         self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance
 

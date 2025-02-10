@@ -239,8 +239,10 @@ class FreddyTrainer(SubsetTrainer):
             )
 
             feat = map(lambda x: x[1] - x[0], feat)
-            feat = np.vstack([*feat]) * (
-                self.importance_score.reshape(-1, 1) + self.cur_error
+            feat = (
+                np.vstack([*feat])
+                + self.importance_score.reshape(-1, 1)
+                + self.cur_error
             )
 
         if self.grad_freddy:

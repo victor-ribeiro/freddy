@@ -317,12 +317,12 @@ class FreddyTrainer(SubsetTrainer):
             # self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
             self.hist[-1]["avg_importance"] = self.importance_score.mean()
         error = (self.importance_score - importance).sum()
-        error = np.log(error)
+        # error = np.log(error)
         # error = (self.importance_score[self.subset].mean()) - local_importance / (
         #     self.importance_score.mean() - importance
         # )
 
-        print(f"relative error [{abs(self.cur_error/error)}]")
+        print(f"relative error [{abs(error)}]")
         # print(f"relative error [{error}]")
 
         # if abs(self.cur_error - error) < 10e-3:

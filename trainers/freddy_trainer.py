@@ -274,8 +274,8 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        importance = self.importance_score.sum()
-        local_importance = self.importance_score[self.subset].sum()
+        importance = self.importance_score.mean()
+        local_importance = self.importance_score[self.subset].mean()
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -314,12 +314,12 @@ class FreddyTrainer(SubsetTrainer):
             self._update_train_loader_and_weights()
 
         if self.hist:
-            # self.hist[-1]["avg_importance"] = self.importance_score[self.subset].sum()
-            self.hist[-1]["avg_importance"] = self.importance_score.sum()
-        error = abs(self.importance_score.sum() - importance)
+            # self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
+            self.hist[-1]["avg_importance"] = self.importance_score.mean()
+        error = abs(self.importance_score.mean() - importance)
         error = np.log(error)
-        # error = (self.importance_score[self.subset].sum()) - local_importance / (
-        #     self.importance_score.sum() - importance
+        # error = (self.importance_score[self.subset].mean()) - local_importance / (
+        #     self.importance_score.mean() - importance
         # )
 
         print(f"relative error [{abs(self.cur_error/error)}]")

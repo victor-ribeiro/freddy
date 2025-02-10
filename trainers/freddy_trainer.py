@@ -316,7 +316,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             # self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
             self.hist[-1]["avg_importance"] = self.importance_score.mean()
-        error = (self.importance_score - importance).sum()
+        # error = (self.importance_score - importance).sum()
         # error = np.log(error)
         # error = (self.importance_score[self.subset].mean()) - local_importance / (
         #     self.importance_score.mean() - importance
@@ -326,11 +326,11 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"relative error [{error}]")
 
         # if abs(self.cur_error - error) < 10e-3:
-        if abs(self.cur_error / error) < 1:
+        if self.cur_error < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-        self.cur_error = error
+            self.cur_error = (self.importance_score - importance).sum()
         if self.hist:
-            self.hist[-1]["reaL_error"] = error
+            self.hist[-1]["reaL_error"] = self.cur_error
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():

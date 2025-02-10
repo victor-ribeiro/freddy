@@ -322,8 +322,8 @@ class FreddyTrainer(SubsetTrainer):
         #     self.importance_score.sum() - importance
         # )
 
-        # print(f"relative error [{abs(self.cur_error-error)}]")
-        print(f"relative error [{error}]")
+        print(f"relative error [{abs(self.cur_error-error)}]")
+        # print(f"relative error [{error}]")
 
         # if abs(self.cur_error - error) < 10e-3:
         if abs(self.cur_error - error) < 10e-3:
@@ -342,7 +342,7 @@ class FreddyTrainer(SubsetTrainer):
             pred = self.model.to(self.args.device)(data)
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        importance = loss_t2 - loss_t1
+        importance = (loss_t2 - loss_t1) / self.train_loss.avg
         # self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] += importance
         self.importance_score[data_idx] -= importance

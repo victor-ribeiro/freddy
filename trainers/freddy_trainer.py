@@ -326,7 +326,7 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"relative error [{error}]")
 
         # if abs(self.cur_error - error) < 10e-3:
-        if abs(self.cur_error / error) > 1:
+        if abs(self.cur_error / error) < 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
         if self.hist:
@@ -344,7 +344,7 @@ class FreddyTrainer(SubsetTrainer):
 
         importance = (loss_t2 - loss_t1) / self.train_loss.avg
         # self.importance_score[data_idx] = importance
-        self.importance_score[data_idx] += importance
-        # self.importance_score[data_idx] -= importance
+        # self.importance_score[data_idx] += importance
+        self.importance_score[data_idx] -= importance
 
         return loss, train_acc

@@ -275,8 +275,7 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        importance = self.importance_score
-        local_importance = self.importance_score[self.subset].mean()
+        importance = self.importance_score[self.subset]
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -315,8 +314,8 @@ class FreddyTrainer(SubsetTrainer):
             self._update_train_loader_and_weights()
 
         if self.hist:
-            # self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
-            self.hist[-1]["avg_importance"] = self.importance_score.mean()
+            self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
+            # self.hist[-1]["avg_importance"] = self.importance_score.mean()
         # error = (self.importance_score - importance).sum()
         # error = np.log(error)
         # error = (self.importance_score[self.subset].mean()) - local_importance / (
@@ -330,7 +329,7 @@ class FreddyTrainer(SubsetTrainer):
         # if abs(self.cur_error - error) < 10e-3:
         if self.cur_error < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self.cur_error = (self.importance_score - importance).sum()
+            self.cur_error = (self.importance_score[self.subset] - importance).sum()
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
@@ -344,7 +343,7 @@ class FreddyTrainer(SubsetTrainer):
             pred = self.model.to(self.args.device)(data)
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        importance = loss_t2 - loss_t1
+        importance = (loss_t2 - loss_t1) * self.train_loss.avg
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] += importance
         # self.importance_score[data_idx] -= importance

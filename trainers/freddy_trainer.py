@@ -346,7 +346,7 @@ class FreddyTrainer(SubsetTrainer):
 
         importance = (loss_t2 - loss_t1) * self.train_loss.avg
         # self.importance_score[data_idx] = importance
-        self.importance_score[data_idx] += importance
-        # self.importance_score[data_idx] -= importance
+        # self.importance_score[data_idx] += importance
+        self.importance_score[data_idx] -= importance
 
         return loss, train_acc

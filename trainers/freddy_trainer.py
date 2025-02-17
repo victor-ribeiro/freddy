@@ -281,7 +281,7 @@ class FreddyTrainer(SubsetTrainer):
                     importance,
                     importance2,
                 )
-                importance = reduce(lambda a, b: a + b, importance)
+                importance = reduce(sum, importance)
                 # importance = np.hstack([*importance])
                 self.importance_score[self.subset] += importance
         if self.hist:

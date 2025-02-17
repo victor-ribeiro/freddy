@@ -225,7 +225,7 @@ class FreddyTrainer(SubsetTrainer):
 
         with torch.no_grad():
             pred = map(
-                lambda x: self.model.cpu()(x[0]).to(self.device).detach().numpy(),
+                lambda x: self.model.cpu()(x[0]).detach().numpy(),
                 self.train_loader,
             )
             pred = map(np.argmax, pred)

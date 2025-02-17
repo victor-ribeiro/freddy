@@ -224,6 +224,8 @@ class FreddyTrainer(SubsetTrainer):
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
         if epoch % 10 == 0:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+
             with torch.no_grad():
                 pred = map(
                     lambda x: self.model.cpu()(x[0]).detach().numpy(),
@@ -294,24 +296,7 @@ class FreddyTrainer(SubsetTrainer):
             self.train_dataset.clean()
             self._update_train_loader_and_weights()
 
-            # self.hist[-1]["avg_importance"] = self.importance_score.mean()
-        # error = (self.importance_score - importance).sum()
-        # error = np.log(error)
-        # error = (self.importance_score[self.subset].mean()) - local_importance / (
-        #     self.importance_score.mean() - importance
-        # )
-
-        # print(f"relative error [{abs(error)}]")
-        # print(f"relative error [{error}]")
-        # print(f"relative error [{self.cur_error}]")
-        # self.cur_error = abs(
-        self.cur_error = abs(
-            (
-                self.importance_score[self.subset].mean()
-                * self.lr_scheduler.get_last_lr()[0]
-            )
-            - self.train_loss.avg
-        )
+        self.cur_error = self.importance_score[self.subset].mean()
 
         print(f"relative error [{self.cur_error}, {self.args.alpha}, {self.args.beta}]")
 
@@ -320,10 +305,10 @@ class FreddyTrainer(SubsetTrainer):
         # if abs(self.cur_error - error) < 10e-3:
         # if (self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0]) < 10e-3:
         # if self.cur_error > self.args.alpha:
-        if self.cur_error < 10e-2:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            # self.args.alpha += self.cur_error * self.args.alpha
-            # self.args.beta += self.cur_error * self.args.beta
+        # if self.cur_error < 10e-2:
+        #     self._select_subset(epoch, len(self.train_loader) * epoch)
+        # self.args.alpha += self.cur_error * self.args.alpha
+        # self.args.beta += self.cur_error * self.args.beta
 
     # def _forward_and_backward(self, data, target, data_idx):
     #     with torch.no_grad():

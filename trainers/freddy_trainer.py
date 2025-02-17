@@ -322,8 +322,8 @@ class FreddyTrainer(SubsetTrainer):
         # if self.cur_error > self.args.alpha:
         if self.cur_error < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self.args.alpha += self.cur_error * self.args.alpha
-            self.args.beta += self.cur_error * self.args.beta
+            # self.args.alpha += self.cur_error * self.args.alpha
+            # self.args.beta += self.cur_error * self.args.beta
 
     # def _forward_and_backward(self, data, target, data_idx):
     #     with torch.no_grad():

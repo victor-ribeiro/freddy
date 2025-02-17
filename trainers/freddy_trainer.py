@@ -189,8 +189,8 @@ class FreddyTrainer(SubsetTrainer):
 
             # feat = map(lambda x: 0.1 * (x[1] - x[0]) ** 2, feat)
             # feat = map(lambda x: x[1] - (x[0] * self.cur_error * self.args.alpha), feat)
-            # feat = map(lambda x: x[1] - x[0], feat)
-            feat = map(lambda x: x[1], feat)
+            feat = map(lambda x: x[1] - x[0], feat)
+
             feat = np.vstack([*feat])
             # feat = feat - self.importance_score.reshape(-1, 1)
             # feat = feat * (self.importance_score.reshape(-1, 1) + self.cur_error)

@@ -271,11 +271,13 @@ class FreddyTrainer(SubsetTrainer):
             tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
             importance2 = map(self.train_criterion, pred, tgt)
             importance = map(
-                lambda a, b: (b - a).cpu().detach().numpy(), importance, importance2
+                lambda a, b: (b - a).cpu().detach().numpy().sum(),
+                importance,
+                importance2,
             )
-            importance = np.hstack([*importance])
-            print(importance.shape)
-            exit()
+            importance = reduce(lambda a, b: a + b, importance)
+            # importance = np.hstack([*importance])
+            self.importance_score[self.subset] += importance
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

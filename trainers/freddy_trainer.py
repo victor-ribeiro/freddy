@@ -230,8 +230,9 @@ class FreddyTrainer(SubsetTrainer):
             )
             pred = map(partial(np.argmax, axis=1), pred)
             pred = map(lambda x: one_hot_coding(x, classes=self.args.num_classes), pred)
-            # tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
-            print(next(pred))
+            tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
+            _loss = map(self.train_criterion, pred, tgt)
+            print(next(_loss))
             # print(self.train_dataset.dataset.targets)
             exit()
         for batch_idx, (data, target, data_idx) in pbar:

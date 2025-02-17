@@ -221,17 +221,19 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
-
-        with torch.no_grad():
-            pred = map(
-                lambda x: self.model.cpu()(x[0]).detach().numpy(),
-                self.train_loader,
-            )
-            pred = map(partial(np.argmax, axis=1), pred)
-            pred = map(lambda x: one_hot_coding(x, classes=self.args.num_classes), pred)
-            tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
-            importance = map(self.train_criterion, pred, tgt)
-            # importance = reduce(lambda a, b: a + b, importance)
+        if epoch % 10:
+            with torch.no_grad():
+                pred = map(
+                    lambda x: self.model.cpu()(x[0]).detach().numpy(),
+                    self.train_loader,
+                )
+                pred = map(partial(np.argmax, axis=1), pred)
+                pred = map(
+                    lambda x: one_hot_coding(x, classes=self.args.num_classes), pred
+                )
+                tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
+                importance = map(self.train_criterion, pred, tgt)
+                # importance = reduce(lambda a, b: a + b, importance)
 
         for batch_idx, (data, target, data_idx) in pbar:
 
@@ -261,30 +263,36 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
         self._val_epoch(epoch)
-        with torch.no_grad():
-            pred = map(
-                lambda x: self.model.cpu()(x[0]).detach().numpy(),
-                self.train_loader,
-            )
-            pred = map(partial(np.argmax, axis=1), pred)
-            pred = map(lambda x: one_hot_coding(x, classes=self.args.num_classes), pred)
-            tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
-            importance2 = map(self.train_criterion, pred, tgt)
-            importance = map(
-                lambda a, b: (b - a).cpu().detach().numpy().sum(),
-                importance,
-                importance2,
-            )
-            importance = reduce(lambda a, b: a + b, importance)
-            # importance = np.hstack([*importance])
-            self.importance_score[self.subset] += importance
+        if epoch % 10:
+            with torch.no_grad():
+                pred = map(
+                    lambda x: self.model.cpu()(x[0]).detach().numpy(),
+                    self.train_loader,
+                )
+                pred = map(partial(np.argmax, axis=1), pred)
+                pred = map(
+                    lambda x: one_hot_coding(x, classes=self.args.num_classes), pred
+                )
+                tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
+                importance2 = map(self.train_criterion, pred, tgt)
+                importance = map(
+                    lambda a, b: (b - a).cpu().detach().numpy().sum(),
+                    importance,
+                    importance2,
+                )
+                importance = reduce(lambda a, b: a + b, importance)
+                # importance = np.hstack([*importance])
+                self.importance_score[self.subset] += importance
+            if self.hist:
+                self.hist[-1]["avg_importance"] = self.importance_score[
+                    self.subset
+                ].mean()
+                self.hist[-1]["reaL_error"] = self.cur_error
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
             self._update_train_loader_and_weights()
 
-        if self.hist:
-            self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
             # self.hist[-1]["avg_importance"] = self.importance_score.mean()
         # error = (self.importance_score - importance).sum()
         # error = np.log(error)
@@ -299,10 +307,8 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = (self.importance_score[self.subset] - importance).mean()
         self.cur_error = abs(self.cur_error)
         # if abs(self.cur_error - error) < 10e-3:
-        if self.cur_error < 10e-3:
+        if (self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0]) < 10e-3:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-        if self.hist:
-            self.hist[-1]["reaL_error"] = self.cur_error
 
     # def _forward_and_backward(self, data, target, data_idx):
     #     with torch.no_grad():

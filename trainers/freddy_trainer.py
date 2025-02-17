@@ -1,4 +1,5 @@
 import numpy as np
+from functools import partial
 from itertools import batched
 from sklearn.metrics import pairwise_distances
 
@@ -221,9 +222,12 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
+
         with torch.no_grad():
-            pred = map(lambda x: (self.model.cpu()(x[0]), x[1]), self.train_loader)
+            pred = map(lambda x: self.model.cpu()(x[0]), self.train_loader)
+            tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
             print(next(pred))
+            print(next(tgt))
             # print(self.train_dataset.dataset.targets)
             exit()
         for batch_idx, (data, target, data_idx) in pbar:

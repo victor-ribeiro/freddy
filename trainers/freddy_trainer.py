@@ -231,7 +231,7 @@ class FreddyTrainer(SubsetTrainer):
             pred = map(lambda x: one_hot_coding(x, classes=self.args.num_classes), pred)
             tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
             importance = map(self.train_criterion, pred, tgt)
-            importance = reduce(lambda a, b: a + b, importance)
+            # importance = reduce(lambda a, b: a + b, importance)
 
         for batch_idx, (data, target, data_idx) in pbar:
 

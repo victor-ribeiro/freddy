@@ -1,11 +1,10 @@
 import numpy as np
-from functools import partial, reduce
+import heapq
+import math
 from itertools import batched
 from sklearn.metrics import pairwise_distances
 
 import torch
-import math
-import heapq
 
 from .subset_trainer import *
 
@@ -144,6 +143,58 @@ def freddy(
     return np.array(sset)
 
 
+@_register
+def grad_freddy(
+    dataset,
+    base_inc=base_inc,
+    alpha=0.15,
+    metric="similarity",
+    K=1,
+    batch_size=32,
+    beta=0.75,
+    return_vals=False,
+):
+    # basic config
+    base_inc = base_inc(alpha)
+    idx = np.arange(len(dataset))
+    q = Queue()
+    sset = []
+    vals = []
+    argmax = 0
+    inc = 0
+    for ds, V in zip(
+        batched(dataset, batch_size),
+        batched(idx, batch_size),
+    ):
+        D = METRICS[metric](ds, batch_size=batch_size)
+        size = len(D)
+        # localmax = np.median(D, axis=0)
+        localmax = np.amax(D, axis=1)
+        argmax += localmax.sum()
+        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        while q and len(sset) < K:
+            score, idx_s = q.head
+            s = D[:, idx_s[1]]
+            s = score + (s * inc) + (np.gradient(s) * (inc**2) * 0.5)
+            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            inc = score_s - score
+            if (inc < 0) or (not q):
+                break
+            score_t, idx_t = q.head
+            if inc > score_t:
+                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+                localmax = np.maximum(localmax, s)
+                sset.append(idx_s[0])
+                vals.append(score)
+            else:
+                q.push(inc, idx_s)
+            q.push(score_t, idx_t)
+    np.random.shuffle(sset)
+    if return_vals:
+        return np.array(vals), sset
+    return np.array(sset)
+
+
 class FreddyTrainer(SubsetTrainer):
     def __init__(
         self,
@@ -160,10 +211,10 @@ class FreddyTrainer(SubsetTrainer):
         self.selected = np.zeros(len(train_dataset))
         #
         self.epoch_selection = []
-        # self.importance_score = np.ones(len(train_dataset))
-        self.importance_score = np.zeros(len(train_dataset))
+        self.importance_score = np.ones(len(train_dataset))
+        # self.importance_score = np.zeros(len(train_dataset))
         self.select_flag = True
-        self.cur_error = 0
+        self.cur_error = 10e-3
 
     def _select_subset(self, epoch, training_step):
         print(f"selecting subset on epoch {epoch}")
@@ -187,27 +238,32 @@ class FreddyTrainer(SubsetTrainer):
                 dataset,
             )
 
-            # feat = map(lambda x: 0.1 * (x[1] - x[0]) ** 2, feat)
-            # feat = map(lambda x: x[1] - (x[0] * self.cur_error * self.args.alpha), feat)
             feat = map(lambda x: x[1] - x[0], feat)
+            feat = np.vstack([*feat]) * self.importance_score.reshape(-1, 1)
 
-            feat = np.vstack([*feat])
-            # feat = feat - self.importance_score.reshape(-1, 1)
-            # feat = feat * (self.importance_score.reshape(-1, 1) + self.cur_error)
-
-        sset = freddy(
-            feat,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            beta=self.args.beta,
-        )
+        if self.grad_freddy:
+            sset = grad_freddy(
+                feat,
+                K=self.sample_size,
+                metric=self.args.freddy_similarity,
+                alpha=self.args.alpha,
+                beta=self.args.beta,
+            )
+        else:
+            sset = freddy(
+                feat,
+                K=self.sample_size,
+                metric=self.args.freddy_similarity,
+                alpha=self.args.alpha,
+                beta=self.args.beta,
+            )
         self.subset = sset
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self.importance_score
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
         self.subset_weights = np.ones(self.sample_size)
+        # self.subset_weights = self.importance_score[self.subset]
 
         self.select_flag = False
 
@@ -219,26 +275,17 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
+        try:
+            modules = [*self.model.to(self.args.device).modules()]
+            grad1 = modules[-1]
+            grad1 = grad1.weight.grad.data.norm(2).item()
+        except:
+            grad1 = 0
+        importance = self.importance_score.mean()
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
-        if epoch % 10 == 0:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-
-            with torch.no_grad():
-                pred = map(
-                    lambda x: self.model.cpu()(x[0]).detach().numpy(),
-                    self.train_loader,
-                )
-                pred = map(partial(np.argmax, axis=1), pred)
-                pred = map(
-                    lambda x: one_hot_coding(x, classes=self.args.num_classes), pred
-                )
-                tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
-                importance = map(self.train_criterion, pred, tgt)
-                # importance = reduce(lambda a, b: a + b, importance)
-
         for batch_idx, (data, target, data_idx) in pbar:
 
             # load data to device and record data loading time
@@ -267,65 +314,54 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
         self._val_epoch(epoch)
-        if epoch % 10 == 0:
-            with torch.no_grad():
-                pred = map(
-                    lambda x: self.model.cpu()(x[0]).detach().numpy(),
-                    self.train_loader,
-                )
-                pred = map(partial(np.argmax, axis=1), pred)
-                pred = map(
-                    lambda x: one_hot_coding(x, classes=self.args.num_classes), pred
-                )
-                tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
-                importance2 = map(self.train_criterion, pred, tgt)
-                importance = map(
-                    lambda a, b: (b - a).cpu().detach().numpy().sum(),
-                    importance,
-                    importance2,
-                )
-                importance = reduce(lambda a, b: a + b, importance)
-                # importance = np.hstack([*importance])
-                # self.importance_score[self.subset] += importance
-                self.importance_score[self.subset] -= importance
-                self.cur_error = (
-                    self.importance_score[self.subset] - importance
-                ).mean()
-        if self.hist:
-            self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
-            self.hist[-1]["reaL_error"] = self.cur_error
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
             self._update_train_loader_and_weights()
 
-        # self.cur_error = self.importance_score[self.subset].mean()
+        if self.hist:
+            self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        print(f"relative error [{self.cur_error}, {self.args.alpha}, {self.args.beta}]")
+        modules = [*self.model.to(self.args.device).modules()]
+        grad2 = modules[-1]
+        grad2 = grad2.weight.grad.data.norm(2).item()
+        # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
+        # error = grad2 - grad1 / self.importance_score[self.subset].mean()
+        # error = self.importance_score[self.subset].mean() / (
+        #     self.importance_score.mean() - importance
+        # )
+        error = grad2 - grad1
+        # error = abs(error)
+        # error = np.log(error)
+        print(f"relative error [{abs(self.cur_error-error)}]")
+        # if not epoch or abs(self.cur_error - error) < 10e-2:
+        # if not epoch or abs(self.cur_error / error) > 1:
+        # if not epoch or abs(self.cur_error - error) < 10e-2:
+        # if abs(self.cur_error - error) < 10e-2:
+        if abs(self.cur_error - error) < 10e-2:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+        self.cur_error = error
+        if self.hist:
+            self.hist[-1]["reaL_error"] = error
 
-        # self.cur_error = (self.importance_score[self.subset] - importance).mean()
-        # self.cur_error = abs(self.cur_error)
-        # if abs(self.cur_error - error) < 10e-3:
-        # if (self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0]) < 10e-3:
-        # if self.cur_error > self.args.alpha:
-        # if self.cur_error < 10e-2:
-        #     self._select_subset(epoch, len(self.train_loader) * epoch)
-        # self.args.alpha += self.cur_error * self.args.alpha
-        # self.args.beta += self.cur_error * self.args.beta
+    def _forward_and_backward(self, data, target, data_idx):
+        with torch.no_grad():
+            pred = self.model.to(self.args.device)(data)
+            loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-    # def _forward_and_backward(self, data, target, data_idx):
-    #     with torch.no_grad():
-    #         pred = self.model.to(self.args.device)(data)
-    #         loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
+        loss, train_acc = super()._forward_and_backward(data, target, data_idx)
+        with torch.no_grad():
+            pred = self.model.to(self.args.device)(data)
+            loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-    #     loss, train_acc = super()._forward_and_backward(data, target, data_idx)
-    #     with torch.no_grad():
-    #         pred = self.model.to(self.args.device)(data)
-    #         loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
+        # importance = np.abs(loss_t2 - loss_t1)
+        # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
+        importance = loss_t2 - loss_t1
+        self.importance_score[data_idx] += importance
+        # self.importance_score[data_idx] += importance
 
-    #     importance = (loss_t2 - loss_t1) * self.train_loss.avg
-    #     # self.importance_score[data_idx] = importance
-    #     self.importance_score[data_idx] += importance
-    #     # self.importance_score[data_idx] -= importance
+        return loss, train_acc
 
-    #     return loss, train_acc
+    # def train(self):
+    #     self._select_subset(0, 0)
+    #     return super().train()

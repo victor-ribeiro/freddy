@@ -226,8 +226,8 @@ class FreddyTrainer(SubsetTrainer):
         with torch.no_grad():
             pred = map(lambda x: self.model.cpu()(x[0]), self.train_loader)
             tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
+            pred = map(lambda a, b: a - b, pred, tgt)
             print(next(pred))
-            print(next(tgt))
             # print(self.train_dataset.dataset.targets)
             exit()
         for batch_idx, (data, target, data_idx) in pbar:

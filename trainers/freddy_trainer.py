@@ -232,8 +232,7 @@ class FreddyTrainer(SubsetTrainer):
             tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
             importance = map(self.train_criterion, pred, tgt)
             importance = reduce(lambda a, b: a + b, importance)
-            print(importance)
-            exit()
+
         for batch_idx, (data, target, data_idx) in pbar:
 
             # load data to device and record data loading time
@@ -262,6 +261,18 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
         self._val_epoch(epoch)
+        with torch.no_grad():
+            pred = map(
+                lambda x: self.model.cpu()(x[0]).detach().numpy(),
+                self.train_loader,
+            )
+            pred = map(partial(np.argmax, axis=1), pred)
+            pred = map(lambda x: one_hot_coding(x, classes=self.args.num_classes), pred)
+            tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
+            importance2 = map(self.train_criterion, pred, tgt)
+            importance = map(lambda a, b: b - a, importance, importance2)
+            print(next(importance))
+            exit()
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

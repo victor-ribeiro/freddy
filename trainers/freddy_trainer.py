@@ -1,5 +1,5 @@
 import numpy as np
-from functools import partial
+from functools import partial, reduce
 from itertools import batched
 from sklearn.metrics import pairwise_distances
 
@@ -217,7 +217,6 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        importance = self.importance_score[self.subset]
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -231,9 +230,9 @@ class FreddyTrainer(SubsetTrainer):
             pred = map(partial(np.argmax, axis=1), pred)
             pred = map(lambda x: one_hot_coding(x, classes=self.args.num_classes), pred)
             tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
-            _loss = map(self.train_criterion, pred, tgt)
-            print(next(_loss))
-            # print(self.train_dataset.dataset.targets)
+            importance = map(self.train_criterion, pred, tgt)
+            importance = reduce(lambda a, b: a + b, importance)
+            print(importance)
             exit()
         for batch_idx, (data, target, data_idx) in pbar:
 

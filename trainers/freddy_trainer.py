@@ -221,7 +221,7 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
-        if epoch % 10:
+        if epoch % 10 == 0:
             with torch.no_grad():
                 pred = map(
                     lambda x: self.model.cpu()(x[0]).detach().numpy(),
@@ -263,7 +263,7 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
         self._val_epoch(epoch)
-        if epoch % 10:
+        if epoch % 10 == 0:
             with torch.no_grad():
                 pred = map(
                     lambda x: self.model.cpu()(x[0]).detach().numpy(),
@@ -283,11 +283,9 @@ class FreddyTrainer(SubsetTrainer):
                 importance = reduce(lambda a, b: a + b, importance)
                 # importance = np.hstack([*importance])
                 self.importance_score[self.subset] += importance
-            if self.hist:
-                self.hist[-1]["avg_importance"] = self.importance_score[
-                    self.subset
-                ].mean()
-                self.hist[-1]["reaL_error"] = self.cur_error
+        if self.hist:
+            self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
+            self.hist[-1]["reaL_error"] = self.cur_error
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

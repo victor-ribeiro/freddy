@@ -308,7 +308,7 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = (
             self.importance_score[self.subset].mean()
             * self.lr_scheduler.get_last_lr()[0]
-        )
+        ) - self.train_loss.avg
 
         print(f"relative error [{self.cur_error}, {self.args.alpha}, {self.args.beta}]")
 

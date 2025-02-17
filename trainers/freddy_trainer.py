@@ -273,6 +273,8 @@ class FreddyTrainer(SubsetTrainer):
             importance = map(
                 lambda a, b: (b - a).cpu().detach().numpy(), importance, importance2
             )
+            print(next(importance))
+            exit()
             importance = np.vstack([*importance])
             print(importance.shape)
             exit()

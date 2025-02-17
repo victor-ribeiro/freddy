@@ -221,6 +221,9 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
+        with torch.no_grad():
+            print(self.train_dataset)
+            exit()
         for batch_idx, (data, target, data_idx) in pbar:
 
             # load data to device and record data loading time
@@ -275,19 +278,19 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-    def _forward_and_backward(self, data, target, data_idx):
-        with torch.no_grad():
-            pred = self.model.to(self.args.device)(data)
-            loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
+    # def _forward_and_backward(self, data, target, data_idx):
+    #     with torch.no_grad():
+    #         pred = self.model.to(self.args.device)(data)
+    #         loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        loss, train_acc = super()._forward_and_backward(data, target, data_idx)
-        with torch.no_grad():
-            pred = self.model.to(self.args.device)(data)
-            loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
+    #     loss, train_acc = super()._forward_and_backward(data, target, data_idx)
+    #     with torch.no_grad():
+    #         pred = self.model.to(self.args.device)(data)
+    #         loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        importance = (loss_t2 - loss_t1) * self.train_loss.avg
-        # self.importance_score[data_idx] = importance
-        self.importance_score[data_idx] += importance
-        # self.importance_score[data_idx] -= importance
+    #     importance = (loss_t2 - loss_t1) * self.train_loss.avg
+    #     # self.importance_score[data_idx] = importance
+    #     self.importance_score[data_idx] += importance
+    #     # self.importance_score[data_idx] -= importance
 
-        return loss, train_acc
+    #     return loss, train_acc

@@ -303,21 +303,18 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"relative error [{abs(error)}]")
         # print(f"relative error [{error}]")
         # print(f"relative error [{self.cur_error}]")
-        self.cur_error = (
-            self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0]
+        self.cur_error = abs(
+            self.importance_score[self.subset].mean()
+            * self.lr_scheduler.get_last_lr()[0]
         )
 
-        print(
-            f"relative error [{(self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0])}, {self.args.alpha}]"
-        )
+        print(f"relative error [{self.cur_error}, {self.args.alpha}]")
 
         # self.cur_error = (self.importance_score[self.subset] - importance).mean()
         # self.cur_error = abs(self.cur_error)
         # if abs(self.cur_error - error) < 10e-3:
         # if (self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0]) < 10e-3:
-        if (
-            self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0]
-        ) > self.args.alpha:
+        if self.cur_error > self.args.alpha:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
     # def _forward_and_backward(self, data, target, data_idx):

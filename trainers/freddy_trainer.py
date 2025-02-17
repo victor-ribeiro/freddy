@@ -284,7 +284,8 @@ class FreddyTrainer(SubsetTrainer):
                 )
                 importance = reduce(lambda a, b: a + b, importance)
                 # importance = np.hstack([*importance])
-                self.importance_score[self.subset] += importance
+                # self.importance_score[self.subset] += importance
+                self.importance_score[self.subset] -= importance
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
             self.hist[-1]["reaL_error"] = self.cur_error

@@ -191,7 +191,7 @@ class FreddyTrainer(SubsetTrainer):
             # feat = map(lambda x: x[1] - (x[0] * self.cur_error * self.args.alpha), feat)
             feat = map(lambda x: x[1] - x[0], feat)
             feat = np.vstack([*feat])
-            self.args.alpha -= self.cur_error * self.args.alpha
+            self.args.alpha += self.cur_error * self.args.alpha
             # feat = feat - self.importance_score.reshape(-1, 1)
             # feat = feat * (self.importance_score.reshape(-1, 1) + self.cur_error)
 
@@ -303,6 +303,7 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"relative error [{abs(error)}]")
         # print(f"relative error [{error}]")
         # print(f"relative error [{self.cur_error}]")
+        # self.cur_error = abs(
         self.cur_error = (
             self.importance_score[self.subset].mean()
             * self.lr_scheduler.get_last_lr()[0]
@@ -314,7 +315,7 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = abs(self.cur_error)
         # if abs(self.cur_error - error) < 10e-3:
         # if (self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0]) < 10e-3:
-        if abs(self.cur_error) > self.args.alpha:
+        if self.cur_error > self.args.alpha:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
     # def _forward_and_backward(self, data, target, data_idx):

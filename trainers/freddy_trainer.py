@@ -303,7 +303,7 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"relative error [{error}]")
         # print(f"relative error [{self.cur_error}]")
         print(
-            f"relative error [{(self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0])}]"
+            f"relative error [{(self.importance_score.mean() * self.lr_scheduler.get_last_lr()[0])}, {self.args.alpha}]"
         )
 
         # self.cur_error = (self.importance_score[self.subset] - importance).mean()

@@ -285,7 +285,7 @@ class FreddyTrainer(SubsetTrainer):
                 importance = reduce(lambda a, b: a + b, importance)
                 # importance = np.hstack([*importance])
                 # self.importance_score[self.subset] += importance
-                self.importance_score[self.subset] -= importance
+                self.importance_score[self.subset] += importance
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
             self.hist[-1]["reaL_error"] = self.cur_error
@@ -306,7 +306,7 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"relative error [{self.cur_error}]")
         # self.cur_error = abs(
         self.cur_error = (
-            self.importance_score[self.subset].sum()
+            self.importance_score[self.subset].mean()
             * self.lr_scheduler.get_last_lr()[0]
         )
 

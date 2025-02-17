@@ -228,7 +228,7 @@ class FreddyTrainer(SubsetTrainer):
                 lambda x: self.model.cpu()(x[0]).detach().numpy(),
                 self.train_loader,
             )
-            pred = map(np.argmax, pred)
+            pred = map(partial(np.argmax, axis=1), pred)
             # pred = map(lambda x: one_hot_coding(x, classes=10), pred)
             # tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
             print(next(pred))

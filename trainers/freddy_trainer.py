@@ -5,7 +5,6 @@ from sklearn.metrics import pairwise_distances
 import torch
 
 from .subset_trainer import *
-from .coreset.freddy.sampling.lazzy_greed import freddy
 
 REDUCE = {"mean": np.mean, "sum": np.sum}
 __all__ = ["METRICS"]

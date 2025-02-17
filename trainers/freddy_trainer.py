@@ -222,8 +222,8 @@ class FreddyTrainer(SubsetTrainer):
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
         with torch.no_grad():
-            print(self.train_dataset.dataset)
-            print(self.train_dataset.target)
+            print(self.train_dataset.dataset[:3])
+            print(self.train_dataset.dataset.targets)
             exit()
         for batch_idx, (data, target, data_idx) in pbar:
 

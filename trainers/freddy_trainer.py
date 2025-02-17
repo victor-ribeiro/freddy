@@ -270,7 +270,9 @@ class FreddyTrainer(SubsetTrainer):
             pred = map(lambda x: one_hot_coding(x, classes=self.args.num_classes), pred)
             tgt = map(lambda x: one_hot_coding(x[1], classes=10), self.train_loader)
             importance2 = map(self.train_criterion, pred, tgt)
-            importance = map(lambda a, b: b - a, importance, importance2)
+            importance = map(
+                lambda a, b: (b - a).cpu().detach().numpy(), importance, importance2
+            )
             importance = np.vstack([*importance])
             print(importance.shape)
             exit()

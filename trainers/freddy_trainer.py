@@ -331,7 +331,7 @@ class FreddyTrainer(SubsetTrainer):
         # error = self.importance_score[self.subset].mean() / (
         #     self.importance_score.mean() - importance
         # )
-        error = grad2 - grad1
+        error = (grad2 - grad1) / importance
         # error = abs(error)
         # error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")

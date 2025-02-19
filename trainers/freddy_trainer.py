@@ -328,6 +328,7 @@ class FreddyTrainer(SubsetTrainer):
         modules = [*self.model.to(self.args.device).modules()]
         grad2 = modules[-1]
         grad2 = grad2.weight.grad.data
+        # error = (grad2 - grad1).norm(2).item() / self.cur_error # -> esse teste aqui é o próximo
         error = (grad2 - grad1).norm(2).item()
         print(f"relative error [{abs(self.cur_error-error)}]")
         # print(f"relative error [{self.cur_error}]")

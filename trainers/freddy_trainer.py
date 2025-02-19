@@ -348,7 +348,7 @@ class FreddyTrainer(SubsetTrainer):
             pred = torch.argmax(pred, dim=1).float()
             pred = torch.nn.functional.one_hot(
                 pred.to(torch.int64), self.args.num_classes
-            )
+            ).float()
             loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)

@@ -329,16 +329,17 @@ class FreddyTrainer(SubsetTrainer):
         grad2 = modules[-1]
         grad2 = grad2.weight.grad.data
         error = (grad2 - grad1).norm(2).item()
-        self.cur_error = error
-        # print(f"relative error [{abs(self.cur_error-error)}]")
-        print(f"relative error [{self.cur_error}]")
-        if self.cur_error < 10e-2:
+        print(f"relative error [{abs(self.cur_error-error)}]")
+        # print(f"relative error [{self.cur_error}]")
+        # if self.cur_error < 10e-2:
+        if abs(self.cur_error - error) < 10e-2:
             # if (
             #     self.importance_score[self.subset].mean() < 1
             # ):  # --> reselecionar quando a importancia for muito baixa
             self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.hist:
             self.hist[-1]["reaL_error"] = error
+        self.cur_error = error
 
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():

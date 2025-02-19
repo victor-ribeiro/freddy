@@ -239,8 +239,8 @@ class FreddyTrainer(SubsetTrainer):
             )
 
             feat = map(lambda x: x[1] - x[0], feat)
-            # feat = np.vstack([*feat]) * self.importance_score.reshape(-1, 1)
-            feat = np.vstack([*feat])
+            feat = np.vstack([*feat]) * self.importance_score.reshape(-1, 1)
+            # feat = np.vstack([*feat])
 
         if self.grad_freddy:
             sset = grad_freddy(
@@ -279,7 +279,7 @@ class FreddyTrainer(SubsetTrainer):
         try:
             modules = [*self.model.to(self.args.device).modules()]
             grad1 = modules[-1]
-            grad1 = grad1.weight.grad.data.norm(2).item()
+            grad1 = grad1.weight.grad.data
         except:
             grad1 = 0
         importance = self.importance_score.mean()
@@ -325,22 +325,15 @@ class FreddyTrainer(SubsetTrainer):
 
         modules = [*self.model.to(self.args.device).modules()]
         grad2 = modules[-1]
-        grad2 = grad2.weight.grad.data.norm(2).item()
-        # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
-        # error = grad2 - grad1 / self.importance_score[self.subset].mean()
-        # error = self.importance_score[self.subset].mean() / (
-        #     self.importance_score.mean() - importance
-        # )
-        error = (grad2 - grad1) / importance
-        # error = abs(error)
-        # error = np.log(error)
-        print(f"relative error [{abs(self.cur_error-error)}]")
-        # if abs(self.cur_error - error) < 10e-2:
-        if (
-            self.importance_score[self.subset].mean() < 1
-        ):  # --> reselecionar quando a importancia for muito baixa
-            self._select_subset(epoch, len(self.train_loader) * epoch)
+        grad2 = grad2.weight.grad.data
+        error = (grad2 - grad1).norm(2).item() / importance
         self.cur_error = error
+        print(f"relative error [{abs(self.cur_error-error)}]")
+        if abs(self.cur_error - error) < 10e-2:
+            # if (
+            #     self.importance_score[self.subset].mean() < 1
+            # ):  # --> reselecionar quando a importancia for muito baixa
+            self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.hist:
             self.hist[-1]["reaL_error"] = error
 

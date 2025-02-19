@@ -335,8 +335,10 @@ class FreddyTrainer(SubsetTrainer):
         # error = abs(error)
         # error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
-        # if self.importance_score[self.subset].mean() < 10e1:
-        if abs(self.cur_error - error) < 10e-2:
+        # if abs(self.cur_error - error) < 10e-2:
+        if (
+            self.importance_score[self.subset].mean() < 1
+        ):  # --> reselecionar quando a importancia for muito baixa
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
         if self.hist:

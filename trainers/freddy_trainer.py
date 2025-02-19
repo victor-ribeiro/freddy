@@ -233,12 +233,12 @@ class FreddyTrainer(SubsetTrainer):
             feat = map(
                 lambda x: (
                     self.model.cpu()(x[0]).detach().numpy(),
-                    one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+                    # one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
                 ),
                 dataset,
             )
 
-            feat = map(lambda x: x[1] - x[0], feat)
+            # feat = map(lambda x: x[1] - x[0], feat)
             feat = np.vstack([*feat]) - (
                 self.cur_error * self.importance_score.reshape(-1, 1)
             )

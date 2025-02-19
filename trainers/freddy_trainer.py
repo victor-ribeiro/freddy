@@ -329,7 +329,7 @@ class FreddyTrainer(SubsetTrainer):
         error = (grad2 - grad1).norm(2).item() / importance
         self.cur_error = error
         print(f"relative error [{abs(self.cur_error-error)}]")
-        if abs(self.cur_error - error) < 10e-2:
+        if self.cur_error < 10e-2:
             # if (
             #     self.importance_score[self.subset].mean() < 1
             # ):  # --> reselecionar quando a importancia for muito baixa

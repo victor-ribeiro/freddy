@@ -335,8 +335,8 @@ class FreddyTrainer(SubsetTrainer):
         # error = abs(error)
         # error = np.log(error)
         print(f"relative error [{abs(self.cur_error-error)}]")
-        if self.importance_score[self.subset].mean() < 10e1:
-            # if abs(self.cur_error - error) < 10e-2:
+        # if self.importance_score[self.subset].mean() < 10e1:
+        if abs(self.cur_error - error) < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         self.cur_error = error
         if self.hist:
@@ -345,6 +345,7 @@ class FreddyTrainer(SubsetTrainer):
     def _forward_and_backward(self, data, target, data_idx):
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data)
+            pred = torch.argmax(pred, dim=1)
             loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)

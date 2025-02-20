@@ -239,29 +239,21 @@ class FreddyTrainer(SubsetTrainer):
                 dataset,
             )
 
-            feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
+            # feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
+            feat = map(lambda x: x[1] - x[0], feat)
 
-            feat = np.vstack([*feat])
-            # feat = np.vstack([*feat]) - (
-            #     self.cur_error * self.importance_score.reshape(-1, 1)
-            # )
-        # feat = np.vstack([*feat])
-        if self.grad_freddy:
-            sset = grad_freddy(
-                feat,
-                K=self.sample_size,
-                metric=self.args.freddy_similarity,
-                alpha=self.args.alpha,
-                beta=self.args.beta,
+            # feat = np.vstack([*feat])
+            feat = np.vstack([*feat]) - (
+                self.cur_error * self.importance_score.reshape(-1, 1)
             )
-        else:
-            sset = freddy(
-                feat,
-                K=self.sample_size,
-                metric=self.args.freddy_similarity,
-                alpha=self.args.alpha,
-                beta=self.args.beta,
-            )
+
+        sset = freddy(
+            feat,
+            K=self.sample_size,
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
+            beta=self.args.beta,
+        )
         self.subset = sset
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected

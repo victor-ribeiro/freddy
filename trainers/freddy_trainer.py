@@ -238,8 +238,8 @@ class FreddyTrainer(SubsetTrainer):
                 dataset,
             )
 
-            feat = map(lambda x: ((x[1] - x[0]) ** 2).sum(axis=1), feat)
-            feat = np.hstack([*feat])
+            feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
+            feat = np.vstack([*feat])
             print(feat.shape)
             exit()
             feat = np.vstack([*feat]) - (

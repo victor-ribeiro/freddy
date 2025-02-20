@@ -243,23 +243,21 @@ class FreddyTrainer(SubsetTrainer):
             feat = map(lambda x: x[1] - x[0], feat)
 
             # feat = np.vstack([*feat])
-            feat = np.vstack([*feat]) - (
-                self.cur_error * self.importance_score.reshape(-1, 1)
-            )
+            feat = np.vstack([*feat]) * self.importance_score.reshape(-1, 1)
 
-        sset = freddy(
-            feat,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            beta=self.args.beta,
-        )
-        self.subset = sset
-        self.selected[sset] += 1
-        self.train_checkpoint["selected"] = self.selected
-        self.train_checkpoint["importance"] = self.importance_score
-        self.train_checkpoint["epoch_selection"] = self.epoch_selection
-        self.subset_weights = np.ones(self.sample_size)
+            sset = freddy(
+                feat,
+                K=self.sample_size,
+                metric=self.args.freddy_similarity,
+                alpha=self.args.alpha,
+                beta=self.args.beta,
+            )
+            self.subset = sset
+            self.selected[sset] += 1
+            self.train_checkpoint["selected"] = self.selected
+            self.train_checkpoint["importance"] = self.importance_score
+            self.train_checkpoint["epoch_selection"] = self.epoch_selection
+            self.subset_weights = np.ones(self.sample_size)
         # self.subset_weights = self.importance_score[self.subset]
 
         self.select_flag = False

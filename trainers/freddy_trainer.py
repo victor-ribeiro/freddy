@@ -214,7 +214,7 @@ class FreddyTrainer(SubsetTrainer):
         self.importance_score = np.ones(len(train_dataset))
         # self.importance_score = np.zeros(len(train_dataset))
         self.select_flag = True
-        self.cur_error = 10e-3
+        self.cur_error = 1
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()

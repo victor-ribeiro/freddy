@@ -240,8 +240,6 @@ class FreddyTrainer(SubsetTrainer):
 
             feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
             feat = np.vstack([*feat])
-            print(feat.shape)
-            exit()
             feat = np.vstack([*feat]) - (
                 self.cur_error * self.importance_score.reshape(-1, 1)
             )

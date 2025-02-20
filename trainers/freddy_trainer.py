@@ -220,25 +220,28 @@ class FreddyTrainer(SubsetTrainer):
         print(f"selecting subset on epoch {epoch}")
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
-        dataset = self.train_dataset.dataset
-        dataset = DataLoader(
-            dataset,
-            batch_size=self.args.batch_size,
-            shuffle=True,
-            num_workers=self.args.num_workers,
-        )
+        # dataset = self.train_dataset.dataset
+        # dataset = DataLoader(
+        #     dataset,
+        #     batch_size=self.args.batch_size,
+        #     shuffle=True,
+        #     num_workers=self.args.num_workers,
+        # )
 
-        # with torch.no_grad():
+        # # with torch.no_grad():
 
-        feat = map(
-            lambda x: (
-                self.model.cpu()(x[0]).detach().numpy(),
-                one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-            ),
-            dataset,
-        )
+        # feat = map(
+        #     lambda x: (
+        #         self.model.cpu()(x[0]).detach().numpy(),
+        #         one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+        #     ),
+        #     dataset,
+        # )
 
-        feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
+        # feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
+        feat = self.train_softmax[self.subset]
+        print(feat.shape)
+        exit()
         # feat = np.vstack([*feat])
         # feat = np.vstack([*feat]) - (
         #     self.cur_error * self.importance_score.reshape(-1, 1)
@@ -362,6 +365,7 @@ class FreddyTrainer(SubsetTrainer):
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
         # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
         importance = (loss_t2 - loss_t1) / self.importance_score[data_idx].mean()
+        importance *= self.cur_error
         # self.importance_score[data_idx] -= importance
         self.importance_score[data_idx] += importance
 

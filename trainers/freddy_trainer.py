@@ -336,17 +336,15 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error [{self.importance_score[self.subset].mean()}]")
         # print(f"relative error [{abs(self.cur_error-error)}]")
         # print(f"relative error [{self.cur_error}]")
-        # if self.cur_error < 10e-2:
-        if self.importance_score[self.subset].mean() > 1:
-            # if (
-            #     self.importance_score[self.subset].mean() < 1
-            # ):  # --> reselecionar quando a importancia for muito baixa
+        if self.cur_error < 10e-2:
+            # if self.importance_score[self.subset].mean() > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.hist:
             self.hist[-1]["reaL_error"] = error
         self.cur_error = error
 
     def _forward_and_backward(self, data, target, data_idx):
+        self.model.eval()
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data)
             pred = torch.argmax(pred, dim=1).float()
@@ -367,7 +365,7 @@ class FreddyTrainer(SubsetTrainer):
         importance *= self.cur_error
         # self.importance_score[data_idx] -= importance
         self.importance_score[data_idx] += importance
-
+        self.model.train()
         return loss, train_acc
 
     # def train(self):

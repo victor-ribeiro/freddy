@@ -228,22 +228,22 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
 
-        with torch.no_grad():
+        # with torch.no_grad():
 
-            feat = map(
-                lambda x: (
-                    self.model.cpu()(x[0]).detach().numpy(),
-                    one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-                ),
-                dataset,
-            )
+        feat = map(
+            lambda x: (
+                self.model.cpu()(x[0]).detach().numpy(),
+                one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+            ),
+            dataset,
+        )
 
-            feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
-            # feat = np.vstack([*feat])
-            # feat = np.vstack([*feat]) - (
-            #     self.cur_error * self.importance_score.reshape(-1, 1)
-            # )
-            feat = np.vstack([*feat])
+        feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
+        # feat = np.vstack([*feat])
+        # feat = np.vstack([*feat]) - (
+        #     self.cur_error * self.importance_score.reshape(-1, 1)
+        # )
+        feat = np.vstack([*feat])
 
         if self.grad_freddy:
             sset = grad_freddy(

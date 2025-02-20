@@ -238,7 +238,7 @@ class FreddyTrainer(SubsetTrainer):
                 dataset,
             )
 
-            feat = map(lambda x: ((x[1] - x[0]) ** 2).sum(), feat)
+            feat = map(lambda x: ((x[1] - x[0]) ** 2).sum(axis=1), feat)
             feat = np.vstack([*feat]) - (
                 self.cur_error * self.importance_score.reshape(-1, 1)
             )

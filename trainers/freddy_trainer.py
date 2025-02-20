@@ -244,8 +244,7 @@ class FreddyTrainer(SubsetTrainer):
             # feat = np.vstack([*feat]) - (
             #     self.cur_error * self.importance_score.reshape(-1, 1)
             # )
-        feat = np.vstack([*feat])
-
+        # feat = np.vstack([*feat])
         if self.grad_freddy:
             sset = grad_freddy(
                 feat,
@@ -271,6 +270,7 @@ class FreddyTrainer(SubsetTrainer):
         # self.subset_weights = self.importance_score[self.subset]
 
         self.select_flag = False
+        self.model.train()
 
     def _train_epoch(self, epoch):
         if not epoch:

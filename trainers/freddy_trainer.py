@@ -217,6 +217,7 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = 10e-3
 
     def _select_subset(self, epoch, training_step):
+        self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
@@ -232,7 +233,7 @@ class FreddyTrainer(SubsetTrainer):
 
             feat = map(
                 lambda x: (
-                    self.model.softmax(dim=1).cpu()(x[0]).detach().numpy(),
+                    self.model(x[0]).softmax(dim=1).cpu().detach().numpy(),
                     one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
                 ),
                 dataset,

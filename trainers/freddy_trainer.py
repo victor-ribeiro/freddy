@@ -333,10 +333,10 @@ class FreddyTrainer(SubsetTrainer):
         grad2 = grad2.weight.grad.data
         # error = (grad2 - grad1).norm(2).item() / self.cur_error # -> esse teste aqui é o próximo
         error = (grad2 - grad1).norm(2).item()
-        print(f"relative error [{self.importance_score[self.subset].mean()}]")
+        # print(f"relative error [{self.importance_score[self.subset].mean()}]")
         # print(f"relative error [{abs(self.cur_error-error)}]")
-        # print(f"relative error [{self.cur_error}]")
-        if self.cur_error < 10e-2:
+        print(f"relative error [{abs(self.cur_error)}]")
+        if abs(self.cur_error) < 10e-2:
             # if self.importance_score[self.subset].mean() > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.hist:

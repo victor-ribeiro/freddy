@@ -220,7 +220,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"selecting subset on epoch {epoch}")
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
-        # dataset = self.train_dataset.dataset
+        dataset = self.train_dataset.dataset
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,

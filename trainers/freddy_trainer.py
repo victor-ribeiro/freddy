@@ -189,7 +189,7 @@ def grad_freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
-    np.random.shuffle(sset)
+    # np.random.shuffle(sset)
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)

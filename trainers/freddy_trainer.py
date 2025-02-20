@@ -239,7 +239,7 @@ class FreddyTrainer(SubsetTrainer):
             )
 
             feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
-            feat = np.vstack([*feat])
+            # feat = np.vstack([*feat])
             feat = np.vstack([*feat]) - (
                 self.cur_error * self.importance_score.reshape(-1, 1)
             )
@@ -335,7 +335,7 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"relative error [{abs(self.cur_error-error)}]")
         # print(f"relative error [{self.cur_error}]")
         # if self.cur_error < 10e-2:
-        if self.importance_score[self.subset].mean() < 1:
+        if self.importance_score[self.subset].mean() > 1:
             # if (
             #     self.importance_score[self.subset].mean() < 1
             # ):  # --> reselecionar quando a importancia for muito baixa

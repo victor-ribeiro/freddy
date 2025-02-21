@@ -124,10 +124,10 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            if not importance:
-                s = D[:, idx_s[1]]
-            else:
+            if importance:
                 s = D[:, idx_s[1]] * importance[idx_s[1]]
+            else:
+                s = D[:, idx_s[1]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -142,58 +142,6 @@ def freddy(
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     np.random.shuffle(sset)
-    if return_vals:
-        return np.array(vals), sset
-    return np.array(sset)
-
-
-@_register
-def grad_freddy(
-    dataset,
-    base_inc=base_inc,
-    alpha=0.15,
-    metric="similarity",
-    K=1,
-    batch_size=32,
-    beta=0.75,
-    return_vals=False,
-):
-    # basic config
-    base_inc = base_inc(alpha)
-    idx = np.arange(len(dataset))
-    q = Queue()
-    sset = []
-    vals = []
-    argmax = 0
-    inc = 0
-    for ds, V in zip(
-        batched(dataset, batch_size),
-        batched(idx, batch_size),
-    ):
-        D = METRICS[metric](ds, batch_size=batch_size)
-        size = len(D)
-        # localmax = np.median(D, axis=0)
-        localmax = np.amax(D, axis=1)
-        argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
-        while q and len(sset) < K:
-            score, idx_s = q.head
-            s = D[:, idx_s[1]]
-            s = score + (s * inc) + (np.gradient(s) * (inc**2) * 0.5)
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            inc = score_s - score
-            if (inc < 0) or (not q):
-                break
-            score_t, idx_t = q.head
-            if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                localmax = np.maximum(localmax, s)
-                sset.append(idx_s[0])
-                vals.append(score)
-            else:
-                q.push(inc, idx_s)
-            q.push(score_t, idx_t)
-    # np.random.shuffle(sset)
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)

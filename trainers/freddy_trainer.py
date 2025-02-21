@@ -102,6 +102,7 @@ def freddy(
     batch_size=128,
     beta=0.75,
     return_vals=False,
+    importance=None,
 ):
     # basic config
     base_inc = base_inc(alpha)
@@ -123,7 +124,10 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]]
+            if not importance:
+                s = D[:, idx_s[1]]
+            else:
+                s = D[:, idx_s[1]] * importance[idx_s[1]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -239,11 +243,8 @@ class FreddyTrainer(SubsetTrainer):
                 dataset,
             )
 
-            # feat = map(lambda x: ((x[1] - x[0]) ** 2), feat)
             feat = map(lambda x: x[1] - x[0], feat)
-
-            # feat = np.vstack([*feat])
-            feat = np.vstack([*feat]) * self.importance_score.reshape(-1, 1)
+            feat = np.vstack([*feat])
 
             sset = freddy(
                 feat,
@@ -251,6 +252,7 @@ class FreddyTrainer(SubsetTrainer):
                 metric=self.args.freddy_similarity,
                 alpha=self.args.alpha,
                 beta=self.args.beta,
+                importance=self.importance_score,
             )
             self.subset = sset
             self.selected[sset] += 1
@@ -352,7 +354,7 @@ class FreddyTrainer(SubsetTrainer):
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
         # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
-        importance = (loss_t2 - loss_t1) / self.importance_score[data_idx].mean()
+        importance = loss_t2 - loss_t1  # / self.importance_score[data_idx].mean()
 
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance

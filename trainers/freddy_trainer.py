@@ -307,8 +307,10 @@ class FreddyTrainer(SubsetTrainer):
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
         # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
-        importance = loss_t2 - loss_t1  # / self.importance_score[data_idx].mean()
-        # importance /= importance.max()
+        importance = (
+            loss_t2 - loss_t1
+        ) ** 2  # / self.importance_score[data_idx].mean()
+        importance /= importance.max()
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance

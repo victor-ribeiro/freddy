@@ -125,9 +125,12 @@ def freddy(
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[:, idx_s[1]]
-            score_s = (
-                utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                / importance[idx_s[1]]
+            score_s = utility_score(
+                s,
+                localmax,
+                acc=argmax,
+                alpha=alpha * importance[idx_s[1]],
+                beta=beta * importance[idx_s[1]],
             )
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -135,10 +138,14 @@ def freddy(
             score_t, idx_t = q.head
             print(importance[idx_s[1]])
             if inc > score_t:
-                score = (
-                    utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                    / importance[idx_s[1]]
+                score = utility_score(
+                    s,
+                    localmax,
+                    acc=argmax,
+                    alpha=alpha * importance[idx_s[1]],
+                    beta=beta * importance[idx_s[1]],
                 )
+
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)

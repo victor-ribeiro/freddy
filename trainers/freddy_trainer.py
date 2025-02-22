@@ -129,8 +129,8 @@ def freddy(
                 s,
                 localmax,
                 acc=argmax,
-                alpha=alpha * importance[idx_s[1]],
-                beta=beta * importance[idx_s[1]],
+                alpha=importance[idx_s[1]],
+                beta=beta,
             )
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -142,8 +142,8 @@ def freddy(
                     s,
                     localmax,
                     acc=argmax,
-                    alpha=alpha * importance[idx_s[1]],
-                    beta=beta * importance[idx_s[1]],
+                    alpha=importance[idx_s[1]],
+                    beta=beta,
                 )
 
                 localmax = np.maximum(localmax, s)

@@ -134,7 +134,6 @@ def freddy(
                 break
             score_t, idx_t = q.head
             print(importance[idx_s[1]])
-            exit()
             if inc > score_t:
                 score = (
                     utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)

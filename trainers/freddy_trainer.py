@@ -279,7 +279,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # if not epoch or abs(self.cur_error - error) < 10e-4:
         # if not epoch or np.isclose(self.cur_error - error, lr):
-        if not epoch or np.isclose(self.cur_error - error, lr):
+        if not epoch or np.isclose(self.cur_error - error, 10e-3):
             self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.hist:
             self.hist[-1]["reaL_error"] = error
@@ -329,7 +329,7 @@ class FreddyTrainer(SubsetTrainer):
         # importance = np.abs(importance)
         # importance /= self.importance_score[self.subset].max()
         # importance /= self.importance_score.max()
-        self.importance_score[data_idx] = importance
+        self.importance_score[data_idx] = importance.max() - importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance
         return loss, train_acc

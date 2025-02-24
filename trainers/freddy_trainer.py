@@ -127,7 +127,7 @@ def freddy(
             s = D[:, idx_s[1]]
             score_s = (
                 utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            ) * importance[idx_s[0]]
+            ) * importance[idx_s[1]]
             inc = score_s - score
             if (inc < 0) or (not q):
                 break
@@ -135,7 +135,7 @@ def freddy(
             if inc > score_t:
                 score = (
                     utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                ) * importance[idx_s[0]]
+                ) * importance[idx_s[1]]
 
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
@@ -299,14 +299,20 @@ class FreddyTrainer(SubsetTrainer):
             pred = self.model.to(self.args.device)(data)
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
-        # ################################
-        # # com isso aqui eu consegui uma correção mais forte entre avg_importance e accuracy
-        # # consegui uma distribuição não binomoail
+        # importance = np.abs(loss_t2 - loss_t1)
+        # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
+        # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
         importance = loss_t2 - loss_t1
+        # importance = (importance - importance.mean()) / importance.std()
         importance = np.abs(importance)
+        # importance /= importance.max()
         importance /= importance.max()
-        self.importance_score[data_idx] = importance
-        # ################################
+        ################################
+        # com isso aqui eu consegui uma correção mais forte entre avg_importance e accuracy
+        # consegui uma distribuição não binomoail
+        # self.importance_score[data_idx] = importance
+        ################################
+        # self.importance_score[data_idx] -= importance
         self.model.train()
         return loss, train_acc
 

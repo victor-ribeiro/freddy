@@ -298,7 +298,7 @@ class FreddyTrainer(SubsetTrainer):
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
         self.model.eval()
         with torch.no_grad():
-            pred = self.model.to(self.args.device)(data).softmax(dim=1)
+            pred = self.model.to(self.args.device)(data)
             # pred = torch.argmax(pred, dim=1).float()
             # pred = torch.nn.functional.one_hot(
             #     pred.to(torch.int64), self.args.num_classes
@@ -308,10 +308,7 @@ class FreddyTrainer(SubsetTrainer):
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
         # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
-        importance = (loss_t2 - loss_t1) ** 2
-        print(importance.shape)
-        exit()
-        importance = ((loss_t2 - loss_t1) ** 2).sum(axis=1)
+        # importance = (loss_t2 - loss_t1) ** 2
         # importance = np.abs(importance)
         # importance /= self.importance_score.max()
         importance = (importance.max() - importance) / (

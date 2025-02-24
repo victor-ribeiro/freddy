@@ -221,12 +221,12 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         data_start = time.time()
-        try:
-            modules = [*self.model.to(self.args.device).modules()]
-            grad1 = modules[-1]
-            grad1 = grad1.weight.grad.data
-        except:
-            grad1 = 0
+        # try:
+        #     modules = [*self.model.to(self.args.device).modules()]
+        #     grad1 = modules[-1]
+        #     grad1 = grad1.weight.grad.data
+        # except:
+        #     grad1 = 0
         rel = self.importance_score[self.subset].mean()
 
         pbar = tqdm(
@@ -268,12 +268,12 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        modules = [*self.model.to(self.args.device).modules()]
-        grad2 = modules[-1]
-        grad2 = grad2.weight.grad.data
+        # modules = [*self.model.to(self.args.device).modules()]
+        # grad2 = modules[-1]
+        # grad2 = grad2.weight.grad.data
+        # error = (grad2 - grad1).norm(2).item()
+        error = abs(self.importance_score[self.subset].mean() - rel)
         lr = self.lr_scheduler.get_last_lr()[0]
-        error = (grad2 - grad1).norm(2).item() * lr
-        # error = abs(self.importance_score[self.subset].mean() - rel)
         print(f"relative error: {abs(self.cur_error - error)}")
         print(f"learning rate: {lr}")
 
@@ -284,50 +284,52 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = error
         self.cur_error = error
+        self.importance_score[self.subset] *= lr
 
     def _forward_and_backward(self, data, target, data_idx):
         self.model.eval()
         with torch.no_grad():
-            pred = self.model.to(self.args.device)(data)
-            pred = torch.argmax(pred, dim=1).float()
-            pred = torch.nn.functional.one_hot(
-                pred.to(torch.int64), self.args.num_classes
-            ).float()
-            loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
-            # loss_t1 = (
-            #     self.model.to(self.args.device)(data)
-            #     .softmax(dim=1)
-            #     .cpu()
-            #     .detach()
-            #     .numpy()
-            # )
+            # pred = self.model.to(self.args.device)(data)
+            # pred = torch.argmax(pred, dim=1).float()
+            # pred = torch.nn.functional.one_hot(
+            #     pred.to(torch.int64), self.args.num_classes
+            # ).float()
+            # loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
+            loss_t1 = (
+                self.model.to(self.args.device)(data)
+                .softmax(dim=1)
+                .cpu()
+                .detach()
+                .numpy()
+            )
+            # loss_t1 = self.model.to(self.args.device)(data).cpu().detach().numpy()
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
         # self.model.eval()
         with torch.no_grad():
-            pred = self.model.to(self.args.device)(data)
-            pred = torch.argmax(pred, dim=1).float()
-            pred = torch.nn.functional.one_hot(
-                pred.to(torch.int64), self.args.num_classes
-            ).float()
-            loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
-            # loss_t2 = (
-            #     self.model.to(self.args.device)(data)
-            #     .softmax(dim=1)
-            #     .cpu()
-            #     .detach()
-            #     .numpy()
-            # )
+            # pred = self.model.to(self.args.device)(data)
+            # pred = torch.argmax(pred, dim=1).float()
+            # pred = torch.nn.functional.one_hot(
+            #     pred.to(torch.int64), self.args.num_classes
+            # ).float()
+            # loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
+            loss_t2 = (
+                self.model.to(self.args.device)(data)
+                .softmax(dim=1)
+                .cpu()
+                .detach()
+                .numpy()
+            )
             # loss_t2 = self.model.to(self.args.device)(data).cpu().detach().numpy()
 
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
         # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
-        importance = loss_t2 - loss_t1
-        importance = np.abs(importance)
+        importance = ((loss_t2 - loss_t1) ** 2).sum(axis=1)
+        # importance = np.abs(importance)
         # importance /= self.importance_score[self.subset].max()
         # importance /= self.importance_score.max()
-        self.importance_score[data_idx] = importance
+        # self.importance_score[data_idx] = 1 - importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance
         return loss, train_acc

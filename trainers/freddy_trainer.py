@@ -121,14 +121,14 @@ def freddy(
         size = len(D)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
-        _ = [q.push(base_inc / importance[i[0]], i) for i in zip(V, range(size))]
+        _ = [q.push(base_inc * importance[i[0]], i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
             print(f"aqui: {len(sset)} | {score} | {importance[idx_s[0]]}")
             s = D[:, idx_s[1]]
             score_s = (
                 utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            ) / importance[idx_s[0]]
+            ) * importance[idx_s[0]]
             inc = score_s - score
             if (inc < 0) or (not q):
                 break
@@ -136,7 +136,7 @@ def freddy(
             if inc > score_t:
                 score = (
                     utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                ) / importance[idx_s[0]]
+                ) * importance[idx_s[0]]
 
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
@@ -307,8 +307,9 @@ class FreddyTrainer(SubsetTrainer):
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
         # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
         importance = loss_t2 - loss_t1
-        importance = np.abs(importance)
-        importance /= self.importance_score.max()
+        # importance = np.abs(importance)
+        # importance /= self.importance_score.max()
+        importance /= importance.max()
         print(importance)
         exit()
         self.importance_score[data_idx] = importance

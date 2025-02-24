@@ -274,7 +274,6 @@ class FreddyTrainer(SubsetTrainer):
         error = (grad2 - grad1).norm(2).item()
         # error = abs(self.importance_score[self.subset].mean() - rel)
         lr = self.lr_scheduler.get_last_lr()[0]
-        self.importance_score[self.subset] *= lr
         print(f"relative error: {abs(self.cur_error - error)}")
         print(f"learning rate: {lr}")
 
@@ -285,6 +284,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = error
         self.cur_error = error
+        self.importance_score[self.subset] *= lr
 
     def _forward_and_backward(self, data, target, data_idx):
         self.model.eval()

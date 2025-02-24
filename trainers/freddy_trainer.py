@@ -274,6 +274,7 @@ class FreddyTrainer(SubsetTrainer):
         error = (grad2 - grad1).norm(2).item()
         # error = abs(self.importance_score[self.subset].mean() - rel)
         lr = self.lr_scheduler.get_last_lr()[0]
+        self.importance_score *= lr
         print(f"relative error: {abs(self.cur_error - error)}")
         print(f"learning rate: {lr}")
 
@@ -327,7 +328,7 @@ class FreddyTrainer(SubsetTrainer):
         importance = ((loss_t2 - loss_t1) ** 2).sum(axis=1)
         # importance = np.abs(importance)
         # importance /= self.importance_score[self.subset].max()
-        importance /= self.importance_score.max()
+        # importance /= self.importance_score.max()
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance

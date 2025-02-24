@@ -127,7 +127,7 @@ def freddy(
             s = D[:, idx_s[1]]
             score_s = (
                 utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            ) * importance[idx_s[1]]
+            ) * importance[idx_s[0]]
             inc = score_s - score
             if (inc < 0) or (not q):
                 break
@@ -135,7 +135,7 @@ def freddy(
             if inc > score_t:
                 score = (
                     utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                ) * importance[idx_s[1]]
+                ) * importance[idx_s[0]]
 
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])

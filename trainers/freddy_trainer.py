@@ -274,7 +274,7 @@ class FreddyTrainer(SubsetTrainer):
         error = (grad2 - grad1).norm(2).item()
         # error = abs(self.importance_score[self.subset].mean() - rel)
         lr = self.lr_scheduler.get_last_lr()[0]
-        self.importance_score *= lr
+        self.importance_score[self.subset] *= lr
         print(f"relative error: {abs(self.cur_error - error)}")
         print(f"learning rate: {lr}")
 

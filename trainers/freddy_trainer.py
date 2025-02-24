@@ -302,19 +302,11 @@ class FreddyTrainer(SubsetTrainer):
         # ################################
         # # com isso aqui eu consegui uma correção mais forte entre avg_importance e accuracy
         # # consegui uma distribuição não binomoail
-        # importance = loss_t2 - loss_t1
-        # importance = np.abs(importance)
-        # importance /= importance.max()
-        # self.importance_score[data_idx] = importance
-        # ################################
-        ################################
-        # teste atual
-        #
         importance = loss_t2 - loss_t1
         importance = np.abs(importance)
         importance /= importance.max()
-        self.importance_score[data_idx] = 1 - importance
-        ################################
+        self.importance_score[data_idx] = importance
+        # ################################
         self.model.train()
         return loss, train_acc
 

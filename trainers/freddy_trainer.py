@@ -296,7 +296,7 @@ class FreddyTrainer(SubsetTrainer):
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
         with torch.no_grad():
-            pred = self.model.to(self.args.device)(data)
+            pred = self.model.to(self.args.device)(data).softmax(dim=1)
             print(pred)
             exit()
             # pred = torch.argmax(pred, dim=1).float()

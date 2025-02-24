@@ -314,8 +314,6 @@ class FreddyTrainer(SubsetTrainer):
         importance = (importance.max() - importance) / (
             importance.max() - importance.min()
         )
-        print(importance)
-        exit()
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance

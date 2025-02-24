@@ -286,6 +286,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def _forward_and_backward(self, data, target, data_idx):
         self.model.eval()
+        # a alteração pode estar aqui
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data)
             pred = torch.argmax(pred, dim=1).float()
@@ -310,7 +311,7 @@ class FreddyTrainer(SubsetTrainer):
         ################################
         # com isso aqui eu consegui uma correção mais forte entre avg_importance e accuracy
         # consegui uma distribuição não binomoail
-        # self.importance_score[data_idx] = importance
+        self.importance_score[data_idx] = importance
         ################################
         # self.importance_score[data_idx] -= importance
         self.model.train()

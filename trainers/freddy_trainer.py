@@ -123,8 +123,8 @@ def freddy(
         argmax += localmax.sum()
         _ = [q.push(base_inc / importance[i[0]], i) for i in zip(V, range(size))]
         while q and len(sset) < K:
-            print(f"aqui: {len(sset)}")
             score, idx_s = q.head
+            print(f"aqui: {len(sset)} | {score} | {importance[idx_s[0]]}")
             s = D[:, idx_s[1]]
             score_s = (
                 utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)

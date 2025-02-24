@@ -221,13 +221,14 @@ class FreddyTrainer(SubsetTrainer):
 
         data_start = time.time()
         # use tqdm to display a smart progress bar
-        try:
-            modules = [*self.model.to(self.args.device).modules()]
-            grad1 = modules[-1]
-            grad1 = grad1.weight.grad.data
-        except:
-            grad1 = 0
-        importance = self.importance_score.mean()
+        # try:
+        #     modules = [*self.model.to(self.args.device).modules()]
+        #     grad1 = modules[-1]
+        #     grad1 = grad1.weight.grad.data
+        # except:
+        #     grad1 = 0
+        # importance = self.importance_score.mean()
+        rel = self.importance_score[self.subset].mean()
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -268,17 +269,15 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        modules = [*self.model.to(self.args.device).modules()]
-        grad2 = modules[-1]
-        grad2 = grad2.weight.grad.data
-        # error = (grad2 - grad1).norm(2).item() / self.cur_error # -> esse teste aqui é o próximo
-        error = (grad2 - grad1).norm(2).item()
-        # print(f"relative error [{self.importance_score[self.subset].mean()}]")
-        # print(f"relative error [{abs(self.cur_error-error)}]")
+        # modules = [*self.model.to(self.args.device).modules()]
+        # grad2 = modules[-1]
+        # grad2 = grad2.weight.grad.data
+        # error = (grad2 - grad1).norm(2).item()
+        error = abs(self.importance_score[self.subset].mean() - rel)
+
         print(f"relative error [{abs(self.cur_error - error)}]")
-        # if abs(self.cur_error) < 10e-2:
+
         if abs(self.cur_error - error) < 10e-2:
-            # if self.importance_score[self.subset].mean() > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.hist:
             self.hist[-1]["reaL_error"] = error
@@ -288,10 +287,10 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data)
-            pred = torch.argmax(pred, dim=1).float()
-            pred = torch.nn.functional.one_hot(
-                pred.to(torch.int64), self.args.num_classes
-            ).float()
+            # pred = torch.argmax(pred, dim=1).float()
+            # pred = torch.nn.functional.one_hot(
+            #     pred.to(torch.int64), self.args.num_classes
+            # ).float()
             loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)

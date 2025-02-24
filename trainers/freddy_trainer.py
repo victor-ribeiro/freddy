@@ -221,12 +221,12 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         data_start = time.time()
-        # try:
-        #     modules = [*self.model.to(self.args.device).modules()]
-        #     grad1 = modules[-1]
-        #     grad1 = grad1.weight.grad.data
-        # except:
-        #     grad1 = 0
+        try:
+            modules = [*self.model.to(self.args.device).modules()]
+            grad1 = modules[-1]
+            grad1 = grad1.weight.grad.data
+        except:
+            grad1 = 0
         rel = self.importance_score[self.subset].mean()
 
         pbar = tqdm(
@@ -268,12 +268,12 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        # modules = [*self.model.to(self.args.device).modules()]
-        # grad2 = modules[-1]
-        # grad2 = grad2.weight.grad.data
-        # error = (grad2 - grad1).norm(2).item()
-        error = abs(self.importance_score[self.subset].mean() - rel)
+        modules = [*self.model.to(self.args.device).modules()]
+        grad2 = modules[-1]
+        grad2 = grad2.weight.grad.data
         lr = self.lr_scheduler.get_last_lr()[0]
+        error = (grad2 - grad1).norm(2).item() * lr
+        # error = abs(self.importance_score[self.subset].mean() - rel)
         print(f"relative error: {abs(self.cur_error - error)}")
         print(f"learning rate: {lr}")
 
@@ -328,7 +328,7 @@ class FreddyTrainer(SubsetTrainer):
         importance = loss_t2 - loss_t1
         # importance = np.abs(importance)
         # importance /= self.importance_score[self.subset].max()
-        # importance /= self.importance_score.max()
+        importance /= self.importance_score.max()
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance

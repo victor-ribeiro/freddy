@@ -302,8 +302,6 @@ class FreddyTrainer(SubsetTrainer):
             #     pred.to(torch.int64), self.args.num_classes
             # ).float()
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
-            print((loss_t1 - loss_t2) / self.importance_score.max())
-            exit()
 
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
@@ -311,6 +309,8 @@ class FreddyTrainer(SubsetTrainer):
         importance = loss_t2 - loss_t1
         importance = np.abs(importance)
         importance /= self.importance_score.max()
+        print(importance)
+        exit()
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance

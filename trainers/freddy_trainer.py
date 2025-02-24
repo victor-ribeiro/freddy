@@ -121,14 +121,14 @@ def freddy(
         size = len(D)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
-        _ = [q.push(base_inc / importance[i[0]], i) for i in zip(V, range(size))]
+        _ = [q.push(base_inc * importance[i[0]], i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
             print(f"aqui: {len(sset)} | {score} | {importance[idx_s[0]]}")
             s = D[:, idx_s[1]]
             score_s = (
                 utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            ) / importance[idx_s[0]]
+            ) * importance[idx_s[0]]
             inc = score_s - score
             if (inc < 0) or (not q):
                 break
@@ -136,7 +136,7 @@ def freddy(
             if inc > score_t:
                 score = (
                     utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                ) / importance[idx_s[0]]
+                ) * importance[idx_s[0]]
 
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
@@ -288,10 +288,10 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data)
-            # pred = torch.argmax(pred, dim=1).float()
-            # pred = torch.nn.functional.one_hot(
-            #     pred.to(torch.int64), self.args.num_classes
-            # ).float()
+            pred = torch.argmax(pred, dim=1).float()
+            pred = torch.nn.functional.one_hot(
+                pred.to(torch.int64), self.args.num_classes
+            ).float()
             loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         self.model.train()
@@ -299,10 +299,10 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data)
-            # pred = torch.argmax(pred, dim=1).float()
-            # pred = torch.nn.functional.one_hot(
-            #     pred.to(torch.int64), self.args.num_classes
-            # ).float()
+            pred = torch.argmax(pred, dim=1).float()
+            pred = torch.nn.functional.one_hot(
+                pred.to(torch.int64), self.args.num_classes
+            ).float()
             loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         # importance = np.abs(loss_t2 - loss_t1)

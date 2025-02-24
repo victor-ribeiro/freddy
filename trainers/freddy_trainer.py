@@ -296,14 +296,14 @@ class FreddyTrainer(SubsetTrainer):
             #     pred.to(torch.int64), self.args.num_classes
             # ).float()
             # loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
-            # loss_t1 = (
-            #     self.model.to(self.args.device)(data)
-            #     .softmax(dim=1)
-            #     .cpu()
-            #     .detach()
-            #     .numpy()
-            # )
-            loss_t1 = self.model.to(self.args.device)(data).cpu().detach().numpy()
+            loss_t1 = (
+                self.model.to(self.args.device)(data)
+                .softmax(dim=1)
+                .cpu()
+                .detach()
+                .numpy()
+            )
+            # loss_t1 = self.model.to(self.args.device)(data).cpu().detach().numpy()
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
         # self.model.eval()
@@ -314,14 +314,14 @@ class FreddyTrainer(SubsetTrainer):
             #     pred.to(torch.int64), self.args.num_classes
             # ).float()
             # loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
-            # loss_t2 = (
-            #     self.model.to(self.args.device)(data)
-            #     .softmax(dim=1)
-            #     .cpu()
-            #     .detach()
-            #     .numpy()
-            # )
-            loss_t2 = self.model.to(self.args.device)(data).cpu().detach().numpy()
+            loss_t2 = (
+                self.model.to(self.args.device)(data)
+                .softmax(dim=1)
+                .cpu()
+                .detach()
+                .numpy()
+            )
+            # loss_t2 = self.model.to(self.args.device)(data).cpu().detach().numpy()
 
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())

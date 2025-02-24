@@ -160,6 +160,7 @@ class BaseTrainer:
         self._save_checkpoint()
 
     def _forward_and_backward(self, data, target, data_idx):
+        self.model.train()
         self.optimizer.zero_grad()
 
         # train model with the current batch and record forward and backward time

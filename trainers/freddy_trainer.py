@@ -284,7 +284,6 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = error
         self.cur_error = error
-        self.importance_score[self.subset] += self.importance_score[self.subset] * lr
 
     def _forward_and_backward(self, data, target, data_idx):
         self.model.eval()

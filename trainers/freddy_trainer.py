@@ -173,6 +173,7 @@ class FreddyTrainer(SubsetTrainer):
     def _select_subset(self, epoch, training_step):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
+        self.epoch_selection.append(epoch)
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
         dataset = self.train_dataset.dataset

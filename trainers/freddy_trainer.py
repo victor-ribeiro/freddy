@@ -294,7 +294,9 @@ class FreddyTrainer(SubsetTrainer):
             # ).float()
             loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
+        self.model.train()
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
+        self.model.eval()
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data).softmax(dim=1)
             # pred = torch.argmax(pred, dim=1).float()
@@ -315,7 +317,6 @@ class FreddyTrainer(SubsetTrainer):
         self.importance_score[data_idx] = importance
         # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance
-        self.model.train()
         return loss, train_acc
 
     # def train(self):

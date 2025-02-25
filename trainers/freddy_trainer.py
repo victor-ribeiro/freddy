@@ -276,7 +276,7 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = error
 
     def _error_func(self, grad):
-        grad = [g for g in self.model.parameters() if g.grad is not None]
+        grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         hess = [
             torch.autograd.grad(
                 g,

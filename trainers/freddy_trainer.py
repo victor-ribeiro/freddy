@@ -290,10 +290,10 @@ class FreddyTrainer(SubsetTrainer):
 
     def _forward_and_backward(self, data, target, data_idx):
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
-
-        importance = ((loss_t2 - loss_t1) ** 2).sum(axis=1)
-        self.importance_score[data_idx] = importance
-        return loss, train_acc
+        self._relevance_score(data)
+        # importance = ((loss_t2 - loss_t1) ** 2).sum(axis=1)
+        # self.importance_score[data_idx] = importance
+        # return loss, train_acc
 
     def _relevance_score(self, data):
         self.model.eval()

@@ -291,11 +291,12 @@ class FreddyTrainer(SubsetTrainer):
         data, _ = train_data
         self.model.eval()
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
+        lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return (loss - delta_loss).cpu().numpy() * self.cur_error
+        return ((loss - delta_loss).cpu().numpy() / lr) * self.cur_error
 
     # def train(self):
     #     self._select_subset(0, 0)

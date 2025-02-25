@@ -173,7 +173,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
-        print(f"selecting subset on epoch {epoch}")
+        # print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         if not epoch or self.cur_error > 10e-2:
             lr = self.lr_scheduler.get_last_lr()[0]
@@ -240,8 +240,10 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            rel_error.append(self._error_func(data, target))
-        self.cur_error = np.mean(rel_error)
+            if epoch:
+                rel_error.append(self._error_func(data, target))
+        if rel_error:
+            self.cur_error = np.mean(rel_error)
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:

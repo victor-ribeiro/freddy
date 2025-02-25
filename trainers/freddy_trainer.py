@@ -284,7 +284,6 @@ class FreddyTrainer(SubsetTrainer):
                 g,
                 self.model.parameters(),
                 grad_outputs=torch.ones_like(g),
-                create_graph=True,
                 allow_unused=True,
             )
             hess.append(h)

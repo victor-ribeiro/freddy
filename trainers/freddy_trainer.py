@@ -279,8 +279,10 @@ class FreddyTrainer(SubsetTrainer):
         hess = []
         for g in grad:
             self.model.zero_grad()
+            print(g)
+            exit()
             h = torch.autograd.grad(
-                g.grad.clone(),
+                g,
                 self.model.parameters(),
                 grad_outputs=torch.ones_like(g),
                 create_graph=True,

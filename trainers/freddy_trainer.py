@@ -241,7 +241,7 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-        # self._error_func()
+        self._error_func()
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:
@@ -270,11 +270,11 @@ class FreddyTrainer(SubsetTrainer):
         #     self.hist[-1]["reaL_error"] = error
         # self.cur_error = error
 
-    def _forward_and_backward(self, data, target, data_idx):
-        out = super()._forward_and_backward(data, target, data_idx)
-        e = self._error_func(data, target)
+    # def _forward_and_backward(self, data, target, data_idx):
+    #     out = super()._forward_and_backward(data, target, data_idx)
+    #     e = self._error_func(data, target)
 
-    def _error_func(self, data, target):
+    def _error_func(self):
         grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         hess = [
             torch.autograd.grad(

@@ -167,13 +167,9 @@ class FreddyTrainer(SubsetTrainer):
         n = len(train_dataset)
         self.epoch_selection = []
         self.delta = np.ones((n, self.args.num_classes))
+        self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 0
-
-    @property
-    def _relevance_score(self):
-        score = np.linalg.norm(self.delta, axis=1)
-        return score**-1
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()

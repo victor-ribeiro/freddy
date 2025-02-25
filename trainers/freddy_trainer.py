@@ -285,7 +285,9 @@ class FreddyTrainer(SubsetTrainer):
         )
         hess = []
         for g in grad:
-            gg = torch.autograd.grad(g, self.model.parameters(), retain_graph=True)
+            gg = torch.autograd.grad(
+                g, self.model.parameters(), retain_graph=True, grad_outputs=g
+            )
             hess.append(gg)
         print(hess)
         exit()

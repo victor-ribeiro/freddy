@@ -227,8 +227,7 @@ class FreddyTrainer(SubsetTrainer):
         #     grad1 = grad1.weight.grad.data
         # except:
         #     grad1 = 0
-        lr = self.lr_scheduler.get_last_lr()[0]
-        rel = self.importance_score[self.subset].mean() * lr
+        rel = self.importance_score[self.subset].mean()
 
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -275,12 +274,12 @@ class FreddyTrainer(SubsetTrainer):
         # grad2 = grad2.weight.grad.data
         # # error = (grad2 - grad1).norm(2).item() * lr
         # error = ((grad2 - grad1) * lr).norm(2).item()
-        error = abs((self.importance_score[self.subset].mean() * lr) - rel)
+        error = abs(self.importance_score[self.subset].mean() - rel) * lr
         print(f"relative error: {abs(self.cur_error - error)}")
         print(f"learning rate: {lr}")
 
         # if not epoch or abs(self.cur_error - error) < lr:
-        if not epoch or abs(self.cur_error - error) > 10e-4:
+        if not epoch or abs(self.cur_error - error) > 10e-2:
             # if not epoch or np.isclose(self.cur_error - error, lr):
             # if not epoch or np.isclose(self.cur_error - error, lr, atol=10e-2):
             self._select_subset(epoch, len(self.train_loader) * epoch)

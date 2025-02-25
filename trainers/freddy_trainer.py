@@ -241,12 +241,7 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            g = {
-                name: param.grad.clone()
-                for name, param in self.model.cpu().named_parameters()
-            }
-            grad.append(g["linear.weight"])
-        self._error_func(grad)
+        self._error_func()
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:
@@ -275,7 +270,7 @@ class FreddyTrainer(SubsetTrainer):
         #     self.hist[-1]["reaL_error"] = error
         # self.cur_error = error
 
-    def _error_func(self, grad):
+    def _error_func(self):
         # grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         print(grad)

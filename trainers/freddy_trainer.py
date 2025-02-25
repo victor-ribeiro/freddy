@@ -280,13 +280,14 @@ class FreddyTrainer(SubsetTrainer):
         grad = torch.autograd.grad(
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )
-        hess = []
-        for g in grad:
-            gg = torch.autograd.grad(
+        hess = [
+            torch.autograd.grad(
                 g, self.model.parameters(), retain_graph=True, grad_outputs=g
-            )
-            hess.append(gg)
-        print(hess[0][0])
+            )[0][0]
+            for g in grad
+        ]
+
+        print(hess)
         exit()
 
     def _update_delta(self, train_data):

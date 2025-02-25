@@ -210,6 +210,8 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         self._select_subset(epoch, len(self.train_loader) * epoch)
+        self._update_train_loader_and_weights()
+
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout

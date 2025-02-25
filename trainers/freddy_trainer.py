@@ -245,7 +245,8 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            if epoch % 20 == 0:
+            # if epoch % 20 == 0:
+            if self.cur_error > 10e-2:
                 lr = self.lr_scheduler.get_last_lr()[0]
                 rel_error.append(self._error_func(data, target) * lr)
             else:

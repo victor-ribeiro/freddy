@@ -247,30 +247,19 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             # if epoch % 20 == 0:
-            if self.cur_error > 0.05:
-                lr = self.lr_scheduler.get_last_lr()[0]
-                rel_error.append(self._error_func(data, target) * lr)
-            else:
-                lr = self.lr_scheduler.get_last_lr()[0]
-                rel_error.append(self._relevance_score[self.subset].mean() * lr)
-        if rel_error:
-            self.cur_error = np.mean(rel_error)
+            lr = self.lr_scheduler.get_last_lr()[0]
+            rel_error.append(self._error_func(data, target) * lr)
+        self.cur_error = np.mean(rel_error)
         self._val_epoch(epoch)
 
-        # if self.args.cache_dataset and self.args.clean_cache_iteration:
-        #     self.train_dataset.clean()
-        #     self._update_train_loader_and_weights()
+        if self.args.cache_dataset and self.args.clean_cache_iteration:
+            self.train_dataset.clean()
+            self._update_train_loader_and_weights()
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
 
         print(f"relative error: {self.cur_error}")
-
-        # # if not epoch or abs(self.cur_error - error) < lr:
-        # if not epoch or abs(self.cur_error - error) > lr:
-        #     # if not epoch or np.isclose(self.cur_error - error, lr):
-        #     # if not epoch or np.isclose(self.cur_error - error, lr, atol=10e-2):
-        #     self._select_subset(epoch, len(self.train_loader) * epoch)
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 

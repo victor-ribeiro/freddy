@@ -296,7 +296,7 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1).log()
             delta_loss = self.model(data + e).softmax(dim=1).log()
-        return 1 / (loss - delta_loss).detach().cpu().numpy()
+        return (loss - delta_loss).detach().cpu().numpy()
 
     # def train(self):
     #     self._select_subset(0, 0)

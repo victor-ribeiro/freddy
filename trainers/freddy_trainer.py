@@ -288,7 +288,7 @@ class FreddyTrainer(SubsetTrainer):
             for g in grad
         ]
         print(hess)
-        exit()
+        # exit()
 
     def _update_delta(self, train_data):
         data, _ = train_data

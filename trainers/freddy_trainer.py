@@ -213,8 +213,8 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
-        if self.cur_error < 10e-3:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
+
+        self._select_subset(epoch, len(self.train_loader) * epoch)
         rel_error = []
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time

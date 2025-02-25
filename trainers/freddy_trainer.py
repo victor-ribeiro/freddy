@@ -266,10 +266,6 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-    # def _forward_and_backward(self, data, target, data_idx):
-    #     out = super()._forward_and_backward(data, target, data_idx)
-    #     e = self._error_func(data, target)
-
     def _error_func(self, data, target):
         from functools import reduce
 
@@ -299,7 +295,7 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return (loss - delta_loss).cpu().numpy()
+        return (loss - delta_loss).cpu().numpy() * self.cur_error
 
     # def train(self):
     #     self._select_subset(0, 0)

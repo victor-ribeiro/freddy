@@ -276,12 +276,8 @@ class FreddyTrainer(SubsetTrainer):
 
     def _error_func(self):
         grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
-        print(len(grad))
-        exit()
         hess = []
         for g in grad:
-            if g.grad is None:
-                continue
             self.model.zero_grad()
             h = torch.autograd.grad(
                 g.grad.clone(),

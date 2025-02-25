@@ -278,6 +278,8 @@ class FreddyTrainer(SubsetTrainer):
         grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         hess = []
         for g in grad:
+            if g.grad is None:
+                continue
             self.model.zero_grad()
             h = torch.autograd.grad(
                 g,

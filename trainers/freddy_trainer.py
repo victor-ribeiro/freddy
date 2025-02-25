@@ -241,11 +241,12 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-        g = {
-            name: param.grad.clone()
-            for name, param in self.model.cpu().named_parameters()
-        }
-        print(g.keys())
+            g = {
+                name: param.grad.clone()
+                for name, param in self.model.cpu().named_parameters()
+            }
+            grad.append(g["linear.weight"])
+        print(grad)
         exit()
         self._val_epoch(epoch)
 

@@ -164,56 +164,48 @@ class FreddyTrainer(SubsetTrainer):
         self.grad_freddy = grad_freddy
         self.selected = np.zeros(len(train_dataset))
         #
+        n = len(train_dataset)
         self.epoch_selection = []
-        self.importance_score = np.ones(len(train_dataset))
-        # self.importance_score = np.zeros(len(train_dataset))
+        self.delta = np.one((n, self.args.num_classes))
         self.select_flag = True
         self.cur_error = 1
+
+    @property
+    def _relevance_score(self):
+        score = np.linalg.norm(self.delta, axis=1)
+        return score**-1
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        if self.epoch_selection:
-            print(f"RESELECTING: {self.epoch_selection[-1]}")
-        dataset = self.train_dataset.dataset
-        dataset = DataLoader(
-            dataset,
-            batch_size=self.args.batch_size,
-            shuffle=True,
-            num_workers=self.args.num_workers,
-        )
-
-        with torch.no_grad():
-
-            feat = map(
-                lambda x: (
-                    self.model.cpu()(x[0]).softmax(dim=1).detach().numpy(),
-                    one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-                ),
+        if epoch % 5:
+            dataset = self.train_dataset.dataset
+            dataset = DataLoader(
                 dataset,
+                batch_size=self.args.batch_size,
+                shuffle=True,
+                num_workers=self.args.num_workers,
             )
+            with torch.no_grad():
+                delta = map(self._update_delta, dataset)
+                delta = map(lambda x: x[1] - x[0], delta)
+                self.delta = np.vstack([*delta])
 
-            feat = map(lambda x: x[1] - x[0], feat)
-            feat = np.vstack([*feat])
-
-            sset = freddy(
-                feat,
-                K=self.sample_size,
-                metric=self.args.freddy_similarity,
-                alpha=self.args.alpha,
-                beta=self.args.beta,
-                importance=self.importance_score,
-            )
-            self.subset = sset
-            self.selected[sset] += 1
-            self.train_checkpoint["selected"] = self.selected
-            self.train_checkpoint["importance"] = self.importance_score
-            self.train_checkpoint["epoch_selection"] = self.epoch_selection
-            self.subset_weights = np.ones(self.sample_size)
-        # self.subset_weights = self.importance_score[self.subset]
-
-        self.select_flag = False
+        sset = freddy(
+            delta,
+            K=self.sample_size,
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
+            beta=self.args.beta,
+            importance=self._relevance_score,
+        )
+        self.subset = sset
+        self.selected[sset] += 1
+        self.train_checkpoint["selected"] = self.selected
+        self.train_checkpoint["importance"] = self._relevance_score
+        self.train_checkpoint["epoch_selection"] = self.epoch_selection
+        self.subset_weights = np.ones(self.sample_size)
         self.model.train()
 
     def _train_epoch(self, epoch):
@@ -221,26 +213,22 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         data_start = time.time()
-        # try:
-        #     modules = [*self.model.to(self.args.device).modules()]
-        #     grad1 = modules[-1]
-        #     grad1 = grad1.weight.grad.data
-        # except:
-        #     grad1 = 0
-        rel = self.importance_score[self.subset].mean()
-
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
+        grad = []
         for batch_idx, (data, target, data_idx) in pbar:
-
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)
 
             self.optimizer.zero_grad()
-
+            g = {
+                name: param.grad.clone() for name, param in self.model.named_parameters
+            }
+            print(g)
+            exit()
             # train model with the current batch and record forward and backward time
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
 
@@ -286,26 +274,16 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = error
         self.cur_error = error
-        self.importance_score[self.subset] *= lr
 
-    def _forward_and_backward(self, data, target, data_idx):
-        loss, train_acc = super()._forward_and_backward(data, target, data_idx)
-        self._relevance_score(data)
-        # importance = ((loss_t2 - loss_t1) ** 2).sum(axis=1)
-        # self.importance_score[data_idx] = importance
-        # return loss, train_acc
-
-    def _relevance_score(self, data):
+    def _update_delta(self, train_data):
+        data, _ = train_data
         self.model.eval()
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         with torch.no_grad():
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
-            print(data.shape, e.shape)
             delta_loss = self.model(data + e).softmax(dim=1)
-            print(delta_loss.log() - loss.log())
-            exit()
-        return
+        return loss - delta_loss
 
     # def train(self):
     #     self._select_subset(0, 0)

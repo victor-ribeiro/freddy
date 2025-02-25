@@ -245,7 +245,7 @@ class FreddyTrainer(SubsetTrainer):
             name: param.grad.clone()
             for name, param in self.model.cpu().named_parameters()
         }
-        print(g.names())
+        print(g.keys())
         exit()
         self._val_epoch(epoch)
 

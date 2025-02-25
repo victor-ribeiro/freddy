@@ -279,7 +279,6 @@ class FreddyTrainer(SubsetTrainer):
         # grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         print(grad)
-        exit()
         hess = [
             torch.autograd.grad(
                 g,
@@ -291,7 +290,7 @@ class FreddyTrainer(SubsetTrainer):
             for g in grad
         ]
         print(hess)
-        # exit()
+        exit()
 
     def _update_delta(self, train_data):
         data, _ = train_data

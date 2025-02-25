@@ -276,10 +276,8 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = error
 
     def _error_func(self, grad):
-        from functools import reduce
-
-        f = reduce(lambda a, b: a + b, grad)
-        print(f)
+        grad = [g for g in self.model.parameters() if g.grad is not None]
+        print(grad)
         exit()
 
     def _update_delta(self, train_data):

@@ -246,8 +246,7 @@ class FreddyTrainer(SubsetTrainer):
                 for name, param in self.model.cpu().named_parameters()
             }
             grad.append(g["linear.weight"])
-        print(grad)
-        exit()
+        self._error_func(grad)
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:
@@ -275,6 +274,11 @@ class FreddyTrainer(SubsetTrainer):
         # if self.hist:
         #     self.hist[-1]["reaL_error"] = error
         # self.cur_error = error
+
+    def _error_func(self, grad):
+        f = torch.sum(grad, dim=1)
+        print(f)
+        exit()
 
     def _update_delta(self, train_data):
         data, _ = train_data

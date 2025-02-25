@@ -186,7 +186,7 @@ class FreddyTrainer(SubsetTrainer):
         with torch.no_grad():
             delta = map(self._update_delta, dataset)
             # delta = map(lambda x: x[1] - x[0], delta)
-            self.delta = np.vstack([*delta])
+            self.delta += np.vstack([*delta]) * lr
 
         sset = freddy(
             self.delta,
@@ -244,8 +244,11 @@ class FreddyTrainer(SubsetTrainer):
             )
             if epoch > 5:
                 rel_error.append(self._error_func(data, target))
-        if rel_error:
+        if epoch % 20 == 0:
             self.cur_error = np.mean(rel_error)
+        else:
+            lr = self.lr_scheduler.get_last_lr()[0]
+            self.cur_error += self._relevance_score[self.subset].mean() * lr
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:

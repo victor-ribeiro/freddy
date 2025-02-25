@@ -246,7 +246,7 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             # if epoch % 20 == 0:
-            if self.cur_error > 0.1:
+            if self.cur_error > 0.05:
                 lr = self.lr_scheduler.get_last_lr()[0]
                 rel_error.append(self._error_func(data, target) * lr)
             else:

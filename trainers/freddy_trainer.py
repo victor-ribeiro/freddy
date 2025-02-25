@@ -289,52 +289,22 @@ class FreddyTrainer(SubsetTrainer):
         self.importance_score[self.subset] *= lr
 
     def _forward_and_backward(self, data, target, data_idx):
-        self.model.eval()
-        with torch.no_grad():
-            # pred = self.model.to(self.args.device)(data)
-            # pred = torch.argmax(pred, dim=1).float()
-            # pred = torch.nn.functional.one_hot(
-            #     pred.to(torch.int64), self.args.num_classes
-            # ).float()
-            # loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
-            loss_t1 = (
-                self.model.to(self.args.device)(data)
-                .softmax(dim=1)
-                .cpu()
-                .detach()
-                .numpy()
-            )
-            # loss_t1 = self.model.to(self.args.device)(data).cpu().detach().numpy()
-
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
-        # self.model.eval()
-        with torch.no_grad():
-            # pred = self.model.to(self.args.device)(data)
-            # pred = torch.argmax(pred, dim=1).float()
-            # pred = torch.nn.functional.one_hot(
-            #     pred.to(torch.int64), self.args.num_classes
-            # ).float()
-            # loss_t2 = self.train_criterion(pred, target).cpu().detach().numpy()
-            loss_t2 = (
-                self.model.to(self.args.device)(data)
-                .softmax(dim=1)
-                .cpu()
-                .detach()
-                .numpy()
-            )
-            # loss_t2 = self.model.to(self.args.device)(data).cpu().detach().numpy()
 
-        # importance = np.abs(loss_t2 - loss_t1)
-        # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
-        # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
         importance = ((loss_t2 - loss_t1) ** 2).sum(axis=1)
-        # importance = np.abs(importance)
-        # importance /= self.importance_score[self.subset].max()
-        # importance /= self.importance_score.max()
         self.importance_score[data_idx] = importance
-        # self.importance_score[data_idx] -= importance
-        # self.importance_score[data_idx] += importance
         return loss, train_acc
+
+    def _relevance_score(self, data):
+        self.model.eval()
+        e = torch.normal(0, 1, size=(len(data), self.args.num_classes))
+        with torch.no_grad():
+            data = data.to(self.args.device)
+            loss = self.model(data).softmax(dim=1)
+            delta_loss = self.model(data + e).softmax(dim=1)
+            print(delta_loss.log() - loss.log())
+            exit()
+        return
 
     # def train(self):
     #     self._select_subset(0, 0)

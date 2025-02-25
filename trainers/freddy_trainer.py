@@ -297,7 +297,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def _relevance_score(self, data):
         self.model.eval()
-        e = torch.normal(0, 1, size=data.shape)
+        e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         with torch.no_grad():
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)

@@ -276,13 +276,14 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = error
 
     def _error_func(self, grad):
-        grad = [g for g in self.model.parameters()]
+        grad = [g for g in self.model.parameters() if g.grad is not None]
         hess = [
             torch.autograd.grad(
                 g,
                 self.model.parameters(),
                 grad_outputs=torch.ones_like(g),
                 retain_graph=True,
+                allow_unused=True,
             )
             for g in grad
         ]

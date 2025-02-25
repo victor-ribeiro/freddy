@@ -282,8 +282,8 @@ class FreddyTrainer(SubsetTrainer):
         grad = torch.autograd.grad(
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )
-        grad = reduce(lambda x, y: x[0] + y[0], grad[0])
-        grad = grad.sum().norm(2).item()
+        g = reduce(lambda x, y: x[0] + y[0], grad[0])
+        g = grad.sum().norm(2).item()
         hess = [
             torch.autograd.grad(
                 g, self.model.parameters(), retain_graph=True, grad_outputs=g
@@ -291,7 +291,7 @@ class FreddyTrainer(SubsetTrainer):
             for g in grad
         ]
 
-        print(grad, hess)
+        print(g, hess)
         exit()
         hess = reduce(lambda x, y: x + y, hess)
         hess = hess.norm(2).item()

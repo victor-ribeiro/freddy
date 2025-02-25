@@ -179,21 +179,21 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        if epoch % 5:
-            dataset = self.train_dataset.dataset
-            dataset = DataLoader(
-                dataset,
-                batch_size=self.args.batch_size,
-                shuffle=True,
-                num_workers=self.args.num_workers,
-            )
-            with torch.no_grad():
-                delta = map(self._update_delta, dataset)
-                delta = map(lambda x: x[1] - x[0], delta)
-                self.delta = np.vstack([*delta])
+        # if epoch % 5:
+        #     dataset = self.train_dataset.dataset
+        #     dataset = DataLoader(
+        #         dataset,
+        #         batch_size=self.args.batch_size,
+        #         shuffle=True,
+        #         num_workers=self.args.num_workers,
+        #     )
+        #     with torch.no_grad():
+        #         delta = map(self._update_delta, dataset)
+        #         delta = map(lambda x: x[1] - x[0], delta)
+        #         self.delta = np.vstack([*delta])
 
         sset = freddy(
-            delta,
+            self.delta,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
@@ -216,7 +216,6 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
-        grad = []
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
@@ -241,6 +240,8 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
+            if epoch % 10:
+                self._error_func(data, target)
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:
@@ -272,10 +273,6 @@ class FreddyTrainer(SubsetTrainer):
     # def _forward_and_backward(self, data, target, data_idx):
     #     out = super()._forward_and_backward(data, target, data_idx)
     #     e = self._error_func(data, target)
-    def _forward_and_backward(self, data, target, data_idx):
-        output = super()._forward_and_backward(data, target, data_idx)
-        self._error_func(data, target)
-        return output
 
     def _error_func(self, data, target):
         pred = self.model(data)
@@ -289,7 +286,7 @@ class FreddyTrainer(SubsetTrainer):
                 g, self.model.parameters(), retain_graph=True, grad_outputs=g
             )
             hess.append(gg)
-        print(hess)
+        print(hess[0][0])
         exit()
 
     def _update_delta(self, train_data):

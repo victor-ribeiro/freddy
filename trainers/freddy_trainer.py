@@ -252,31 +252,31 @@ class FreddyTrainer(SubsetTrainer):
             )
         self._val_epoch(epoch)
 
-        if self.args.cache_dataset and self.args.clean_cache_iteration:
-            self.train_dataset.clean()
-            self._update_train_loader_and_weights()
+        # if self.args.cache_dataset and self.args.clean_cache_iteration:
+        #     self.train_dataset.clean()
+        #     self._update_train_loader_and_weights()
 
-        if self.hist:
-            self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
+        # if self.hist:
+        #     self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
 
-        lr = self.lr_scheduler.get_last_lr()[0]
-        # modules = [*self.model.to(self.args.device).modules()]
-        # grad2 = modules[-1]
-        # grad2 = grad2.weight.grad.data
-        # # error = (grad2 - grad1).norm(2).item() * lr
-        # error = ((grad2 - grad1) * lr).norm(2).item()
-        error = abs(self.importance_score[self.subset].mean() - rel)
-        print(f"relative error: {abs(self.cur_error - error)}")
-        print(f"learning rate: {lr}")
+        # lr = self.lr_scheduler.get_last_lr()[0]
+        # # modules = [*self.model.to(self.args.device).modules()]
+        # # grad2 = modules[-1]
+        # # grad2 = grad2.weight.grad.data
+        # # # error = (grad2 - grad1).norm(2).item() * lr
+        # # error = ((grad2 - grad1) * lr).norm(2).item()
+        # error = abs(self.importance_score[self.subset].mean() - rel)
+        # print(f"relative error: {abs(self.cur_error - error)}")
+        # print(f"learning rate: {lr}")
 
-        # if not epoch or abs(self.cur_error - error) < lr:
-        if not epoch or abs(self.cur_error - error) > lr:
-            # if not epoch or np.isclose(self.cur_error - error, lr):
-            # if not epoch or np.isclose(self.cur_error - error, lr, atol=10e-2):
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-        if self.hist:
-            self.hist[-1]["reaL_error"] = error
-        self.cur_error = error
+        # # if not epoch or abs(self.cur_error - error) < lr:
+        # if not epoch or abs(self.cur_error - error) > lr:
+        #     # if not epoch or np.isclose(self.cur_error - error, lr):
+        #     # if not epoch or np.isclose(self.cur_error - error, lr, atol=10e-2):
+        #     self._select_subset(epoch, len(self.train_loader) * epoch)
+        # if self.hist:
+        #     self.hist[-1]["reaL_error"] = error
+        # self.cur_error = error
 
     def _update_delta(self, train_data):
         data, _ = train_data

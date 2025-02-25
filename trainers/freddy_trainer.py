@@ -276,7 +276,7 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = error
 
     def _error_func(self, grad):
-        f = torch.sum(grad, dim=1)
+        f = torch.sum(*grad, dim=1)
         print(f)
         exit()
 

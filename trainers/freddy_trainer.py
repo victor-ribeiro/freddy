@@ -241,7 +241,6 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-        self._error_func()
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:
@@ -273,23 +272,19 @@ class FreddyTrainer(SubsetTrainer):
     # def _forward_and_backward(self, data, target, data_idx):
     #     out = super()._forward_and_backward(data, target, data_idx)
     #     e = self._error_func(data, target)
+    def _forward_and_backward(self, data, target, data_idx):
+        output = super()._forward_and_backward(data, target, data_idx)
+        self._error_func(data, target)
+        return output
 
-    def _error_func(self):
-        grad = [g.grad.clone() for g in self.model.parameters() if g.requires_grad]
-        hess = []
-        for g in grad:
-            # self.model.zero_grad()
-            g = torch.tensor(g, requires_grad=True)
-            h = torch.autograd.grad(
-                g,
-                self.model.parameters(),
-                grad_outputs=torch.ones_like(g),
-                allow_unused=True,
-            )
-            hess.append(h[0][0])
-
-        print(hess)
-        # exit()
+    def _error_func(self, data, target):
+        pred = self.model(data)
+        loss = self.criterion(pred, target)
+        grad = torch.autograd.grad(
+            loss, self.model.parameters(), retain_graph=True, create_graph=True
+        )
+        print(grad)
+        exit()
 
     def _update_delta(self, train_data):
         data, _ = train_data

@@ -280,7 +280,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"learning rate: {lr}")
 
         # if not epoch or abs(self.cur_error - error) < lr:
-        if not epoch or abs(self.cur_error - error) < 10e-4:
+        if not epoch or abs(self.cur_error - error) > 10e-4:
             # if not epoch or np.isclose(self.cur_error - error, lr):
             # if not epoch or np.isclose(self.cur_error - error, lr, atol=10e-2):
             self._select_subset(epoch, len(self.train_loader) * epoch)

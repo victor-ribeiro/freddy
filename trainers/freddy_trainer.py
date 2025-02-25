@@ -254,7 +254,7 @@ class FreddyTrainer(SubsetTrainer):
             data, target = data.to(self.args.device), target.to(self.args.device)
             lr = self.lr_scheduler.get_last_lr()[0]
             rel_error.append(self._error_func(data, target) * lr)
-        self.cur_error = np.mean(rel_error)
+        self.cur_error = abs(self.cur_error - np.mean(rel_error))
         self._val_epoch(epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:

@@ -275,9 +275,7 @@ class FreddyTrainer(SubsetTrainer):
     #     e = self._error_func(data, target)
 
     def _error_func(self):
-        modules = [m for m in self.model.parameters() if m.requires_grad]
-        # grad = [g.grad.clone() for g in modules if g.grad is not None]
-        grad = [g.grad.clone() for g in modules if g.requires_grad]
+        grad = [g.grad.clone() for g in self.model.parameters() if g.requires_grad]
         hess = []
         for g in grad:
             # self.model.zero_grad()

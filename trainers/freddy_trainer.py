@@ -278,12 +278,11 @@ class FreddyTrainer(SubsetTrainer):
         modules = [m for m in self.model.parameters() if m.requires_grad]
         # grad = [g.grad.clone() for g in modules if g.grad is not None]
         grad = [g.grad.clone() for g in modules if g.requires_grad]
-        grad = [torch.tensor(g, requires_grad=True) for g in grad]
         hess = []
         for g in grad:
             # self.model.zero_grad()
             h = torch.autograd.grad(
-                g,
+                torch.tensor(g, requires_grad=True),
                 self.model.parameters(),
                 grad_outputs=torch.ones_like(g),
                 create_graph=True,

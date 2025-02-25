@@ -175,7 +175,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        if self.cur_error > 10e-2:
+        if not epoch or self.cur_error > 10e-2:
             lr = self.lr_scheduler.get_last_lr()[0]
             dataset = self.train_dataset.dataset
             dataset = DataLoader(

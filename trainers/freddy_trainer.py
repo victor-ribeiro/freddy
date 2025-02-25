@@ -189,7 +189,7 @@ class FreddyTrainer(SubsetTrainer):
                 # delta = map(lambda x: x[1] - x[0], delta)
                 self.delta = np.vstack([*delta])
 
-        self._relevance_score = np.linalg.norm(self.delta, axis=1)
+        self._relevance_score += np.linalg.norm(self.delta, axis=1) * lr
 
         sset = freddy(
             self.delta,

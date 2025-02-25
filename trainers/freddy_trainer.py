@@ -245,9 +245,10 @@ class FreddyTrainer(SubsetTrainer):
             )
             if epoch % 20 == 0:
                 lr = self.lr_scheduler.get_last_lr()[0]
-                rel_error.append(self._error_func(data, target))
+                rel_error.append(self._error_func(data, target) * lr)
             else:
-                rel_error.append(self._relevance_score[self.subset].mean())
+                lr = self.lr_scheduler.get_last_lr()[0]
+                rel_error.append(self._relevance_score[self.subset].mean() * lr)
         if rel_error:
             self.cur_error = np.mean(rel_error)
         self._val_epoch(epoch)

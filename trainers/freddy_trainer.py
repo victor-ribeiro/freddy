@@ -186,7 +186,7 @@ class FreddyTrainer(SubsetTrainer):
             )
             with torch.no_grad():
                 delta = map(self._update_delta, dataset)
-                delta = map(lambda x: x[1] - x[0], delta)
+                # delta = map(lambda x: x[1] - x[0], delta)
                 self.delta += np.vstack([*delta]) * lr
 
         sset = freddy(

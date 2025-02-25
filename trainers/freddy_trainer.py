@@ -168,7 +168,7 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection = []
         self.delta = np.ones((n, self.args.num_classes))
         self.select_flag = True
-        self.cur_error = 1
+        self.cur_error = 0
 
     @property
     def _relevance_score(self):
@@ -179,18 +179,19 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        # if epoch % 5:
-        #     dataset = self.train_dataset.dataset
-        #     dataset = DataLoader(
-        #         dataset,
-        #         batch_size=self.args.batch_size,
-        #         shuffle=True,
-        #         num_workers=self.args.num_workers,
-        #     )
-        #     with torch.no_grad():
-        #         delta = map(self._update_delta, dataset)
-        #         delta = map(lambda x: x[1] - x[0], delta)
-        #         self.delta = np.vstack([*delta])
+        if self.cur_error > 10e-2:
+            lr = self.lr_scheduler.get_last_lr()[0]
+            dataset = self.train_dataset.dataset
+            dataset = DataLoader(
+                dataset,
+                batch_size=self.args.batch_size,
+                shuffle=True,
+                num_workers=self.args.num_workers,
+            )
+            with torch.no_grad():
+                delta = map(self._update_delta, dataset)
+                delta = map(lambda x: x[1] - x[0], delta)
+                self.delta += np.vstack([*delta]) * lr
 
         sset = freddy(
             self.delta,
@@ -216,6 +217,9 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
+        if self.cur_error < 10e-3:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+        rel_error = []
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
@@ -240,35 +244,26 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            if epoch % 10:
-                self._error_func(data, target)
+            rel_error.append(self._error_func(data, target))
+        self.cur_error = np.mean(rel_error)
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:
         #     self.train_dataset.clean()
         #     self._update_train_loader_and_weights()
 
-        # if self.hist:
-        #     self.hist[-1]["avg_importance"] = self.importance_score[self.subset].mean()
+        if self.hist:
+            self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
 
-        # lr = self.lr_scheduler.get_last_lr()[0]
-        # # modules = [*self.model.to(self.args.device).modules()]
-        # # grad2 = modules[-1]
-        # # grad2 = grad2.weight.grad.data
-        # # # error = (grad2 - grad1).norm(2).item() * lr
-        # # error = ((grad2 - grad1) * lr).norm(2).item()
-        # error = abs(self.importance_score[self.subset].mean() - rel)
-        # print(f"relative error: {abs(self.cur_error - error)}")
-        # print(f"learning rate: {lr}")
+        print(f"relative error: {self.cur_error}")
 
         # # if not epoch or abs(self.cur_error - error) < lr:
         # if not epoch or abs(self.cur_error - error) > lr:
         #     # if not epoch or np.isclose(self.cur_error - error, lr):
         #     # if not epoch or np.isclose(self.cur_error - error, lr, atol=10e-2):
         #     self._select_subset(epoch, len(self.train_loader) * epoch)
-        # if self.hist:
-        #     self.hist[-1]["reaL_error"] = error
-        # self.cur_error = error
+        if self.hist:
+            self.hist[-1]["reaL_error"] = self.cur_error
 
     # def _forward_and_backward(self, data, target, data_idx):
     #     out = super()._forward_and_backward(data, target, data_idx)
@@ -283,18 +278,16 @@ class FreddyTrainer(SubsetTrainer):
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )
         g = reduce(lambda x, y: x[0] + y[0], grad[0])
-        g = g.sum().norm(2).item()
+        g = g.sum().norm(2).item() * 10e-3
         hess = [
             torch.autograd.grad(
                 g, self.model.parameters(), retain_graph=True, grad_outputs=g
             )[0][0]
             for g in grad
         ]
-        hess = reduce(lambda x, y: x + y, hess)
-        hess = hess.norm(2).item()
-
-        print(g, hess)
-        exit()
+        gg = reduce(lambda x, y: x + y, hess)
+        gg = gg.norm(2).item() * 10e-3
+        return self._relevance_score[self.subset].mean() + g + (gg / 2)
 
     def _update_delta(self, train_data):
         data, _ = train_data

@@ -279,9 +279,9 @@ class FreddyTrainer(SubsetTrainer):
                 g,
                 self.model.parameters(),
                 grad_outputs=torch.ones_like(g),
-                create_graph=True,
+                # create_graph=True,
                 retain_graph=True,
-                allow_unused=True,
+                # allow_unused=True,
             )
             for g in grad
         ]

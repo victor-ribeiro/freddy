@@ -284,6 +284,7 @@ class FreddyTrainer(SubsetTrainer):
                 # allow_unused=True,
             )
             for g in grad
+            if g.grad is not None
         ]
         print(hess)
         exit()

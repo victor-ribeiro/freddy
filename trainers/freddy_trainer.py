@@ -243,13 +243,13 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            if epoch > 5:
+            if epoch % 20 == 0:
+                lr = self.lr_scheduler.get_last_lr()[0]
                 rel_error.append(self._error_func(data, target))
-        if epoch % 20 == 0:
+            else:
+                rel_error.append(self._relevance_score[self.subset].mean())
+        if rel_error:
             self.cur_error = np.mean(rel_error)
-        else:
-            lr = self.lr_scheduler.get_last_lr()[0]
-            self.cur_error += self._relevance_score[self.subset].mean() * lr
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:

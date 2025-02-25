@@ -276,8 +276,17 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = error
 
     def _error_func(self, grad):
-        grad = [g for g in self.model.parameters() if g.grad is not None]
-        print(grad)
+        grad = [g for g in self.model.parameters()]
+        hess = [
+            torch.autograd.grad(
+                g,
+                self.model.parameters(),
+                grad_outputs=torch.ones_like(g),
+                retain_graph=True,
+            )
+            for g in grad
+        ]
+        print(hess)
         exit()
 
     def _update_delta(self, train_data):

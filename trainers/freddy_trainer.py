@@ -271,13 +271,14 @@ class FreddyTrainer(SubsetTrainer):
     def _error_func(self, data, target):
         from functools import reduce
 
+        lr = self.lr_scheduler.get_last_lr()[0]
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
         grad = torch.autograd.grad(
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )
         g = reduce(lambda x, y: x[0] + y[0], grad[0])
-        g = g.sum().norm(2).item() * 10e-3
+        g = g.sum().norm(2).item() * lr
         # hess = [
         #     torch.autograd.grad(
         #         g, self.model.parameters(), retain_graph=True, grad_outputs=g

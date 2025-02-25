@@ -226,7 +226,7 @@ class FreddyTrainer(SubsetTrainer):
             self.optimizer.zero_grad()
             g = {
                 name: param.grad.clone()
-                for name, param in self.model.to(self.args.device).named_parameters
+                for name, param in self.model.cpu().named_parameters
             }
             print(g)
             exit()

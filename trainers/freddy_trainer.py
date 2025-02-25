@@ -166,7 +166,7 @@ class FreddyTrainer(SubsetTrainer):
         #
         n = len(train_dataset)
         self.epoch_selection = []
-        self.delta = np.ones((n, self.args.num_classes))
+        self.delta = np.zeros((n, self.args.num_classes))
         self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 10e-6
@@ -188,7 +188,7 @@ class FreddyTrainer(SubsetTrainer):
             with torch.no_grad():
                 delta = map(self._update_delta, dataset)
                 # delta = map(lambda x: x[1] - x[0], delta)
-                self.delta = np.vstack([*delta])
+                self.delta += np.vstack([*delta])
 
         self._relevance_score = np.linalg.norm(self.delta, axis=1)
         # self._relevance_score = np.linalg.norm(self.delta, axis=1) ** -1
@@ -215,7 +215,7 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
         # if self.cur_error < 10e-4:
         if not epoch or self.cur_error > 0.5:
-            self.cur_error = self._relevance_score[self.subset].mean()
+            # self.cur_error = self._relevance_score[self.subset].mean()
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
 

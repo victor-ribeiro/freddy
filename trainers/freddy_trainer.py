@@ -272,12 +272,13 @@ class FreddyTrainer(SubsetTrainer):
 
     def _forward_and_backward(self, data, target, data_idx):
         out = super()._forward_and_backward(data, target, data_idx)
-        e = self._error_func(data)
+        e = self._error_func(data, target)
 
-    def _error_func(self, data):
+    def _error_func(self, data, target):
         # grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
-        grad = [*self.model.parameters()]
-        grad = grad[-1].grad.clone()
+        pred = self.model(data).softmax(dim=1)
+        loss = self.criterion(pred, target)
+        grad = torch.autograd.grad(loss, data, create_graph=True)
         print(grad)
         exit()
         grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]

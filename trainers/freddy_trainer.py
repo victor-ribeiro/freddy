@@ -278,7 +278,7 @@ class FreddyTrainer(SubsetTrainer):
         modules = [m for m in self.model.parameters() if m.requires_grad]
         print(len(modules))
         # grad = [g.grad.clone() for g in modules if g.grad is not None]
-        grad = [g.grad.clone() for g in modules]
+        grad = [g.grad.clone() for g in modules if g.requires_grad]
         hess = []
         for g in grad:
             self.model.zero_grad()

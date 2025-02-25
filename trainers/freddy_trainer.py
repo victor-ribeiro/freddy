@@ -226,15 +226,6 @@ class FreddyTrainer(SubsetTrainer):
             self.optimizer.zero_grad()
             # train model with the current batch and record forward and backward time
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
-            try:
-                g = {
-                    name: param.grad.clone()
-                    for name, param in self.model.cpu().named_parameters
-                }
-                print(g)
-                exit()
-            except:
-                pass
             data_start = time.time()
 
             # update progress bar
@@ -250,6 +241,12 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
+        g = {
+            name: param.grad.clone()
+            for name, param in self.model.cpu().named_parameters
+        }
+        print(g)
+        exit()
         self._val_epoch(epoch)
 
         # if self.args.cache_dataset and self.args.clean_cache_iteration:

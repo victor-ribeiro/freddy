@@ -176,7 +176,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         lr = self.lr_scheduler.get_last_lr()[0]
-        if not epoch or self.cur_error > 10e-2:
+        if not epoch or self.cur_error > 0.05:
             dataset = self.train_dataset.dataset
             dataset = DataLoader(
                 dataset,
@@ -189,7 +189,7 @@ class FreddyTrainer(SubsetTrainer):
                 # delta = map(lambda x: x[1] - x[0], delta)
                 self.delta = np.vstack([*delta])
 
-        self._relevance_score += np.linalg.norm(self.delta, axis=1) * lr
+        self._relevance_score -= np.linalg.norm(self.delta, axis=1) * lr
 
         sset = freddy(
             self.delta,
@@ -211,9 +211,9 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-
-        self._select_subset(epoch, len(self.train_loader) * epoch)
-        self._update_train_loader_and_weights()
+        if self.cur_error < 103 - 3:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(

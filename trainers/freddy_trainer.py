@@ -203,6 +203,7 @@ class FreddyTrainer(SubsetTrainer):
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
         self.subset_weights = np.ones(self.sample_size)
         self.model.train()
+        print(f"selected {len(sset)}")
 
     def _train_epoch(self, epoch):
         self.model.train()

@@ -175,19 +175,18 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         # print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        if not epoch or self.cur_error > 10e-2:
-            lr = self.lr_scheduler.get_last_lr()[0]
-            dataset = self.train_dataset.dataset
-            dataset = DataLoader(
-                dataset,
-                batch_size=self.args.batch_size,
-                shuffle=True,
-                num_workers=self.args.num_workers,
-            )
-            with torch.no_grad():
-                delta = map(self._update_delta, dataset)
-                # delta = map(lambda x: x[1] - x[0], delta)
-                self.delta = np.vstack([*delta])
+        lr = self.lr_scheduler.get_last_lr()[0]
+        dataset = self.train_dataset.dataset
+        dataset = DataLoader(
+            dataset,
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            num_workers=self.args.num_workers,
+        )
+        with torch.no_grad():
+            delta = map(self._update_delta, dataset)
+            # delta = map(lambda x: x[1] - x[0], delta)
+            self.delta = np.vstack([*delta])
 
         sset = freddy(
             self.delta,

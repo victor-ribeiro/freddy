@@ -176,7 +176,8 @@ class FreddyTrainer(SubsetTrainer):
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         lr = self.lr_scheduler.get_last_lr()[0]
-        if not epoch or self.cur_error > 0.05:
+        # if not epoch or self.cur_error > 0.05:
+        if not epoch or self.cur_error < 10e-2:
             dataset = self.train_dataset.dataset
             dataset = DataLoader(
                 dataset,
@@ -247,6 +248,8 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             # if epoch % 20 == 0:
+        for data, target, data_idx in self.val_loader:
+            data, target = data.to(self.args.device), target.to(self.args.device)
             lr = self.lr_scheduler.get_last_lr()[0]
             rel_error.append(self._error_func(data, target) * lr)
         self.cur_error = np.mean(rel_error)

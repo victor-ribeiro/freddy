@@ -277,7 +277,7 @@ class FreddyTrainer(SubsetTrainer):
     def _error_func(self, data, target):
         # grad = [g.grad.clone() for g in self.model.parameters() if g.grad is not None]
         pred = self.model(data).softmax(dim=1)
-        loss = self.criterion(pred, target)
+        loss = self.val_criterion(pred, target)
         grad = torch.autograd.grad(loss, data, create_graph=True)
         print(grad)
         exit()

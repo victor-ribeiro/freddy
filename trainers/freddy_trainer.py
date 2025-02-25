@@ -243,7 +243,7 @@ class FreddyTrainer(SubsetTrainer):
             )
         g = {
             name: param.grad.clone()
-            for name, param in self.model.cpu().named_parameters
+            for name, param in self.model.cpu().named_parameters()
         }
         print(g)
         exit()

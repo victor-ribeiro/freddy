@@ -240,7 +240,7 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            if epoch:
+            if epoch > 5:
                 rel_error.append(self._error_func(data, target))
         if rel_error:
             self.cur_error = np.mean(rel_error)

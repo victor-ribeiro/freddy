@@ -246,7 +246,7 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             # if epoch % 20 == 0:
-            if self.cur_error > 10e-2:
+            if self.cur_error > 0.1:
                 lr = self.lr_scheduler.get_last_lr()[0]
                 rel_error.append(self._error_func(data, target) * lr)
             else:
@@ -287,15 +287,16 @@ class FreddyTrainer(SubsetTrainer):
         )
         g = reduce(lambda x, y: x[0] + y[0], grad[0])
         g = g.sum().norm(2).item() * 10e-3
-        hess = [
-            torch.autograd.grad(
-                g, self.model.parameters(), retain_graph=True, grad_outputs=g
-            )[0][0]
-            for g in grad
-        ]
-        gg = reduce(lambda x, y: x + y, hess)
-        gg = gg.norm(2).item() * 10e-3
-        return self._relevance_score[self.subset].mean() + g + (gg / 2)
+        # hess = [
+        #     torch.autograd.grad(
+        #         g, self.model.parameters(), retain_graph=True, grad_outputs=g
+        #     )[0][0]
+        #     for g in grad
+        # ]
+        # gg = reduce(lambda x, y: x + y, hess)
+        # gg = gg.norm(2).item() * 10e-3
+        # return self._relevance_score[self.subset].mean() + g + (gg / 2)
+        return self._relevance_score[self.subset].mean() + g
 
     def _update_delta(self, train_data):
         data, _ = train_data

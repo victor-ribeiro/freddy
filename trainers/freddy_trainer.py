@@ -286,7 +286,7 @@ class FreddyTrainer(SubsetTrainer):
             if g.grad is not None
         ]
         print(hess)
-        exit()
+        # exit()
 
     def _update_delta(self, train_data):
         data, _ = train_data

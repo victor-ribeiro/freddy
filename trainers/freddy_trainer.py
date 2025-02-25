@@ -281,7 +281,7 @@ class FreddyTrainer(SubsetTrainer):
         grad = [torch.tensor(g, requires_grad=True) for g in grad]
         hess = []
         for g in grad:
-            self.model.zero_grad()
+            # self.model.zero_grad()
             h = torch.autograd.grad(
                 g,
                 self.model.parameters(),

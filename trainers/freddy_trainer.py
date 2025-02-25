@@ -290,11 +290,11 @@ class FreddyTrainer(SubsetTrainer):
             )[0][0]
             for g in grad
         ]
-        hess = reduce(lambda x, y: x + y, hess)
-        hess = hess.norm(2).item()
 
         print(grad, hess)
         exit()
+        hess = reduce(lambda x, y: x + y, hess)
+        hess = hess.norm(2).item()
 
     def _update_delta(self, train_data):
         data, _ = train_data

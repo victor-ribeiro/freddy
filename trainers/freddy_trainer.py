@@ -288,7 +288,7 @@ class FreddyTrainer(SubsetTrainer):
                 grad_outputs=torch.ones_like(g),
                 create_graph=True,
                 retain_graph=True,
-                # allow_unused=False,
+                allow_unused=True,
             )
             hess.append(h)
 

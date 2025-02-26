@@ -258,6 +258,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data
+        data, target = data.to(self.args.device), target.to(self.args.device)
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
         model = self.model

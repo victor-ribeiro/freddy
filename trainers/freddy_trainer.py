@@ -224,7 +224,7 @@ class FreddyTrainer(SubsetTrainer):
         #     self._update_train_loader_and_weights()
 
         data_start = time.time()
-        if self.cur_error > self.train_loss.avg:
+        if self.cur_error < self.train_loss.avg:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
         if epoch % 10 == 0:

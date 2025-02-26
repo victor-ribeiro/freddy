@@ -223,7 +223,7 @@ class FreddyTrainer(SubsetTrainer):
 
             self.optimizer.zero_grad()
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
-            train_loss += loss
+            train_loss += loss.item()
             data_start = time.time()
 
             # update progress bar
@@ -251,7 +251,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
-        self.cur_error = abs(self.cur_error - loss)
+        self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

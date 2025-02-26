@@ -253,7 +253,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target, data_idx in self.val_loader:
             data, target = data.to(self.args.device), target.to(self.args.device)
             lr = self.lr_scheduler.get_last_lr()[0]
-            rel_error.append(self._error_func(data, target) * lr)
+            rel_error.append(self._error_func(data, target))
         # self.cur_error = abs(self.cur_error - np.mean(rel_error))
         self.cur_error = np.mean(rel_error)
         self._val_epoch(epoch)

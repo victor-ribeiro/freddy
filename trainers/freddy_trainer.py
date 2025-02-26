@@ -169,7 +169,7 @@ class FreddyTrainer(SubsetTrainer):
         self.delta = np.zeros((n, self.args.num_classes))
         self._relevance_score = np.ones(n)
         self.select_flag = True
-        self.cur_error = 10e-6
+        self.cur_error = 1
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()

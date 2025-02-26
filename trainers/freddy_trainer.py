@@ -216,7 +216,6 @@ class FreddyTrainer(SubsetTrainer):
         # if self.cur_error < 10e-4:
         if not epoch or self.cur_error > 0.2:
             # self.cur_error = self._relevance_score[self.subset].mean()
-            self.model.zero_grad()
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
 
@@ -274,9 +273,10 @@ class FreddyTrainer(SubsetTrainer):
         from functools import reduce
 
         lr = self.lr_scheduler.get_last_lr()[0]
-
+        self.model.zero_grad()
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
+        loss.backward()
         grad = torch.autograd.grad(
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )

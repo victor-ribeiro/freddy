@@ -214,7 +214,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
         # if self.cur_error < 10e-4:
-        if not epoch or self.cur_error > 1:
+        if not epoch or self.cur_error > 0.2:
             # self.cur_error = self._relevance_score[self.subset].mean()
             self.model.zero_grad()
             self._select_subset(epoch, len(self.train_loader) * epoch)

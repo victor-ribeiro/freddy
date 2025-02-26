@@ -200,11 +200,12 @@ class FreddyTrainer(SubsetTrainer):
         if epoch % 10 == 0:
             self.f_embedding()
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
+            self._relevance_score = self._relevance_score / self._relevance_score.sum()
 
         self._select_subset(epoch, len(self.train_loader) * epoch)
         self._update_train_loader_and_weights()
 
-        self.cur_error = self._relevance_score[self.subset].mean() - self.cur_error
+        self.cur_error = abs(self._relevance_score[self.subset].mean() - self.cur_error)
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout

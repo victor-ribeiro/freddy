@@ -202,7 +202,7 @@ class FreddyTrainer(SubsetTrainer):
             self.f_embedding()
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
             self._relevance_score = np.log(self._relevance_score)
-        if self.cur_error > 0.3:
+        if self.cur_error > 0.3 or self.cur_error < 10e-4:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
         lr = self.lr_scheduler.get_last_lr()[0]

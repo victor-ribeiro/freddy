@@ -186,15 +186,15 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
         with torch.no_grad():
-            # delta = map(self._update_delta, dataset)
-            delta = map(
-                lambda x: (
-                    self.model.cpu()(x[0]).detach().numpy(),
-                    one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-                ),
-                dataset,
-            )
-            delta = map(lambda x: x[1] - x[0], delta)
+            delta = map(self._update_delta, dataset)
+            # delta = map(
+            #     lambda x: (
+            #         self.model.cpu()(x[0]).detach().numpy(),
+            #         one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+            #     ),
+            #     dataset,
+            # )
+            # delta = map(lambda x: x[1] - x[0], delta)
             self.delta = np.vstack([*delta])
 
         sset = freddy(
@@ -288,7 +288,7 @@ class FreddyTrainer(SubsetTrainer):
         from functools import reduce
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        pred = self.model(data).to(self.args.device)
+        pred = self.model(data)
         loss = self.val_criterion(pred, target)
         model = self.model
         grad = torch.autograd.grad(

@@ -222,7 +222,7 @@ class FreddyTrainer(SubsetTrainer):
             self.cur_error = abs(rel_error)
         else:
             lr = self.lr_scheduler.get_last_lr()[0]
-            self.cur_error -= self.cur_error * lr
+            self.cur_error -= self.cur_error - self.train_loss.avg
             self.cur_error = abs(self.cur_error)
 
         if not epoch:
@@ -297,8 +297,8 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data)
-            delta_loss = self.model(data + e)
+            loss = self.model(data).softmax(dim=1)
+            delta_loss = self.model(data + e).softmax(dim=1)
         return (loss - delta_loss).detach().cpu().numpy()
 
     # def train(self):

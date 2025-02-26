@@ -227,6 +227,16 @@ class FreddyTrainer(SubsetTrainer):
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
+        if not epoch or self.cur_error > self.train_loss.avg:
+            rel_error = [
+                self._error_func(data.to(self.args.device), target.to(self.args.device))
+                for data, target, _ in self.train_loader
+            ]
+            rel_error = np.mean(rel_error)
+            # self.cur_error = abs(self.cur_error - np.mean(rel_error))
+            self.cur_error = abs(np.mean(rel_error))
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
 
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
@@ -260,15 +270,7 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         # self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
         # self.cur_error = (rel_error / len(self.val_loader)) * lr
-        if not epoch or self.cur_error > self.train_loss.avg:
-            rel_error = [
-                self._error_func(data.to(self.args.device), target.to(self.args.device))
-                for data, target, _ in self.train_loader
-            ]
-            rel_error = np.mean(rel_error)
-            self.cur_error = abs(self.cur_error - np.mean(rel_error))
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
+
         self._val_epoch(epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:

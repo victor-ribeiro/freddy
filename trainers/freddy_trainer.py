@@ -166,7 +166,7 @@ class FreddyTrainer(SubsetTrainer):
         #
         n = len(train_dataset)
         self.epoch_selection = []
-        self.delta = np.zeros((n, self.args.num_classes))
+        self.delta = np.ones((n, self.args.num_classes))
         self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 10e-6
@@ -186,15 +186,18 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
         with torch.no_grad():
-            delta = map(self._update_delta, dataset)
-            # delta = map(
-            #     lambda x: (
-            #         self.model.cpu()(x[0]).detach().numpy(),
-            #         one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-            #     ),
-            #     dataset,
-            # )
-            # delta = map(lambda x: x[1] - x[0], delta)
+            # delta = map(self._update_delta, dataset)
+            delta = map(
+                lambda x: (
+                    self.model.cpu()(x[0]).detach().numpy(),
+                    np.one_hot_coding(
+                        x[1].cpu().detach().numpy(), self.args.num_classes
+                    ),
+                    # one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+                ),
+                dataset,
+            )
+            delta = map(lambda x: x[1] - x[0], delta)
             self.delta = np.vstack([*delta])
 
         sset = freddy(
@@ -223,7 +226,7 @@ class FreddyTrainer(SubsetTrainer):
         #     self._select_subset(epoch, len(self.train_loader) * epoch)
         #     self._update_train_loader_and_weights()
 
-        if not epoch or self.cur_error < self.train_loss.avg:
+        if self.cur_error < self.train_loss.avg:
             # if epoch % 10 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
@@ -232,7 +235,7 @@ class FreddyTrainer(SubsetTrainer):
                 for data, target, _ in self.train_loader
             ]
             rel_error = np.mean(rel_error)
-            self.cur_error = abs(self.cur_error)
+            # self.cur_error = abs(self.cur_error)
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -312,8 +315,8 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data).softmax(dim=1)
-            delta_loss = self.model(data + e).softmax(dim=1)
+            loss = self.model(data)
+            delta_loss = self.model(data + e)
         return (loss - delta_loss).detach().cpu().numpy()
 
     # def train(self):

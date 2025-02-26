@@ -295,8 +295,8 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data).sofmax(dim=1)
-            delta_loss = self.model(data + e).sofmax(dim=1)
+            loss = self.model(data).softmax(dim=1)
+            delta_loss = self.model(data + e).softmax(dim=1)
         return (loss - delta_loss).detach().cpu().numpy()
 
     # def train(self):

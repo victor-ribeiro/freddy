@@ -278,7 +278,9 @@ class FreddyTrainer(SubsetTrainer):
         model = self.model
         w = [*model.modules()]
         w = (w[-1].weight,)
-        grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)
+        grad = torch.autograd.grad(
+            self.train_criterion, w, retain_graph=True, create_graph=True
+        )
         grad = reduce(lambda x, y: x[0] + y[0], grad)
         f = pred.softmax(dim=1)
         print(grad)
@@ -309,7 +311,7 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return (loss - delta_loss).detach().cpu().numpy()
+        return loss - delta_loss
 
     # def train(self):
     #     self._select_subset(0, 0)

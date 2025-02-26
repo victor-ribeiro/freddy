@@ -262,7 +262,8 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = (rel_error / len(self.val_loader)) * lr
         if not epoch or self.cur_error > self.train_loss.avg:
             rel_error = [
-                self._error_func(data, target) for data, target, _ in self.train_loader
+                self._error_func(data.to(self.args.device), target.args.device)
+                for data, target, _ in self.train_loader
             ]
             rel_error = np.mean(rel_error)
             self.cur_error = abs(self.cur_error - np.mean(rel_error))

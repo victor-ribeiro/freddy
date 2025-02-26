@@ -169,7 +169,7 @@ class FreddyTrainer(SubsetTrainer):
         self.delta = np.ones((n, self.args.num_classes))
         self._relevance_score = np.ones(n)
         self.select_flag = True
-        self.cur_error = 10e-6
+        self.cur_error = 0
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
@@ -199,10 +199,12 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
         if epoch % 10 == 0:
             self.f_embedding()
+            self._relevance_score = np.linalg.norm(self.delta, axis=1)
 
         self._select_subset(epoch, len(self.train_loader) * epoch)
         self._update_train_loader_and_weights()
 
+        self.cur_error = self._relevance_score[self.subset].mean() - self.cur_error
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -271,8 +273,6 @@ class FreddyTrainer(SubsetTrainer):
         g = torch.inner(g, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
-        # hess = reduce(lambda x, y: x + y, hess[0])
-        # hess = torch.inner(val, hess)
         gg = torch.inner(f, hess.T)
         gg = torch.inner(gg, hess)
         return (f + g + (gg / 2)).cpu().detach().numpy()

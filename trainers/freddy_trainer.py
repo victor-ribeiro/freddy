@@ -216,7 +216,7 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        if not epoch or self.cur_error > 1:
+        if not epoch or self.cur_error < 10e-4:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
 
@@ -296,8 +296,8 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data).softmax(dim=1)
-            delta_loss = self.model(data + e).softmax(dim=1)
+            loss = self.model(data)
+            delta_loss = self.model(data + e)
         return (loss - delta_loss).detach().cpu().numpy()
 
     # def train(self):

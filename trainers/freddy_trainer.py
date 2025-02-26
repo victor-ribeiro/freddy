@@ -200,7 +200,7 @@ class FreddyTrainer(SubsetTrainer):
         if epoch % 10 == 0:
             self.f_embedding()
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
-            self._relevance_score = self._relevance_score / self._relevance_score.sum()
+            self._relevance_score = self._relevance_score / self._relevance_score.max()
 
         self._select_subset(epoch, len(self.train_loader) * epoch)
         self._update_train_loader_and_weights()

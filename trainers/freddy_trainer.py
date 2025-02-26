@@ -275,7 +275,6 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
-        self.model.zero_grad()
         grad = torch.autograd.grad(
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )
@@ -293,6 +292,7 @@ class FreddyTrainer(SubsetTrainer):
         gg = reduce(lambda x, y: x + y, hess)
         gg = gg.norm(2).item() * lr
         f = self._relevance_score[self.subset].mean()
+        self.model.zero_grad()
         return f + (g * f) + ((gg * f) / 2)
 
     def _update_delta(self, train_data):

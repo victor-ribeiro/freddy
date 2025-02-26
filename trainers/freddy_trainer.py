@@ -102,7 +102,6 @@ def freddy(
     batch_size=128,
     beta=0.75,
     return_vals=False,
-    importance=None,
 ):
     # basic config
     base_inc = base_inc(alpha)
@@ -125,17 +124,13 @@ def freddy(
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[:, idx_s[1]]
-            score_s = (
-                utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            ) * importance[idx_s[0]]
+            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
                 break
             score_t, idx_t = q.head
             if inc > score_t:
-                score = (
-                    utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                ) * importance[idx_s[0]]
+                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
 
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
@@ -181,7 +176,6 @@ class FreddyTrainer(SubsetTrainer):
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             beta=self.args.beta,
-            importance=self._relevance_score,
         )
         self.subset = sset
         self._relevance_score[sset] = np.linalg.norm(self.delta[sset], axis=1)

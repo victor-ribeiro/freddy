@@ -283,7 +283,7 @@ class FreddyTrainer(SubsetTrainer):
         gg = torch.inner(f, hess.T)
         gg = torch.inner(gg, hess)
         W = g + (gg / 2)
-        return torch.inner(torch.inner(f, W.T), W).cpu().detach().numpy()
+        return torch.inner(torch.inner(f, W), W).cpu().detach().numpy()
         # return (f + g + (gg / 2)).cpu().detach().numpy() * self._relevance_score[
         #     self.subset
         # ].mean()

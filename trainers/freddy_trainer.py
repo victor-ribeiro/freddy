@@ -270,7 +270,6 @@ class FreddyTrainer(SubsetTrainer):
         from functools import reduce
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        data, target = data.cpu(), target.cpu()
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
         model = self.model

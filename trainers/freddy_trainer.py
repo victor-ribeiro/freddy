@@ -273,16 +273,15 @@ class FreddyTrainer(SubsetTrainer):
         from functools import reduce
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        self.model.zero_grad()
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
-        loss.backward()
+        model = self.model
         grad = torch.autograd.grad(
-            loss, self.model.parameters(), retain_graph=True, create_graph=True
+            loss, model.parameters(), retain_graph=True, create_graph=True
         )
         g = reduce(lambda x, y: x[0] + y[0], grad[0])
         g = g.sum().norm(2).item() * lr
-        w = [*self.model.modules()]
+        w = [*model.modules()]
         w = (w[-1].weight,)
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
         gg = reduce(lambda x, y: x + y, hess)

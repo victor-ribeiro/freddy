@@ -279,6 +279,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def _update_delta(self, train_data):
         data, _ = train_data
+        data = data.cpu()
         self.model.eval()
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         lr = self.lr_scheduler.get_last_lr()[0]

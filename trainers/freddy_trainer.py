@@ -229,7 +229,7 @@ class FreddyTrainer(SubsetTrainer):
             self._update_train_loader_and_weights()
             rel_error = [
                 self._error_func(data.to(self.args.device), target.to(self.args.device))
-                for data, target, _ in self.train_loader
+                for data, target, _ in self.val_loader
             ]
             rel_error = np.sum(rel_error)
             self.cur_error = abs(self.cur_error)

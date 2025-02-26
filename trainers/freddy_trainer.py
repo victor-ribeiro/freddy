@@ -275,11 +275,10 @@ class FreddyTrainer(SubsetTrainer):
         # hess = torch.inner(val, hess)
         gg = torch.inner(f, hess.T)
         gg = torch.inner(gg, hess)
-        return f + g + (gg / 2)
+        return (f + g + (gg / 2)).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, _ = train_data
-        data = data.cpu()
         self.model.eval()
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         lr = self.lr_scheduler.get_last_lr()[0]

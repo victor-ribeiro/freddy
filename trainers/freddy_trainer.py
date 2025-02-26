@@ -285,7 +285,7 @@ class FreddyTrainer(SubsetTrainer):
         print(torch.inner(f, grad.T).shape)
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
         hess = reduce(lambda x, y: x + y, hess[0])
-        print(hess)
+        print(hess.shape)
         exit()
         # g = reduce(lambda x, y: x[0] + y[0], grad[0])
         # g = g.sum().norm(2).item() * lr

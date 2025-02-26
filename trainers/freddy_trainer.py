@@ -212,7 +212,7 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        if not epoch or self.cur_error > 1:
+        if not epoch or self.cur_error > self.train_loss.avg:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
 

@@ -293,7 +293,7 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data)
             delta_loss = self.model(data + e)
-        return loss - torch.functional.one_hot(target, self.args.num_classes)
+        return loss - torch.nn.functional.one_hot(target, self.args.num_classes)
 
     # def train(self):
     #     self._select_subset(0, 0)

@@ -282,7 +282,7 @@ class FreddyTrainer(SubsetTrainer):
         grad = reduce(lambda x, y: x[0] + y[0], grad)
         f = pred.softmax(dim=1)
         print(grad)
-        print(torch.matmul(f, grad.T).shape)
+        print(torch.matmul(f, grad).shape)
         exit()
         # g = reduce(lambda x, y: x[0] + y[0], grad[0])
         # g = g.sum().norm(2).item() * lr

@@ -230,8 +230,8 @@ class FreddyTrainer(SubsetTrainer):
                 for data, target, _ in self.train_loader
             ]
             rel_error = np.mean(rel_error)
-            # self.cur_error = abs(self.cur_error - np.mean(rel_error))
-            self.cur_error = abs(np.mean(rel_error))
+            self.cur_error = abs(self.cur_error - np.mean(rel_error))
+            # self.cur_error = abs(np.mean(rel_error))
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
         pbar = tqdm(

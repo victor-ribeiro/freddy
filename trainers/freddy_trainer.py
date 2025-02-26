@@ -177,7 +177,7 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection.append(epoch)
         lr = self.lr_scheduler.get_last_lr()[0]
         # if not epoch or self.cur_error > 0.05:
-        if self.cur_error > 1:
+        if not epoch or self.cur_error > 1:
             dataset = self.train_dataset.dataset
             dataset = DataLoader(
                 dataset,
@@ -189,8 +189,6 @@ class FreddyTrainer(SubsetTrainer):
                 delta = map(self._update_delta, dataset)
                 # delta = map(lambda x: x[1] - x[0], delta)
                 self.delta = np.vstack([*delta])
-        else:
-            self.delta += self.cur_error
 
         # self._relevance_score = np.linalg.norm(self.delta, axis=1) ** -1
 
@@ -203,7 +201,9 @@ class FreddyTrainer(SubsetTrainer):
             importance=self._relevance_score,
         )
         self.subset = sset
-        self._relevance_score[sset] += np.linalg.norm(self.delta[sset], axis=1)
+        self._relevance_score[sset] += (
+            np.linalg.norm(self.delta[sset], axis=1) * self.cur_error
+        ) * lr
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score

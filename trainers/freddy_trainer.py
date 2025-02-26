@@ -202,7 +202,8 @@ class FreddyTrainer(SubsetTrainer):
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
             # self._relevance_score = np.log(self._relevance_score)
         else:
-            self._relevance_score += self.selected / self._relevance_score
+            lr = self.lr_scheduler.get_last_lr()[0]
+            self._relevance_score += self._relevance_score * lr
 
         train_loss = 0
         # self.cur_error -= self._relevance_score[self.subset].mean() * lr

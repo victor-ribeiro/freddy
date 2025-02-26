@@ -288,7 +288,7 @@ class FreddyTrainer(SubsetTrainer):
         gg = reduce(lambda x, y: x + y, hess)
         # gg = gg.norm(2).item() * lr
         ########################################################################
-        f = pred.softmax(dim=1)
+        f = pred.softmax(dim=0)
         print(torch.inner(g, f))
         # print(torch.inner(grad[0], f) + torch.inner(hess[0], f))
         exit()

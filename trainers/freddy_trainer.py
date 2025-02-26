@@ -214,17 +214,12 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
         # if self.cur_error < 10e-4:
-        if not epoch or self.cur_error > 0.05:
-            # self.cur_error = self._relevance_score[self.subset].mean()
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
 
-        rel_error = 0
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
@@ -232,7 +227,6 @@ class FreddyTrainer(SubsetTrainer):
             self.batch_data_time.update(data_time)
 
             self.optimizer.zero_grad()
-            # train model with the current batch and record forward and backward time
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
             data_start = time.time()
 
@@ -250,13 +244,18 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             # if epoch % 20 == 0:
+        rel_error = 0
         for data, target, data_idx in self.val_loader:
             data, target = data.to(self.args.device), target.to(self.args.device)
             rel_error += self._error_func(data, target)
         # self.cur_error = abs(self.cur_error - np.mean(rel_error))
         lr = self.lr_scheduler.get_last_lr()[0]
-        self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader) * lr)
+        self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
         self._val_epoch(epoch)
+
+        if not epoch or self.cur_error > 1:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

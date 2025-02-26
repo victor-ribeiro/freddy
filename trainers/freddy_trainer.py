@@ -279,7 +279,7 @@ class FreddyTrainer(SubsetTrainer):
         w = [*model.modules()]
         w = (w[-1].weight,)
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)
-        g = reduce(lambda x, y: x[0] + y[0], grad)
+        grad = reduce(lambda x, y: x[0] + y[0], grad)
         print(grad)
         # g = reduce(lambda x, y: x[0] + y[0], grad[0])
         # g = g.sum().norm(2).item() * lr

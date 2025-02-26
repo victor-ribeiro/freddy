@@ -286,11 +286,11 @@ class FreddyTrainer(SubsetTrainer):
         w = (w[-1].weight,)
         val = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)
-        grad = reduce(lambda x, y: x[0] + y[0], grad)
+        # grad = reduce(lambda x, y: x[0] + y[0], grad)
         grad = torch.inner(val, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
-        hess = reduce(lambda x, y: x + y, hess[0])
+        # hess = reduce(lambda x, y: x + y, hess[0])
         # hess = torch.inner(val, hess)
         hess = torch.inner(val, hess)
         print(val, grad.shape, hess.shape)

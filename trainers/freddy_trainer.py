@@ -220,7 +220,7 @@ class FreddyTrainer(SubsetTrainer):
             ]
             lr = self.lr_scheduler.get_last_lr()[0]
             rel_error = np.mean(rel_error)
-            self.cur_error = abs(rel_error)
+            self.cur_error = abs(rel_error) * lr
 
         if not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)

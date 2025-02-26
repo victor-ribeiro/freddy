@@ -219,9 +219,9 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        if not epoch or self.cur_error > self.train_loss.avg:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
+        # if not epoch or self.cur_error > self.train_loss.avg:
+        #     self._select_subset(epoch, len(self.train_loader) * epoch)
+        #     self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(
@@ -259,7 +259,10 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = abs(self.cur_error - np.mean(rel_error))
         lr = self.lr_scheduler.get_last_lr()[0]
         # self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
-        self.cur_error = rel_error / len(self.val_loader) * lr
+        self.cur_error = (rel_error / len(self.val_loader)) * lr
+        if not epoch or self.cur_error > self.train_loss.avg:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
         self._val_epoch(epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:

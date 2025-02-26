@@ -175,26 +175,6 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        lr = self.lr_scheduler.get_last_lr()[0]
-        # if not epoch or self.cur_error > 0.05:
-
-        dataset = self.train_dataset.dataset
-        dataset = DataLoader(
-            dataset,
-            batch_size=self.args.batch_size,
-            shuffle=True,
-            num_workers=self.args.num_workers,
-        )
-        with torch.no_grad():
-            delta = map(
-                lambda x: (
-                    self.model.cpu()(x[0]).detach().numpy(),
-                    one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-                ),
-                dataset,
-            )
-            self.delta = np.vstack([*delta])
-
         sset = freddy(
             self.delta,
             K=self.sample_size,
@@ -217,23 +197,12 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        if self.cur_error < self.train_loss.avg or not epoch:
-            # self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
-            rel_error = [
-                self.f_embedding(data.to(self.args.device), target.to(self.args.device))
-                for data, target, _ in self.val_loader
-            ]
-            rel_error = np.mean(rel_error)
-            self.cur_error = abs(rel_error)
-        else:
-            lr = self.lr_scheduler.get_last_lr()[0]
-            self.cur_error -= self.cur_error - self.train_loss.avg
-            self.cur_error = abs(self.cur_error)
+        if epoch % 10 == 0:
+            self.f_embedding()
 
-        if not epoch:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
+        self._select_subset(epoch, len(self.train_loader) * epoch)
+        self._update_train_loader_and_weights()
+
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -275,37 +244,36 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-    def f_embedding(self, data, target):
+    def f_embedding(self):
+        dataset = self.train_dataset.dataset
+        dataset = DataLoader(
+            dataset,
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            num_workers=self.args.num_workers,
+        )
+        with torch.no_grad():
+            delta = map(self.f_embedding, dataset)
+            self.delta = np.vstack([*delta])
+
+    def calc_embbeding(self, data, target, ord=1):
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
         model = self.model
         w = [*model.modules()]
         w = (w[-1].weight,)
-        val = self._update_delta((data, target))
+        f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
-        # grad = reduce(lambda x, y: x[0] + y[0], grad)
-        g = torch.inner(val, grad.T)
+
+        g = torch.inner(f, grad.T)
         g = torch.inner(g, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
         # hess = reduce(lambda x, y: x + y, hess[0])
         # hess = torch.inner(val, hess)
-        gg = torch.inner(val, hess.T)
+        gg = torch.inner(f, hess.T)
         gg = torch.inner(gg, hess)
-        print(val.shape, g.shape, gg.shape)
-        exit()
-        # g = reduce(lambda x, y: x[0] + y[0], grad[0])
-        # g = g.sum().norm(2).item() * lr
-        ########################################################################
-        w = [*model.modules()]
-        w = (w[-1].weight,)
-        # gg = gg.norm(2).item() * lr
-        ########################################################################
-        f = pred.softmax(dim=1)
-        # print(torch.inner(grad[0], f) + torch.inner(hess[0], f))
-        exit()
-        return pfred + (grad * f) + ((hess * f) / 2)
-        # return f + (g * f)
+        return f + g + (gg / 2)
 
     def _update_delta(self, train_data):
         data, _ = train_data

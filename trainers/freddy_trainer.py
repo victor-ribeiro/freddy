@@ -291,7 +291,7 @@ class FreddyTrainer(SubsetTrainer):
         f = pred.softmax(dim=1)
         print(pred + (g * f) + ((gg * f) / 2))
         exit()
-        return pred + (g * f) + ((gg * f) / 2)
+        return pred + (grad * f) + ((hess * f) / 2)
         # return f + (g * f)
 
     def _update_delta(self, train_data):

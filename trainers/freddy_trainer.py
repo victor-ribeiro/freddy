@@ -256,7 +256,8 @@ class FreddyTrainer(SubsetTrainer):
             delta = map(self.f_embedding, dataset)
             self.delta = np.vstack([*delta])
 
-    def calc_embbeding(self, data, target, ord=1):
+    def calc_embbeding(self, train_data, ord=1):
+        data, target = train_data
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
         model = self.model

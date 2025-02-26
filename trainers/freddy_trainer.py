@@ -231,7 +231,7 @@ class FreddyTrainer(SubsetTrainer):
                 self._error_func(data.to(self.args.device), target.to(self.args.device))
                 for data, target, _ in self.train_loader
             ]
-            rel_error = np.mean(rel_error)
+            rel_error = np.sum(rel_error)
             self.cur_error = abs(self.cur_error)
         data_start = time.time()
         pbar = tqdm(

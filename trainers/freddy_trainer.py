@@ -253,7 +253,7 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
         with torch.no_grad():
-            delta = map(self.f_embedding, dataset)
+            delta = map(self.calc_embbeding, dataset)
             self.delta = np.vstack([*delta])
 
     def calc_embbeding(self, train_data, ord=1):

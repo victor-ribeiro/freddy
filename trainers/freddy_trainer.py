@@ -200,7 +200,7 @@ class FreddyTrainer(SubsetTrainer):
             self._update_train_loader_and_weights()
             self.f_embedding()
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
-            self._relevance_score = np.log(self._relevance_score)
+            # self._relevance_score = np.log(self._relevance_score)
         else:
             self._relevance_score += self.selected / self._relevance_score
 

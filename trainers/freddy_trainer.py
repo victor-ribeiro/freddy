@@ -186,15 +186,7 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
         with torch.no_grad():
-            # delta = map(self._update_delta, dataset)
-            delta = map(
-                lambda x: (
-                    self.model.cpu()(x[0]).softmax(dim=1).detach().numpy(),
-                    one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-                ),
-                dataset,
-            )
-            delta = map(lambda x: x[1] - x[0], delta)
+            delta = map(self._update_delta, dataset)
             self.delta = np.vstack([*delta])
 
         sset = freddy(

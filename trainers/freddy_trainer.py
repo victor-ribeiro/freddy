@@ -206,7 +206,7 @@ class FreddyTrainer(SubsetTrainer):
         )
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
-        self.train_checkpoint["importance"] = self._relevance_score
+        self.train_checkpoint["importance"] = self._relevance_score * self.cur_error
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
         self.subset_weights = np.ones(self.sample_size)
         self.model.train()

@@ -282,9 +282,11 @@ class FreddyTrainer(SubsetTrainer):
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
         gg = torch.inner(f, hess.T)
         gg = torch.inner(gg, hess)
-        return (f + g + (gg / 2)).cpu().detach().numpy() * self._relevance_score[
-            self.subset
-        ].mean()
+        W = g + (gg / 2)
+        return torch.inner(torch.inner(f, W.T), W).cpu().detach().numpy()
+        # return (f + g + (gg / 2)).cpu().detach().numpy() * self._relevance_score[
+        #     self.subset
+        # ].mean()
 
     def _update_delta(self, train_data):
         data, target = train_data

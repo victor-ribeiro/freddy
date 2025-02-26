@@ -212,8 +212,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
         if self.cur_error < self.train_loss.avg or not epoch:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
+            # self._select_subset(epoch, len(self.train_loader) * epoch)
+            # self._update_train_loader_and_weights()
             rel_error = [
                 self._error_func(data.to(self.args.device), target.to(self.args.device))
                 for data, target, _ in self.val_loader

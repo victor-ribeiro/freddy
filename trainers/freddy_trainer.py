@@ -201,9 +201,10 @@ class FreddyTrainer(SubsetTrainer):
             importance=self._relevance_score,
         )
         self.subset = sset
-        self._relevance_score[sset] = 1 / (
+        self._relevance_score[sset] = (
             np.linalg.norm(self.delta[sset], axis=1) * self.cur_error
         )
+
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score

@@ -219,9 +219,16 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        # if not epoch or self.cur_error > self.train_loss.avg:
-        #     self._select_subset(epoch, len(self.train_loader) * epoch)
-        #     self._update_train_loader_and_weights()
+        if not epoch or self.cur_error > self.train_loss.avg:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
+            rel_error = [
+                self._error_func(data.to(self.args.device), target.to(self.args.device))
+                for data, target, _ in self.val_loader
+            ]
+            lr = self.lr_scheduler.get_last_lr()[0]
+            rel_error = np.mean(rel_error)
+            self.cur_error = abs(rel_error) * lr
 
         if not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
@@ -254,22 +261,6 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            # if epoch % 20 == 0:
-        # rel_error = 0
-        if self.cur_error > self.train_loss.avg:
-            # if epoch % 10 == 0:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
-            rel_error = [
-                self._error_func(data.to(self.args.device), target.to(self.args.device))
-                for data, target, _ in self.val_loader
-            ]
-            rel_error = np.mean(rel_error)
-            self.cur_error = abs(rel_error) * lr
-        lr = self.lr_scheduler.get_last_lr()[0]
-        # self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
-        # self.cur_error = (rel_error / len(self.val_loader)) * lr
-
         self._val_epoch(epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
@@ -301,7 +292,7 @@ class FreddyTrainer(SubsetTrainer):
         # hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
         # gg = reduce(lambda x, y: x + y, hess)
         # gg = gg.norm(2).item() * lr
-        f = self._relevance_score[self.subset].mean()
+        f = self.train_loss.avg
         # return f + (g * f) + ((gg * f) / 2)
         return f + (g * f)
 

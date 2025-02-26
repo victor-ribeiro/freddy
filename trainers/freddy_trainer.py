@@ -211,7 +211,7 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        if not epoch or self.cur_error < self.train_loss.avg:
+        if self.cur_error < self.train_loss.avg or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             rel_error = [
@@ -281,14 +281,18 @@ class FreddyTrainer(SubsetTrainer):
         )
         g = reduce(lambda x, y: x[0] + y[0], grad[0])
         g = g.sum().norm(2).item() * lr
-        # w = [*model.modules()]
-        # w = (w[-1].weight,)
-        # hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
-        # gg = reduce(lambda x, y: x + y, hess)
-        # gg = gg.norm(2).item() * lr
-        f = self._relevance_score[self.subset].mean()
-        # return f + (g * f) + ((gg * f) / 2)
-        return f + (g * f)
+        ########################################################################
+        w = [*model.modules()]
+        w = (w[-1].weight,)
+        hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
+        gg = reduce(lambda x, y: x + y, hess)
+        gg = gg.norm(2).item() * lr
+        ########################################################################
+        f = pred.softmax(dim=1)
+        print(pred + (g * f) + ((gg * f) / 2))
+        exit()
+        return pred + (g * f) + ((gg * f) / 2)
+        # return f + (g * f)
 
     def _update_delta(self, train_data):
         data, _ = train_data

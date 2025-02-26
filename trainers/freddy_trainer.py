@@ -292,7 +292,7 @@ class FreddyTrainer(SubsetTrainer):
         hess = reduce(lambda x, y: x + y, hess[0])
         hess = torch.inner(loss, hess)
         hess = torch.inner(loss, hess)
-        print(grad.shape, hess.shape)
+        print(data.shape, grad.shape, hess.shape)
         exit()
         # g = reduce(lambda x, y: x[0] + y[0], grad[0])
         # g = g.sum().norm(2).item() * lr

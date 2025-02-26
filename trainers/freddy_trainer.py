@@ -256,7 +256,7 @@ class FreddyTrainer(SubsetTrainer):
             )
             # if epoch % 20 == 0:
         # rel_error = 0
-        if not epoch or self.cur_error > self.train_loss.avg:
+        if self.cur_error > self.train_loss.avg:
             # if epoch % 10 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
@@ -264,8 +264,8 @@ class FreddyTrainer(SubsetTrainer):
                 self._error_func(data.to(self.args.device), target.to(self.args.device))
                 for data, target, _ in self.val_loader
             ]
-            rel_error = np.sum(rel_error)
-            self.cur_error = abs(rel_error)
+            rel_error = np.mean(rel_error)
+            self.cur_error = abs(rel_error) * lr
         lr = self.lr_scheduler.get_last_lr()[0]
         # self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
         # self.cur_error = (rel_error / len(self.val_loader)) * lr

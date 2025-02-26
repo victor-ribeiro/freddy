@@ -233,7 +233,7 @@ class FreddyTrainer(SubsetTrainer):
                 for data, target, _ in self.train_loader
             ]
             rel_error = np.mean(rel_error)
-            self.cur_error = abs(self.cur_error - np.mean(rel_error))
+            self.cur_error = abs(self.cur_error)
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )

@@ -288,7 +288,7 @@ class FreddyTrainer(SubsetTrainer):
         from functools import reduce
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        pred = self.model(data.cpu())
+        pred = self.model(data).to(self.args.device)
         loss = self.val_criterion(pred, target)
         model = self.model
         grad = torch.autograd.grad(

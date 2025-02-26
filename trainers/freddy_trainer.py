@@ -255,7 +255,8 @@ class FreddyTrainer(SubsetTrainer):
             rel_error += self._error_func(data, target)
         # self.cur_error = abs(self.cur_error - np.mean(rel_error))
         lr = self.lr_scheduler.get_last_lr()[0]
-        self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
+        # self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
+        self.cur_error = rel_error / len(self.val_loader) * lr
         self._val_epoch(epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
@@ -296,8 +297,8 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data)
-            delta_loss = self.model(data + e)
+            loss = self.model(data).softmax(dim=1)
+            delta_loss = self.model(data + e).softmax(dim=1)
         return (loss - delta_loss).detach().cpu().numpy()
 
     # def train(self):

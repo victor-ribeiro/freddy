@@ -218,10 +218,10 @@ class FreddyTrainer(SubsetTrainer):
                 self._error_func(data.to(self.args.device), target.to(self.args.device))
                 for data, target, _ in self.val_loader
             ]
-            lr = self.lr_scheduler.get_last_lr()[0]
             rel_error = np.mean(rel_error)
             self.cur_error = abs(rel_error)
         else:
+            lr = self.lr_scheduler.get_last_lr()[0]
             self.cur_error -= self._relevance_score[self.subset].mean() * lr
 
         if not epoch:

@@ -286,7 +286,7 @@ class FreddyTrainer(SubsetTrainer):
         w = (w[-1].weight,)
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)
         grad = reduce(lambda x, y: x[0] + y[0], grad)
-        f = pred.softmax(dim=1).max(dim=1)
+        f = pred.softmax(dim=1).max(dim=0)
         print(grad)
         print(torch.inner(f, grad).shape)
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)

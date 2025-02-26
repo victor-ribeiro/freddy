@@ -168,7 +168,7 @@ class FreddyTrainer(SubsetTrainer):
         #
         n = len(train_dataset)
         self.epoch_selection = []
-        self.delta = np.ones((n, self.args.num_classes))
+        self.delta = np.random.normal(0, 1, (n, self.args.num_classes))
         self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 0

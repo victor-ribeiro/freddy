@@ -223,17 +223,17 @@ class FreddyTrainer(SubsetTrainer):
         #     self._select_subset(epoch, len(self.train_loader) * epoch)
         #     self._update_train_loader_and_weights()
 
-        data_start = time.time()
-        if not epoch or self.cur_error < self.train_loss.avg:
+        if epoch % 10 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
-        if epoch % 10 == 0:
+        if not epoch or self.cur_error < self.train_loss.avg:
             rel_error = [
                 self._error_func(data.to(self.args.device), target.to(self.args.device))
                 for data, target, _ in self.train_loader
             ]
             rel_error = np.mean(rel_error)
             self.cur_error = abs(self.cur_error)
+        data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )

@@ -261,13 +261,14 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = abs(self.cur_error - rel_error / len(self.val_loader)) * lr
         self.cur_error = (rel_error / len(self.val_loader)) * lr
         if not epoch or self.cur_error > self.train_loss.avg:
+            self.train_dataset.clean()
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
         self._val_epoch(epoch)
 
-        if self.args.cache_dataset and self.args.clean_cache_iteration:
-            self.train_dataset.clean()
-            self._update_train_loader_and_weights()
+        # if self.args.cache_dataset and self.args.clean_cache_iteration:
+        #     self.train_dataset.clean()
+        #     self._update_train_loader_and_weights()
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()

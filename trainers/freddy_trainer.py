@@ -224,9 +224,6 @@ class FreddyTrainer(SubsetTrainer):
         #     self._update_train_loader_and_weights()
 
         data_start = time.time()
-        pbar = tqdm(
-            enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
-        )
         if not epoch or self.cur_error > self.train_loss.avg:
             rel_error = [
                 self._error_func(data.to(self.args.device), target.to(self.args.device))
@@ -237,6 +234,9 @@ class FreddyTrainer(SubsetTrainer):
             self.cur_error = abs(np.mean(rel_error))
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
+        pbar = tqdm(
+            enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
+        )
 
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time

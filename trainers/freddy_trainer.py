@@ -291,7 +291,7 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data)
+            loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e)
         return loss - torch.nn.functional.one_hot(target, self.args.num_classes)
 

@@ -292,7 +292,7 @@ class FreddyTrainer(SubsetTrainer):
         # hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
         # gg = reduce(lambda x, y: x + y, hess)
         # gg = gg.norm(2).item() * lr
-        f = self.train_loss.avg
+        f = self._relevance_score[self.subset].mean()
         # return f + (g * f) + ((gg * f) / 2)
         return f + (g * f)
 

@@ -190,7 +190,6 @@ class FreddyTrainer(SubsetTrainer):
             # delta = map(lambda x: x[1] - x[0], delta)
             self.delta += np.vstack([*delta])
 
-        self._relevance_score = np.linalg.norm(self.delta, axis=1)
         # self._relevance_score = np.linalg.norm(self.delta, axis=1) ** -1
 
         sset = freddy(
@@ -202,6 +201,7 @@ class FreddyTrainer(SubsetTrainer):
             importance=self._relevance_score,
         )
         self.subset = sset
+        self._relevance_score[sset] += np.linalg.norm(self.delta[sset], axis=1)
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score
@@ -224,7 +224,7 @@ class FreddyTrainer(SubsetTrainer):
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
 
-        rel_error = []
+        rel_error = 0
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
@@ -253,9 +253,9 @@ class FreddyTrainer(SubsetTrainer):
         for data, target, data_idx in self.val_loader:
             data, target = data.to(self.args.device), target.to(self.args.device)
             lr = self.lr_scheduler.get_last_lr()[0]
-            rel_error.append(self._error_func(data, target))
+            rel_error += self._error_func(data, target)
         # self.cur_error = abs(self.cur_error - np.mean(rel_error))
-        self.cur_error = np.mean(rel_error)
+        self.cur_error = rel_error / len(self.val_loader)
         self._val_epoch(epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:

@@ -221,7 +221,7 @@ class FreddyTrainer(SubsetTrainer):
             # self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             rel_error = [
-                self._error_func(data.to(self.args.device), target.to(self.args.device))
+                self.f_embedding(data.to(self.args.device), target.to(self.args.device))
                 for data, target, _ in self.val_loader
             ]
             rel_error = np.mean(rel_error)
@@ -275,10 +275,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-    def _error_func(self, data, target):
-        from functools import reduce
-
-        lr = self.lr_scheduler.get_last_lr()[0]
+    def f_embedding(self, data, target):
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
         model = self.model
@@ -287,7 +284,7 @@ class FreddyTrainer(SubsetTrainer):
         val = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
         # grad = reduce(lambda x, y: x[0] + y[0], grad)
-        grad = torch.inner(val, grad.T)
+        grad = torch.inner(val, grad)
         grad = torch.inner(val, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]

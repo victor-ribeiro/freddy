@@ -127,7 +127,7 @@ def freddy(
             s = D[:, idx_s[1]]
             score_s = (
                 utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                * relevance[idx[0]]
+                * relevance[idx_s[0]]
             )
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -136,7 +136,7 @@ def freddy(
             if inc > score_t:
                 score = (
                     utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                    * relevance[idx[0]]
+                    * relevance[idx_s[0]]
                 )
 
                 localmax = np.maximum(localmax, s)
@@ -204,7 +204,9 @@ class FreddyTrainer(SubsetTrainer):
             self.f_embedding()
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
             self._relevance_score = np.log(self._relevance_score)
-        lr = self.lr_scheduler.get_last_lr()[0]
+        else:
+            self._relevance_score += self.selected / self._relevance_score
+
         train_loss = 0
         # self.cur_error -= self._relevance_score[self.subset].mean() * lr
         # self.cur_error = abs(self.cur_error)
@@ -251,7 +253,6 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
         self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
-        self._relevance_score += self.selected / self._relevance_score
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
@@ -281,7 +282,9 @@ class FreddyTrainer(SubsetTrainer):
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
         gg = torch.inner(f, hess.T)
         gg = torch.inner(gg, hess)
-        return (f + g + (gg / 2)).cpu().detach().numpy()
+        return (f + g + (gg / 2)).cpu().detach().numpy() * self._relevance_score[
+            self.subset
+        ].mean()
 
     def _update_delta(self, train_data):
         data, target = train_data

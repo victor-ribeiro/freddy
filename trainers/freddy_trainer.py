@@ -213,7 +213,9 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        # if self.cur_error < 10e-4:
+        if not epoch or self.cur_error > 1:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(
@@ -245,10 +247,6 @@ class FreddyTrainer(SubsetTrainer):
             )
             # if epoch % 20 == 0:
         rel_error = 0
-        if not epoch or self.cur_error > 1:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
-
         for data, target, data_idx in self.val_loader:
             data, target = data.to(self.args.device), target.to(self.args.device)
             rel_error += self._error_func(data, target)
@@ -295,8 +293,8 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data).softmax(dim=1)
-            delta_loss = self.model(data + e).softmax(dim=1)
+            loss = self.model(data).softmax(dim=1).log()
+            delta_loss = self.model(data + e).softmax(dim=1).log()
         return (loss - delta_loss).detach().cpu().numpy()
 
     # def train(self):

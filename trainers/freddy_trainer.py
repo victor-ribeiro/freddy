@@ -255,7 +255,7 @@ class FreddyTrainer(SubsetTrainer):
             rel_error += self._error_func(data, target)
         # self.cur_error = abs(self.cur_error - np.mean(rel_error))
         lr = self.lr_scheduler.get_last_lr()[0]
-        self.cur_error = rel_error / len(self.val_loader) * lr
+        self.cur_error = abs(self.cur_error(rel_error / len(self.val_loader) * lr))
         self._val_epoch(epoch)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:

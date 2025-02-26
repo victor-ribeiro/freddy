@@ -198,7 +198,7 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        if self.cur_error > self.train_loss.avg or not epoch:
+        if self.cur_error < 10e-2:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
         if epoch % 10 == 0:
@@ -206,9 +206,9 @@ class FreddyTrainer(SubsetTrainer):
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
             self._relevance_score = np.log(self._relevance_score)
         lr = self.lr_scheduler.get_last_lr()[0]
-
-        self.cur_error -= self._relevance_score[self.subset].mean() * lr
-        self.cur_error = abs(self.cur_error)
+        train_loss = 0
+        # self.cur_error -= self._relevance_score[self.subset].mean() * lr
+        # self.cur_error = abs(self.cur_error)
 
         data_start = time.time()
         pbar = tqdm(
@@ -223,6 +223,7 @@ class FreddyTrainer(SubsetTrainer):
 
             self.optimizer.zero_grad()
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
+            train_loss += loss
             data_start = time.time()
 
             # update progress bar
@@ -250,6 +251,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
+        self.cur_error = abs(self.cur_error - loss)
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

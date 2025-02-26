@@ -258,7 +258,6 @@ class FreddyTrainer(SubsetTrainer):
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,
-            shuffle=True,
             num_workers=self.args.num_workers,
         )
         delta = map(self.calc_embbeding, dataset)

@@ -279,7 +279,7 @@ class FreddyTrainer(SubsetTrainer):
         w = [*model.modules()]
         w = (w[-1].weight,)
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)
-        g = reduce(lambda x, y: x[0] + y[0], grad[0])
+        # g = reduce(lambda x, y: x[0] + y[0], grad[0])
         # g = g.sum().norm(2).item() * lr
         ########################################################################
         w = [*model.modules()]
@@ -289,7 +289,7 @@ class FreddyTrainer(SubsetTrainer):
         # gg = gg.norm(2).item() * lr
         ########################################################################
         f = pred.softmax(dim=1)
-        print(torch.inner(g, f))
+        print(torch.inner(grad, f))
         # print(torch.inner(grad[0], f) + torch.inner(hess[0], f))
         exit()
         return pfred + (grad * f) + ((hess * f) / 2)

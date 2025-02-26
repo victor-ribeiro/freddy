@@ -198,13 +198,13 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
+        if self.cur_error > self.train_loss.avg or not epoch:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
         if epoch % 10 == 0:
             self.f_embedding()
             self._relevance_score = np.linalg.norm(self.delta, axis=1)
             self._relevance_score = np.log(self._relevance_score)
-        if self.cur_error > self.train_loss.avg or not epoch:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
         lr = self.lr_scheduler.get_last_lr()[0]
 
         self.cur_error -= self._relevance_score[self.subset].mean() * lr

@@ -178,7 +178,7 @@ class FreddyTrainer(SubsetTrainer):
             beta=self.args.beta,
         )
         self.subset = sset
-        self._relevance_score[sset] = np.linalg.norm(self.delta[sset], axis=1)
+        # self._relevance_score[sset] = np.linalg.norm(self.delta[sset], axis=1)
 
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected

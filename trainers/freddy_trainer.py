@@ -178,7 +178,6 @@ class FreddyTrainer(SubsetTrainer):
             beta=self.args.beta,
         )
         self.subset = sset
-        # self._relevance_score[sset] = np.linalg.norm(self.delta[sset], axis=1)
 
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
@@ -198,8 +197,10 @@ class FreddyTrainer(SubsetTrainer):
 
         self._select_subset(epoch, len(self.train_loader) * epoch)
         self._update_train_loader_and_weights()
+        lr = self.lr_scheduler.get_last_lr()[0]
+        self.cur_error -= self._relevance_score[self.subset].mean() * lr
+        self.cur_error = abs(self.cur_error)
 
-        self.cur_error = abs(self._relevance_score[self.subset].mean() - self.cur_error)
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout

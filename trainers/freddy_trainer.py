@@ -252,7 +252,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
         self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
-        self._relevance_score += self._relevance_score * lr
+        self._relevance_score += self.selected / self._relevance_score
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

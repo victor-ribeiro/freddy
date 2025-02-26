@@ -190,10 +190,7 @@ class FreddyTrainer(SubsetTrainer):
             delta = map(
                 lambda x: (
                     self.model.cpu()(x[0]).detach().numpy(),
-                    np.one_hot_coding(
-                        x[1].cpu().detach().numpy(), self.args.num_classes
-                    ),
-                    # one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+                    one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
                 ),
                 dataset,
             )

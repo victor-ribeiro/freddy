@@ -207,7 +207,7 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        self._relevance_score[self.subset] -= 1 / shannon_entropy(
+        self._relevance_score[self.subset] *= 1 / shannon_entropy(
             self.delta[self.subset]
         )
         if epoch % 5 == 0:

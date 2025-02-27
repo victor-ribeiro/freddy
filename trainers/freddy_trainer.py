@@ -121,6 +121,8 @@ def freddy(
         size = len(D)
         v = list(V)
         D = (relevance[v] @ np.eye(size)) @ D
+        print(D.shape)
+        exit()
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
         # _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]

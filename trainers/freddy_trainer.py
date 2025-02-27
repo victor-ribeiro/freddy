@@ -150,10 +150,6 @@ def freddy(
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     np.random.shuffle(sset)
-    import matplotlib.pyplot as plt
-
-    plt.plot(vals)
-    plt.show()
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)

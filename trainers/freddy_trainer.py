@@ -249,7 +249,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
-        self._relevance_score[self.subset] += np.log(
+        self._relevance_score[self.subset] -= np.log(
             np.linalg.norm(self.delta[self.subset], axis=1)
             / self._relevance_score[self.subset].max()
         )

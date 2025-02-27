@@ -288,10 +288,10 @@ class FreddyTrainer(SubsetTrainer):
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
 
         g = torch.inner(f, grad.T)
-        g = torch.inner(g, grad)
+        # g = torch.inner(g, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
-        gg = torch.dot(f, hess.T)
+        gg = torch.inner(f, hess.T)
         gg = torch.inner(gg, hess)
         return (f + g + (gg / 2)).cpu().detach().numpy()
 

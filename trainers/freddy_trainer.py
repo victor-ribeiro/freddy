@@ -207,10 +207,8 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        self._relevance_score[self.subset] *= 1 / shannon_entropy(
-            self.delta[self.subset]
-        )
-        if epoch % 10 == 0:
+        self._relevance_score[self.subset] = shannon_entropy(self.delta[self.subset])
+        if epoch % 5 == 0:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
         if (
@@ -219,6 +217,7 @@ class FreddyTrainer(SubsetTrainer):
             or not epoch
         ):
             self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(
@@ -252,7 +251,6 @@ class FreddyTrainer(SubsetTrainer):
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
-            self._update_train_loader_and_weights()
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
@@ -285,14 +283,14 @@ class FreddyTrainer(SubsetTrainer):
         w = [*self.model.modules()]
         w = (w[-1].weight,)
         f = self._update_delta((data, target))
-        grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)
+        grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
 
         g = torch.inner(f, grad.T)
-        g = torch.inner(g, grad)
+        # g = torch.inner(g, grad)
 
-        hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)
+        hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
         gg = torch.inner(f, hess.T)
-        gg = torch.inner(gg, hess)
+        # gg = torch.inner(gg, hess)
         return (f + g + (gg / 2)).cpu().detach().numpy()
 
     def _update_delta(self, train_data):

@@ -210,17 +210,13 @@ class FreddyTrainer(SubsetTrainer):
         if self.train_loss.avg > self.cur_error or not epoch:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
-            self._relevance_score[self.subset] = 1 / shannon_entropy(
-                self.delta[self.subset]
-            )
-        if epoch % 15 == 0:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._relevance_score = 1 / shannon_entropy(self.delta)
 
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
         )
-
+        train_loss = 0
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
@@ -229,6 +225,7 @@ class FreddyTrainer(SubsetTrainer):
 
             self.optimizer.zero_grad()
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
+            train_loss += loss.item()
             data_start = time.time()
 
             # update progress bar
@@ -256,6 +253,9 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
+
+        if self.train_loss.avg - train_loss > 1:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
 
         lr = self.lr_scheduler.get_last_lr()[0]
         self._relevance_score += self.train_loss.avg * lr
@@ -304,8 +304,8 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return loss - delta_loss
-        # return loss - target
+        # return loss - delta_loss
+        return loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

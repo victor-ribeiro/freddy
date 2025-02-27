@@ -127,12 +127,12 @@ def freddy(
         argmax += localmax.sum()
         # _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        _, eigenvectors = np.linalg.eig(D)
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
             s = s @ (
-                relevance[v].reshape(-1, 1)
-                @ np.random.normal(0, 1, batch_size).reshape(1, -1)
+                relevance[v].reshape(-1, 1) @ eigenvectors[idx_s[1]].reshape(1, -1)
             )
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score

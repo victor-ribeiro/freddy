@@ -266,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         data, target = train_data
         # data, target = data.cpu(), target.cpu()
         data, target = data.to(self.args.device), target.to(self.args.device)
-        target = torch.nn.functional.one_hot(target).float()
+        target = torch.nn.functional.one_hot(target, self.args.num_classes).float()
         pred = self.model(data)
         loss = self.val_criterion(pred, target)
         model = self.model
@@ -298,7 +298,7 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data)  # .softmax(dim=1)
             delta_loss = self.model(data + e)
-        return loss - torch.nn.functional.one_hot(target, self.args.num_classes)
+        return loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

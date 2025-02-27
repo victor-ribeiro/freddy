@@ -199,13 +199,9 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
         if epoch % 5 == 0:
+            self.f_embedding()
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
-            self.f_embedding()
-            self._relevance_score[self.subset] += np.log(
-                np.linalg.norm(self.delta[self.subset], axis=1)
-                / self._relevance_score[self.subset].max()
-            )
 
         train_loss = 0
         # self.cur_error -= self._relevance_score[self.subset].mean() * lr
@@ -252,7 +248,15 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
-        self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
+        self._relevance_score[self.subset] += np.log(
+            np.linalg.norm(self.delta[self.subset], axis=1)
+            / self._relevance_score[self.subset].max()
+        )
+        self.cur_error = (
+            self._relevance_score[self.subset].max()
+            - self._relevance_score[self.subset].min()
+        )
+        # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
@@ -295,8 +299,8 @@ class FreddyTrainer(SubsetTrainer):
         with torch.no_grad():
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
-            delta_loss = self.model(data + e)
-        return loss - target
+            delta_loss = self.model(data + e).softmax(dim=1)
+        return loss - delta_loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

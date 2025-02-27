@@ -262,7 +262,7 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
         delta = map(self.calc_embbeding, dataset)
-        self.delta = np.vstack([*delta])
+        self.delta += np.vstack([*delta])
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data

@@ -258,7 +258,7 @@ class FreddyTrainer(SubsetTrainer):
             self.hist[-1]["reaL_error"] = self.cur_error
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        self._relevance_score -= self.train_loss * lr
+        self._relevance_score -= self.train_loss.avg * lr
         self.cur_error = abs(self._relevance_score[self.subset].mean())
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 

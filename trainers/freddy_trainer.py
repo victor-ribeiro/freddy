@@ -214,7 +214,8 @@ class FreddyTrainer(SubsetTrainer):
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
         if (
-            np.isclose(self._relevance_score[self.subset].mean(), self.cur_error)
+            # np.isclose(self._relevance_score[self.subset].mean(), self.cur_error)
+            self.train_loss.avg < self.cur_error
             or not epoch
         ):
             self._select_subset(epoch, len(self.train_loader) * epoch)

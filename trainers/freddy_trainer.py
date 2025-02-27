@@ -120,13 +120,8 @@ def freddy(
         size = len(ds)
         v = list(V)
         D = METRICS[metric](ds, batch_size=batch_size)
-        # D = (relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1)) @ D
-        # print(D)
-        # exit()
         localmax = np.amax(D, axis=1)
-        # localmax = np.mean(D, axis=1)
         argmax += localmax.sum()
-        # _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         _, eigenvectors = np.linalg.eigh(D)
         while q and len(sset) < K:
@@ -214,12 +209,9 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
         if epoch % 5 == 0:
             self.f_embedding()
+        if np.isclose(self._relevance_score[self.subset], self.cur_error):
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
-
-        train_loss = 0
-        # self.cur_error -= self._relevance_score[self.subset].mean() * lr
-        # self.cur_error = abs(self.cur_error)
 
         data_start = time.time()
         pbar = tqdm(
@@ -234,7 +226,6 @@ class FreddyTrainer(SubsetTrainer):
 
             self.optimizer.zero_grad()
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
-            train_loss += loss.item()
             data_start = time.time()
 
             # update progress bar
@@ -254,7 +245,6 @@ class FreddyTrainer(SubsetTrainer):
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
-            # self._update_train_loader_and_weights()
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
@@ -266,10 +256,6 @@ class FreddyTrainer(SubsetTrainer):
         self._relevance_score[self.subset] = (
             shannon_entropy(self.delta[self.subset]) * lr
         )
-        # self.cur_error = (
-        #     self._relevance_score[self.subset].max()
-        #     - self._relevance_score[self.subset].min()
-        # )
         self.cur_error = self._relevance_score[self.subset].mean()
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 

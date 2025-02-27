@@ -123,8 +123,8 @@ def freddy(
         # D = (relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1)) @ D
         # print(D)
         # exit()
-        # localmax = np.amax(D, axis=1)
-        localmax = np.mean(D, axis=1)
+        localmax = np.amax(D, axis=1)
+        # localmax = np.mean(D, axis=1)
         argmax += localmax.sum()
         # _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
@@ -278,10 +278,11 @@ class FreddyTrainer(SubsetTrainer):
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,
+            shuffle=True,
             num_workers=self.args.num_workers,
         )
         delta = map(self.calc_embbeding, dataset)
-        self.delta -= np.vstack([*delta])
+        self.delta = np.vstack([*delta])
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data
@@ -314,8 +315,8 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        # return loss - delta_loss
-        return loss - target
+        return loss - delta_loss
+        # return loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

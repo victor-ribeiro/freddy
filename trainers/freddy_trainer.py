@@ -207,13 +207,13 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        if epoch % 5 == 0:
+        if epoch % 15 == 0:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
             self._relevance_score[self.subset] = 1 / shannon_entropy(
                 self.delta[self.subset]
             )
-        if np.isclose(self.train_loss.avg, self.cur_error) or not epoch:
+        if (self.train_loss.avg < self.cur_error or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
         data_start = time.time()

@@ -211,8 +211,12 @@ class FreddyTrainer(SubsetTrainer):
             self.delta[self.subset]
         )
         if epoch % 5 == 0:
+            print(f"finding embedding epoch({epoch})")
             self.f_embedding()
-        if np.isclose(self._relevance_score[self.subset].mean(), self.cur_error):
+        if (
+            np.isclose(self._relevance_score[self.subset].mean(), self.cur_error)
+            or not epoch
+        ):
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
 

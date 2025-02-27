@@ -119,7 +119,7 @@ def freddy(
     ):
         v = list(V)
         ds = np.array(ds)
-        print((relevance[v] @ ds.T).shape, ds.shape)
+        print((ds @ relevance[v]).shape, ds.shape)
         ds = (ds.T @ relevance[v]) @ ds
         print(ds.shape)
         exit()

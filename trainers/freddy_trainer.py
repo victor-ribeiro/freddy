@@ -118,9 +118,9 @@ def freddy(
         batched(idx, batch_size),
     ):
         D = METRICS[metric](ds, batch_size=batch_size)
-        v = list(V)
-        D = (relevance[v] @ D) * D
         size = len(D)
+        v = list(V)
+        D = (relevance[v] @ np.eye(size)) @ D
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
         # _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]

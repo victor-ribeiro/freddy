@@ -213,7 +213,7 @@ class FreddyTrainer(SubsetTrainer):
             self._relevance_score[self.subset] = 1 / shannon_entropy(
                 self.delta[self.subset]
             )
-        if self.train_loss.avg < self.cur_error or not epoch:
+        if self.train_loss.avg > self.cur_error or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
         data_start = time.time()

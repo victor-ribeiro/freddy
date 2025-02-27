@@ -117,7 +117,7 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
-        size = len(D)
+        size = len(ds)
         v = list(V)
         ds = np.array(ds)
         print((np.eye(size) @ ds.T @ relevance[v]).T.shape, ds.shape)

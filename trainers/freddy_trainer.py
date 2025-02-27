@@ -262,6 +262,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
+        lr = self.lr_scheduler.get_last_lr()[0]
         self._relevance_score[self.subset] = (
             shannon_entropy(self.delta[self.subset]) * lr
         )
@@ -280,7 +281,6 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
         delta = map(self.calc_embbeding, dataset)
-        lr = self.lr_scheduler.get_last_lr()[0]
         self.delta -= np.vstack([*delta])
 
     def calc_embbeding(self, train_data, ord=1):

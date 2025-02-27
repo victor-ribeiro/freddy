@@ -210,7 +210,7 @@ class FreddyTrainer(SubsetTrainer):
         if epoch % 5 == 0:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
-            self._relevance_score[self.subset] = shannon_entropy(
+            self._relevance_score[self.subset] = 1 / shannon_entropy(
                 self.delta[self.subset]
             )
         if np.isclose(self.train_loss.avg, self.cur_error) or not epoch:

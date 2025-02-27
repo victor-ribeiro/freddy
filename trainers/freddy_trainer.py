@@ -254,7 +254,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        if self.train_loss.avg - train_loss > 1:
+        if self.train_loss.avg - train_loss > 1 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
         lr = self.lr_scheduler.get_last_lr()[0]
@@ -282,7 +282,8 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        f = self._update_delta((data, target))
+        # f = self._update_delta((data, target))
+        f = torch.tensor(self.delta).float()
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
 
         g = torch.inner(f, grad.T)

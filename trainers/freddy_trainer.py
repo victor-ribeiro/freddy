@@ -273,7 +273,7 @@ class FreddyTrainer(SubsetTrainer):
         w = (w[-1].weight,)
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(
-            pred.softax(), w, retain_graph=True, create_graph=True
+            pred.softamx(), w, retain_graph=True, create_graph=True
         )[0]
 
         g = torch.inner(f, grad.T)

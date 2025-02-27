@@ -129,7 +129,9 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[idx_s[1], :] @ (relevance[v].reshape(-1, 1) @ relevance[v])
+            s = D[idx_s[1], :] @ (
+                relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1)
+            )
             print(s)
             exit()
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)

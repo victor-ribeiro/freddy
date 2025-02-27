@@ -120,8 +120,7 @@ def freddy(
         size = len(ds)
         v = list(V)
         ds = np.array(ds)
-        print((np.eye(size) @ relevance[v] @ ds).T.shape, ds.shape)
-        ds = (np.eye(size) @ relevance[v]) @ ds
+        ds = ds @ (np.eye(size) @ relevance[v] @ ds)
         print(ds.shape)
         exit()
         D = METRICS[metric](ds, batch_size=batch_size)

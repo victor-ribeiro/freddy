@@ -120,7 +120,7 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         size = len(D)
         v = list(V)
-        D = np.inner(np.inner(relevance[v], D), D)
+        D = np.dot(np.dot(relevance[v], D), D)
         print(D.shape)
         exit()
         localmax = np.amax(D, axis=1)

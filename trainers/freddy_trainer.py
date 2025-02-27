@@ -201,8 +201,9 @@ class FreddyTrainer(SubsetTrainer):
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             self.f_embedding()
-            self._relevance_score = np.linalg.norm(self.delta, axis=1)
-            self._relevance_score = np.log(self._relevance_score)
+            self._relevance_score[self.subset] = np.log(
+                np.linalg.norm(self.delta[self.subset], axis=1)
+            )
 
         train_loss = 0
         # self.cur_error -= self._relevance_score[self.subset].mean() * lr

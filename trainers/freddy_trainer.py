@@ -118,7 +118,7 @@ def freddy(
         batched(idx, batch_size),
     ):
         v = list(V)
-        ds = relevance[v].reshape(-1, 1) @ (relevance[v] @ ds)
+        ds = relevance[v] @ (relevance[v].reshape(-1, 1) @ ds)
         print(ds)
         exit()
         D = METRICS[metric](ds, batch_size=batch_size)

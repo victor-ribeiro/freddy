@@ -262,7 +262,9 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
-        self._relevance_score[self.subset] -= shannon_entropy(self.delta[self.subset])
+        self._relevance_score[self.subset] = (
+            shannon_entropy(self.delta[self.subset]) * lr
+        )
         # self.cur_error = (
         #     self._relevance_score[self.subset].max()
         #     - self._relevance_score[self.subset].min()

@@ -207,6 +207,9 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
+        self._relevance_score[self.subset] -= 1 / shannon_entropy(
+            self.delta[self.subset]
+        )
         if epoch % 5 == 0:
             self.f_embedding()
         if np.isclose(self._relevance_score[self.subset].mean(), self.cur_error):
@@ -252,10 +255,7 @@ class FreddyTrainer(SubsetTrainer):
         print(f"relative error: {self.cur_error}")
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
-        lr = self.lr_scheduler.get_last_lr()[0]
-        self._relevance_score[self.subset] = 1 / shannon_entropy(
-            self.delta[self.subset]
-        )
+
         self.cur_error = self._relevance_score[self.subset].mean()
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 

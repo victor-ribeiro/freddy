@@ -121,7 +121,7 @@ def freddy(
         size = len(D)
         v = list(V)
         D = np.outer(relevance[v], np.inner(relevance[v], D).reshape(-1, 1))
-        print(D.shape)
+        print(D)
         exit()
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()

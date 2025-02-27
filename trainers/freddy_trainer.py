@@ -121,7 +121,7 @@ def freddy(
         v = list(V)
         ds = np.array(ds)
         ds = (relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1)) @ ds
-        print(ds.shape)
+        print(ds)
         exit()
         D = METRICS[metric](ds, batch_size=batch_size)
         localmax = np.amax(D, axis=1)

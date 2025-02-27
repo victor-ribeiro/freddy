@@ -168,7 +168,8 @@ class FreddyTrainer(SubsetTrainer):
         n = len(train_dataset)
         self.epoch_selection = []
         self.delta = np.random.normal(0, 1, (n, self.args.num_classes))
-        self._relevance_score = np.random.normal(0, 1, n)
+        # self._relevance_score = np.random.normal(0, 1, n)
+        self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 0
 
@@ -182,7 +183,7 @@ class FreddyTrainer(SubsetTrainer):
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             beta=self.args.beta,
-            relevance=self._relevance_score,
+            relevance=1 / self._relevance_score,
         )
         self.subset = sset
 
@@ -201,8 +202,9 @@ class FreddyTrainer(SubsetTrainer):
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             self.f_embedding()
-            self._relevance_score[self.subset] = np.log(
+            self._relevance_score[self.subset] += (
                 np.linalg.norm(self.delta[self.subset], axis=1)
+                / self._relevance_score[self.subset].max()
             )
 
         train_loss = 0
@@ -283,9 +285,7 @@ class FreddyTrainer(SubsetTrainer):
         gg = torch.inner(gg, hess)
         # W = g + (gg / 2)
         # return torch.inner(torch.inner(f, W), W.T).cpu().detach().numpy()
-        return (f + g + (gg / 2)).cpu().detach().numpy() * self._relevance_score[
-            self.subset
-        ].mean()
+        return (f + g + (gg / 2)).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, target = train_data
@@ -296,7 +296,7 @@ class FreddyTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data)  # .softmax(dim=1)
+            loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e)
         return loss - target
 

@@ -207,18 +207,14 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-        self._relevance_score[self.subset] -= 1 / shannon_entropy(
-            self.delta[self.subset]
-        )
         if epoch % 5 == 0:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
-        if (
-            np.isclose(self._relevance_score[self.subset].mean(), self.cur_error)
-            or not epoch
-        ):
+            self._relevance_score[self.subset] = shannon_entropy(
+                self.delta[self.subset]
+            )
+        if np.isclose(self.train_loss.avg, self.cur_error) or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(
@@ -252,6 +248,7 @@ class FreddyTrainer(SubsetTrainer):
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
+            self._update_train_loader_and_weights()
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
@@ -260,6 +257,8 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
+        lr = self.lr_scheduler.get_last_lr()[0]
+        self._relevance_score -= self.train_loss * lr
         self.cur_error = abs(self._relevance_score[self.subset].mean())
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 
@@ -300,7 +299,7 @@ class FreddyTrainer(SubsetTrainer):
         data = data.to(self.args.device)
         self.model.eval()
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
-        lr = self.lr_scheduler.get_last_lr()[0]
+        # lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)

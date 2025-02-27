@@ -123,11 +123,12 @@ def freddy(
         # D = (relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1)) @ D
         # print(D)
         # exit()
-        localmax = np.amax(D, axis=1)
+        # localmax = np.amax(D, axis=1)
+        localmax = np.mean(D, axis=1)
         argmax += localmax.sum()
         # _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
-        _, eigenvectors = np.linalg.eig(D)
+        _, eigenvectors = np.linalg.eigh(D)
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
@@ -149,6 +150,10 @@ def freddy(
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     np.random.shuffle(sset)
+    import matplotlib.pyplot as plt
+
+    plt.plot(vals)
+    plt.show()
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)
@@ -187,7 +192,8 @@ class FreddyTrainer(SubsetTrainer):
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             beta=self.args.beta,
-            relevance=1 / self._relevance_score,
+            # relevance=1 / self._relevance_score,
+            relevance=self._relevance_score,
         )
         self.subset = sset
 
@@ -256,10 +262,11 @@ class FreddyTrainer(SubsetTrainer):
             np.linalg.norm(self.delta[self.subset], axis=1)
             / self._relevance_score[self.subset].max()
         )
-        self.cur_error = (
-            self._relevance_score[self.subset].max()
-            - self._relevance_score[self.subset].min()
-        )
+        # self.cur_error = (
+        #     self._relevance_score[self.subset].max()
+        #     - self._relevance_score[self.subset].min()
+        # )
+        self.cur_error = self._relevance_score[self.subset].mean()
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 
     def f_embedding(self):
@@ -304,8 +311,8 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return loss - delta_loss
-        # return loss - delta_loss - target
+        # return loss - delta_loss
+        return loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

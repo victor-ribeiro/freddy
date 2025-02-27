@@ -118,6 +118,7 @@ def freddy(
         batched(idx, batch_size),
     ):
         v = list(V)
+        ds = np.array(ds)
         ds = relevance[v] @ (relevance[v] @ ds.T)
         print(ds)
         exit()

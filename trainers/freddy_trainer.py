@@ -129,12 +129,8 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[idx_s[1], :] @ (
-                relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1)
-            )
-            print(relevance[v])
-            print(s)
-            exit()
+            s = D[idx_s[1], :]
+            s = s @ (relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1))
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -305,7 +301,8 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return loss - delta_loss - target
+        return loss - delta_loss
+        # return loss - delta_loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

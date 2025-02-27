@@ -132,6 +132,7 @@ def freddy(
             s = D[idx_s[1], :] @ (
                 relevance[v].reshape(-1, 1) @ relevance[v].reshape(1, -1)
             )
+            print(relevance[v])
             print(s)
             exit()
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)

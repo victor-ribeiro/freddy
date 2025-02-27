@@ -210,7 +210,7 @@ class FreddyTrainer(SubsetTrainer):
         self._relevance_score[self.subset] *= 1 / shannon_entropy(
             self.delta[self.subset]
         )
-        if epoch % 5 == 0:
+        if epoch % 10 == 0:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
         if (
@@ -219,7 +219,6 @@ class FreddyTrainer(SubsetTrainer):
             or not epoch
         ):
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(
@@ -253,6 +252,7 @@ class FreddyTrainer(SubsetTrainer):
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
+            self._update_train_loader_and_weights()
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()

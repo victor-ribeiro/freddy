@@ -275,7 +275,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
-        print(dataset.shape)
+        print(len(dataset))
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,

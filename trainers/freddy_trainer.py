@@ -275,7 +275,7 @@ class FreddyTrainer(SubsetTrainer):
         self._relevance_score -= self._relevance_score * lr
         self.cur_error = abs(self.cur_error - self._relevance_score[self.subset].mean())
 
-        print(self.delta.shape)
+        print(self.delta)
         print(self._relevance_score[self.subset])
         print(self._relevance_score[self.subset].mean())
         print((self._relevance_score[self.subset] < 0).sum())

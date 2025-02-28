@@ -326,7 +326,7 @@ class FreddyTrainer(SubsetTrainer):
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
         # return loss - delta_loss
-        return (loss - target) * self._relevance_score[self.subset].mean()
+        return loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

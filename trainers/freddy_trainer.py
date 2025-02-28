@@ -123,13 +123,13 @@ def freddy(
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
-        _, eigenvectors = np.linalg.eigh(D)
+        eigenvals, eigenvectors = np.linalg.eigh(D)
+        max_eigenval = np.argsort(eigenvals)[-1]
+        max_eigenvector = eigenvectors[max_eigenval].reshape(1, -1)
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
-            s = s @ (
-                relevance[v].reshape(-1, 1) @ eigenvectors[idx_s[1]].reshape(1, -1)
-            )
+            s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -155,7 +155,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     total = np.sum(abs_vector) + epsilon  # Avoid division by zero
     p = abs_vector / total
     p = p[p > 0]  # Remove zeros to avoid log(0)
-    return -np.sum(p * np.log(p))
+    return -np.sum(p * np.log10(p))
 
 
 class FreddyTrainer(SubsetTrainer):
@@ -210,7 +210,6 @@ class FreddyTrainer(SubsetTrainer):
         if self.train_loss.avg > self.cur_error or not epoch:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
-        self._relevance_score += 1 / shannon_entropy(self.delta)
 
         data_start = time.time()
         pbar = tqdm(
@@ -254,12 +253,14 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        if self.train_loss.avg > self.cur_error or not epoch:
+        if self.cur_error > 1 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-
         lr = self.lr_scheduler.get_last_lr()[0]
+        self._relevance_score[self.subset] -= (
+            shannon_entropy(self.delta[self.subset]).mean * lr
+        )
         self._relevance_score += self.train_loss.avg * lr
-        self.cur_error = abs(self._relevance_score[self.subset].mean())
+        self.cur_error = abs(self.cur_error - train_loss)
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 
     def f_embedding(self):

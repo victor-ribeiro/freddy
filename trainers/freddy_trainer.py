@@ -213,9 +213,9 @@ class FreddyTrainer(SubsetTrainer):
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
 
-        self._relevance_score[self.subset] = (
-            shannon_entropy(self.delta[self.subset]).mean() * lr
-        )
+        self._relevance_score[self.subset] = shannon_entropy(
+            self.delta[self.subset]
+        ).mean()
 
         data_start = time.time()
         pbar = tqdm(

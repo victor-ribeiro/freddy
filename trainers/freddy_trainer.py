@@ -261,7 +261,8 @@ class FreddyTrainer(SubsetTrainer):
         self._relevance_score[self.subset] -= (
             shannon_entropy(self.delta[self.subset]).mean() * lr
         )
-        self._relevance_score += self.train_loss.avg * lr
+        print(self._relevance_score)
+        self._relevance_score -= self.train_loss.avg * lr
         self.cur_error = abs(self.cur_error - train_loss)
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 

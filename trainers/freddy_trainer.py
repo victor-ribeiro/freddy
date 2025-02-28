@@ -145,6 +145,11 @@ def freddy(
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     np.random.shuffle(sset)
+    import matplotlib.pyplot as plt
+
+    # plt.plot(vals)
+    # plt.show()
+    # exit()
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)
@@ -215,7 +220,7 @@ class FreddyTrainer(SubsetTrainer):
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
             self._relevance_score = shannon_entropy(self.delta)
-            # self._relevance_score = self._relevance_score.max() - self._relevance_score
+            self._relevance_score = self._relevance_score.max() - self._relevance_score
 
         data_start = time.time()
         pbar = tqdm(

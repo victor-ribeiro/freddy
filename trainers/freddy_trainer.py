@@ -312,7 +312,7 @@ class FreddyTrainer(SubsetTrainer):
         # g = torch.inner(g, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
-        gg = torch.inner(f, hess)
+        gg = torch.inner(g, hess)
         # gg = torch.inner(gg, hess)
         print(g.shape, gg.shape)
         exit()

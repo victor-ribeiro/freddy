@@ -152,10 +152,10 @@ def freddy(
 
 def shannon_entropy(vector, epsilon=1e-10):
     abs_vector = np.abs(vector)  # Ensure non-negative
-    total = np.sum(abs_vector) + epsilon  # Avoid division by zero
+    total = np.sum(abs_vector, axis=1) + epsilon  # Avoid division by zero
     p = abs_vector / total
     p = p[p > 0]  # Remove zeros to avoid log(0)
-    return -np.sum(p * np.log10(p))
+    return -np.sum(p * np.log2(p))
 
 
 class FreddyTrainer(SubsetTrainer):
@@ -266,6 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         )
 
         print(self._relevance_score[self.subset])
+        print((self._relevance_score[self.subset] < 0).sum())
         # self._relevance_score -= self.train_loss.avg * lr
         self.cur_error = abs(self.cur_error - train_loss)
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))

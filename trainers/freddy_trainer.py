@@ -318,7 +318,8 @@ class FreddyTrainer(SubsetTrainer):
 
     def _update_delta(self, train_data):
         data, target = train_data
-        data = data.to(self.args.device)
+        # data = data.to(self.args.device)
+        data = data.cpu()
         self.model.eval()
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         with torch.no_grad():

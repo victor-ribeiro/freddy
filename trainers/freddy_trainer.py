@@ -323,7 +323,7 @@ class FreddyTrainer(SubsetTrainer):
         data, target = train_data
         data = data.to(self.args.device)
         self.model.eval()
-        # e = torch.normal(0, 1, size=data.shape).to(self.args.device)
+        e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         with torch.no_grad():
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)

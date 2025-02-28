@@ -210,7 +210,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.train_loss.avg > self.cur_error or not epoch:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
-            self._relevance_score = 1 / shannon_entropy(self.delta)
+        self._relevance_score += 1 / shannon_entropy(self.delta)
 
         data_start = time.time()
         pbar = tqdm(

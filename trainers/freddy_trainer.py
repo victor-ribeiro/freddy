@@ -263,7 +263,8 @@ class FreddyTrainer(SubsetTrainer):
             self.hist[-1]["reaL_error"] = self.cur_error
 
         # if self.cur_error > self.train_loss.avg or not epoch:
-        if self.cur_error < 10e-3 or not epoch:
+        # if self.cur_error < 10e-3 or not epoch:
+        if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         # self._relevance_score[self.subset] -= (
         #     shannon_entropy(self.delta[self.subset]).mean() * lr

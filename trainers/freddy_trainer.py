@@ -152,7 +152,7 @@ def freddy(
 
 def shannon_entropy(vector, epsilon=1e-10):
     abs_vector = np.abs(vector)  # Ensure non-negative
-    total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
+    total = abs_vector.sum(axis=0) + epsilon  # Avoid division by zero
     p = abs_vector / total
     p = p[p > 0]  # Remove zeros to avoid log(0)
     val = -np.sum(p * np.log2(p))

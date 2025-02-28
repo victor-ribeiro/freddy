@@ -129,7 +129,7 @@ def freddy(
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
-            s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
+            # s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
             # print(s)
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
@@ -162,7 +162,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     p = abs_vector / total
     p = p[p > 0]  # Remove zeros to avoid log(0)
     # p += 1  # Remove zeros to avoid log(0)
-    return -(p * np.log2(p)) / np.log2(len(vector))
+    return -(p * np.log2(p))
 
 
 class FreddyTrainer(SubsetTrainer):
@@ -266,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        self.cur_error = abs(self.cur_error - train_loss) / (lr + 10e-7)
+        self.cur_error = abs(self.cur_error - train_loss)
         if self.cur_error > 10e-2 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         # self._relevance_score[self.subset] -= (

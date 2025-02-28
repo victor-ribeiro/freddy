@@ -308,7 +308,7 @@ class FreddyTrainer(SubsetTrainer):
         # f = torch.tensor(self.delta, device=self.args.device).float()
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
 
-        g = torch.inner(grad, f.T)
+        g = torch.inner(grad.T, f.T)
         # g = torch.inner(g, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]

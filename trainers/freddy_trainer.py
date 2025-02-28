@@ -276,7 +276,7 @@ class FreddyTrainer(SubsetTrainer):
 
         print(self.delta.shape)
         print(self._relevance_score[self.subset])
-        print(self._relevance_score[self.subset].sum())
+        print(self._relevance_score[self.subset].mean())
         print((self._relevance_score[self.subset] < 0).sum())
         # self._relevance_score -= self.train_loss.avg * lr
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
@@ -323,8 +323,8 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return loss - delta_loss
-        # return loss - target
+        # return loss - delta_loss
+        return (loss - target) * self._relevance_score[self.subset].mean()
 
     # def train(self):
     #     self._select_subset(0, 0)

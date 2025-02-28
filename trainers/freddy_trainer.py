@@ -155,8 +155,8 @@ def shannon_entropy(vector, epsilon=1e-10):
     total = abs_vector.sum(axis=0) + epsilon  # Avoid division by zero
     p = abs_vector / total
     p = p[p > 0]  # Remove zeros to avoid log(0)
-    val = -np.sum(p * np.log2(p), axis=0)
-    print(val.shape)
+    val = -np.sum(p * np.log2(p), axis=1)
+    print(val)
     exit()
     return -np.sum(p * np.log2(p), axis=0)
 

@@ -261,6 +261,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
+        self.cur_error = abs(self.cur_error - train_loss)
         if self.cur_error > 1 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         # self._relevance_score[self.subset] -= (
@@ -274,7 +275,6 @@ class FreddyTrainer(SubsetTrainer):
         print(self._relevance_score[self.subset].sum())
         print((self._relevance_score[self.subset] < 0).sum())
         # self._relevance_score -= self.train_loss.avg * lr
-        self.cur_error = abs(self.cur_error - train_loss)
         # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 
     def f_embedding(self):

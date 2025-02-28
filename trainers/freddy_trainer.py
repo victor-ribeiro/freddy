@@ -264,7 +264,7 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score[self.subset] -= (
         #     shannon_entropy(self.delta[self.subset]).mean() * lr
         # )
-        self._relevance_score[self.subset] = shannon_entropy(self.delta[self.subset])
+        self._relevance_score = shannon_entropy(self.delta)
 
         print(self.delta.shape)
         print(self._relevance_score[self.subset])
@@ -275,6 +275,7 @@ class FreddyTrainer(SubsetTrainer):
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
+        print(dataset.shape)
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,

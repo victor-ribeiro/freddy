@@ -216,7 +216,7 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        if self._relevance_score[self.subset] < 10e-2 or not epoch:
+        if self._relevance_score[self.subset].mean() < 10e-2 or not epoch:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
             self._relevance_score = shannon_entropy(self.delta)

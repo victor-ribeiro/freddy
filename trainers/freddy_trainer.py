@@ -124,13 +124,12 @@ def freddy(
         argmax += localmax.sum()
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         eigenvals, eigenvectors = np.linalg.eigh(D)
-        # max_eigenval = np.argsort(eigenvals)[-1]
-        # max_eigenvector = eigenvectors[max_eigenval].reshape(1, -1)
+        max_eigenval = np.argsort(eigenvals)[-1]
+        max_eigenvector = eigenvectors[max_eigenval].reshape(1, -1)
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
-            # s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
-            # print(s)
+            s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):

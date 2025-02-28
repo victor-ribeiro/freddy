@@ -254,7 +254,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        if self.train_loss.avg > train_loss > 1 or not epoch:
+        if self.train_loss.avg > self.cur_error or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
         lr = self.lr_scheduler.get_last_lr()[0]

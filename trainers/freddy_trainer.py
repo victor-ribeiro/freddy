@@ -266,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        self.cur_error = abs(self.cur_error - train_loss) / lr
+        self.cur_error = abs(self.cur_error - train_loss) / (lr + 10e-7)
         if self.cur_error > 10e-2 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
         # self._relevance_score[self.subset] -= (

@@ -318,12 +318,11 @@ class FreddyTrainer(SubsetTrainer):
 
     def _update_delta(self, train_data):
         data, target = train_data
-        # data = data.to(self.args.device)
-        data = data.cpu()
+        data = data.to(self.args.device)
         self.model.eval()
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         with torch.no_grad():
-            data = data.to(self.args.device)
+            data = data.cpu()
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
         # return loss - delta_loss

@@ -211,7 +211,7 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        if self.train_loss.avg > self.cur_error or not epoch:
+        if self.cur_error > 1 or not epoch:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
             self._relevance_score = shannon_entropy(self.delta)
@@ -271,6 +271,7 @@ class FreddyTrainer(SubsetTrainer):
 
         print(self.delta.shape)
         print(self._relevance_score[self.subset])
+        print(self._relevance_score[self.subset].sum())
         print((self._relevance_score[self.subset] < 0).sum())
         # self._relevance_score -= self.train_loss.avg * lr
         self.cur_error = abs(self.cur_error - train_loss)

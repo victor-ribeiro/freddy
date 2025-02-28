@@ -210,8 +210,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
+        lr = self.lr_scheduler.get_last_lr()[0]
         if self.train_loss.avg > self.cur_error or not epoch:
-            lr = self.lr_scheduler.get_last_lr()[0]
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
             # self._relevance_score = shannon_entropy(self.delta)

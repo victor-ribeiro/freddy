@@ -214,7 +214,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.train_loss.avg > self.cur_error or not epoch:
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
-            # self._relevance_score = shannon_entropy(self.delta)
+            self._relevance_score = shannon_entropy(self.delta)
             # self._relevance_score = self._relevance_score.max() - self._relevance_score
 
         data_start = time.time()
@@ -267,7 +267,7 @@ class FreddyTrainer(SubsetTrainer):
         #     shannon_entropy(self.delta[self.subset]).mean() * lr
         # )
         self.delta -= self.cur_error * lr
-        self._relevance_score = shannon_entropy(self.delta) / lr
+        self._relevance_score = shannon_entropy(self.delta)
 
         print(self.delta.shape)
         print(self._relevance_score[self.subset])
@@ -318,10 +318,10 @@ class FreddyTrainer(SubsetTrainer):
         # lr = self.lr_scheduler.get_last_lr()[0]
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data)
-            delta_loss = self.model(data + e)
-        # return loss - delta_loss
-        return loss - target
+            loss = self.model(data).softmax(dim=1)
+            delta_loss = self.model(data + e).softmax(dim=1)
+        return loss - delta_loss
+        # return loss - target
 
     # def train(self):
     #     self._select_subset(0, 0)

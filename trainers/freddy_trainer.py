@@ -304,6 +304,7 @@ class FreddyTrainer(SubsetTrainer):
         w = [*self.model.modules()]
         w = (w[-1].weight,)
         f = self._update_delta((data, target))
+        return f
         # f = torch.tensor(self.delta, device=self.args.device).float()
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
 

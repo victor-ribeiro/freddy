@@ -155,7 +155,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
     total = total.reshape(-1, 1)
     p = abs_vector / total
-    # p = p[p > 0]  # Remove zeros to avoid log(0)
+    p = p[p > 0]  # Remove zeros to avoid log(0)
     # p += 1  # Remove zeros to avoid log(0)
     return -(p * np.log(p))
 
@@ -213,7 +213,7 @@ class FreddyTrainer(SubsetTrainer):
             print(f"finding embedding epoch({epoch})")
             self.f_embedding()
 
-        self._relevance_score[self.subset] = shannon_entropy(self.delta[self.subset])
+        self._relevance_score = shannon_entropy(self.delta)
 
         data_start = time.time()
         pbar = tqdm(

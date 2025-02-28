@@ -242,6 +242,8 @@ class FreddyTrainer(SubsetTrainer):
             )
         self._val_epoch(epoch)
 
+        train_loss /= len(self.train_loader)
+
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()
             self._update_train_loader_and_weights()

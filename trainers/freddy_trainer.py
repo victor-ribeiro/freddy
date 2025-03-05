@@ -266,9 +266,7 @@ class FreddyTrainer(SubsetTrainer):
         # if self.cur_error < 10e-3 or not epoch:
         if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._relevance_score[self.subset] = shannon_entropy(
-                self.delta[self.subset, :]
-            )
+            self._relevance_score = shannon_entropy(self.delta)
         # self._relevance_score[self.subset] -= (
         #     shannon_entropy(self.delta[self.subset]).mean() * lr
         # )
@@ -289,7 +287,6 @@ class FreddyTrainer(SubsetTrainer):
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,
-            shuffle=True,
             num_workers=self.args.num_workers,
         )
         delta = map(self.calc_embbeding, dataset)

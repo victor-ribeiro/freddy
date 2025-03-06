@@ -135,7 +135,7 @@ def freddy(
             print(f"s_1{s}")
             # s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
             s = alpha * (relevance[v] @ max_eigenvector)
-            print(f"s_2{s}")
+            print(f"s_2{s}, {score}")
             exit()
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score

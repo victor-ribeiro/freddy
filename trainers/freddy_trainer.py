@@ -134,16 +134,17 @@ def freddy(
             s = D[idx_s[1], :]
             print(f"s_1{s}")
             # s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
-            s = alpha * (relevance[v] @ max_eigenvector)
-            print(f"s_2{s}, {score}")
-            exit()
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            c = alpha * (relevance[v] @ max_eigenvector)
+            # score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            score_s = utility_score(s, localmax, acc=c, alpha=alpha, beta=beta)
+            print(f"{score}, {c}")
             inc = score_s - score
             if (inc < 0) or (not q):
                 break
             score_t, idx_t = q.head
             if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+                # score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+                score = utility_score(s, localmax, acc=c, alpha=alpha, beta=beta)
 
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])

@@ -105,7 +105,8 @@ def freddy(
     relevance=None,
 ):
     # basic config
-    base_inc = base_inc(alpha)
+    # base_inc = base_inc(alpha)
+    base_inc = 0
     idx = np.arange(len(dataset))
     # idx = np.random.permutation(idx)
     q = Queue()
@@ -129,14 +130,16 @@ def freddy(
         v_i = eigenvectors[max_eigenval]
         # normalize relevance
         r = relevance[v]
+        r /= np.linalg.norm(r)
         # sign alignment
         if r @ -v_i > 0:
             v_i = -v_i
         # linear penalty
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
+        v_i = v_i.reshape(-1, 1) @ localmax
         r = r @ v_i - np.exp(-r @ v_i)
-        r = np.maximum(relevance[v], r)
+        # r = np.maximum(relevance[v], r)
         ##################
         while q and len(sset) < K:
             score, idx_s = q.head

@@ -134,7 +134,7 @@ def freddy(
             v_i = -v_i
         # linear penalty
         print(-r @ v_i)
-        r = r @ v_i - np.max(0.0, -r @ v_i)
+        r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
         r = r @ v_i - np.exp(-r @ v_i)
         print(v_i)

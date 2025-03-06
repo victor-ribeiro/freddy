@@ -127,12 +127,14 @@ def freddy(
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v_i = eigenvectors[max_eigenval]
+        # normalize relevance
         r = relevance[v]
-        r /= np.linalg.norm(r)
-        print(r)
-        print(r.sum())
-        exit()
+        r = r / np.linalg.norm(r)
+        if r @ -v_i > 0:
+            v_i = -v_i
+            print(v_i)
 
+        exit()
         # sign alignment
         sign = r @ v_i
         ##################

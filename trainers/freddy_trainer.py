@@ -132,7 +132,7 @@ def freddy(
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
-            print(f"s_1{s}")
+            print(f"s_1{s}, {idx_s}")
             # s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
             c = alpha * (relevance[v] @ max_eigenvector)
             # score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)

@@ -58,7 +58,6 @@ def base_inc(alpha=1):
 
 
 def utility_score(e, sset, /, acc=0, alpha=0.1, beta=1.1):
-    beta = 0
     gamma = (alpha + beta) / 2
     norm = 1 / base_inc(alpha)
     argmax = np.maximum(e, sset)

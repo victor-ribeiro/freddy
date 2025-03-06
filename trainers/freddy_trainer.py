@@ -119,8 +119,8 @@ def freddy(
     ):
         size = len(ds)
         v = list(V)
-        D = METRICS["pdist"](ds, batch_size=batch_size)
-        # D = METRICS[metric](ds, batch_size=batch_size)
+        # D = METRICS["pdist"](ds, batch_size=batch_size)
+        D = METRICS[metric](ds, batch_size=batch_size)
         # D = METRICS["codist"](ds, batch_size=batch_size)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -132,8 +132,10 @@ def freddy(
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
+            print(s)
             # s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
             s -= alpha * (relevance[v] @ max_eigenvector)
+            print(s)
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):

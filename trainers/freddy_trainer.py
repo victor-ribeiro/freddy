@@ -93,8 +93,96 @@ class Queue(list):
         self.append(item)
 
 
-@_register
+def linear_selector(r, v1, k, lambda_=0.5):
+    from scipy.optimize import linprog
+
+    """
+    Selects k items to maximize:
+    Total relevance - lambda * max(0, -alignment),
+    where alignment = sum(r_i * v1_i for selected items).
+
+    Args:
+        r (np.ndarray): Relevance scores (shape: [n])
+        v1 (np.ndarray): Principal eigenvector components (shape: [n])
+        lambda_ (float): Penalty strength for negative alignment
+        k (int): Number of items to select
+
+    Returns:
+        selected_indices (np.ndarray): Indices of selected items
+        final_alignment (float): Final alignment value of selected set
+    """
+    n = len(r)
+
+    # Linear programming setup
+    # Objective: Maximize sum(r_i * x_i) - lambda * z
+    # Variables: x_i (binary selection), z (slack for penalty)
+    c = np.hstack([-r, lambda_])  # Minimize -sum(r_i x_i) + lambda z
+
+    # Constraints:
+    # 1. sum(x_i) = k (select exactly k items)
+    A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
+    b_eq = np.array([k])
+
+    # 2. z >= -sum(r_i v1_i x_i) (penalty slack)
+    A_ub = np.hstack([r * v1, 1]).reshape(1, n + 1)
+    b_ub = np.array([0])
+
+    # 3. z >= 0
+    A_ub = np.vstack([A_ub, [0] * n + [-1]])
+    b_ub = np.hstack([b_ub, 0])
+
+    # Bounds: x_i in [0, 1], z >= 0
+    bounds = [(0, 1)] * n + [(0, None)]
+
+    # Solve the linear program
+    result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
+
+    # Extract selected items
+    x = result.x[:n]
+    selected_indices = np.where(x > 0.5)[0]  # Threshold to binary
+
+    # Compute final alignment
+    final_alignment = np.sum(r[selected_indices] * v1[selected_indices])
+
+    return selected_indices, final_alignment
+
+
 def freddy(
+    dataset,
+    base_inc=base_inc,
+    alpha=0.15,
+    metric="similarity",
+    K=1,
+    batch_size=128,
+    beta=0.75,
+    return_vals=False,
+    relevance=None,
+):
+    sample_size = K / len(dataset)
+    idx = np.arange(len(dataset))
+    selected, alignment = [], []
+    for ds, V in zip(
+        batched(dataset, batch_size),
+        batched(idx, batch_size),
+    ):
+        D = METRICS[metric](ds, batch_size=batch_size)
+        V = list(V)
+        r = relevance[V]
+        eigenvals, eigenvectors = np.linalg.eigh(D)
+        max_eigenval = np.argsort(eigenvals)[-1]
+        v1 = eigenvectors[max_eigenval]
+        sset, score = linear_selector(r, v1, k=sample_size)
+        selected.append(sset)
+        alignment.append(score)
+
+    selected = np.hstack(selected)
+    alignment = np.hstack(alignment)
+    print(len(selected), K)
+    exit()
+
+
+@_register
+def _freddy(
     dataset,
     base_inc=base_inc,
     alpha=0.15,

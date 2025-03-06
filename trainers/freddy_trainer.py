@@ -152,7 +152,7 @@ def freddy(
     alpha=0.15,
     metric="similarity",
     K=1,
-    batch_size=128,
+    batch_size=256,
     beta=0.75,
     return_vals=False,
     relevance=None,
@@ -377,9 +377,7 @@ class FreddyTrainer(SubsetTrainer):
         # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._relevance_score[self.subset] = shannon_entropy(
-                self.delta[self.subset]
-            )
+            self._relevance_score = shannon_entropy(self.delta)
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             # print(self.train_dataset.dataset[3])
             # print(self.delta)

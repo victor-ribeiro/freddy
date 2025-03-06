@@ -308,7 +308,7 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset = freddy(
             self.delta,
-            lambda_=self.lambda_
+            lambda_=self.lambda_,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
@@ -318,7 +318,7 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
         )
         self.subset = sset
-        self.lambda_ = min(self.lambda_*1.1, 1)
+        self.lambda_ = min(self.lambda_ * 1.1, 1)
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score
@@ -377,7 +377,9 @@ class FreddyTrainer(SubsetTrainer):
         # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._relevance_score = shannon_entropy(self.delta)
+            self._relevance_score[self.subset] = shannon_entropy(
+                self.delta[self.subset]
+            )
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             # print(self.train_dataset.dataset[3])
             # print(self.delta)

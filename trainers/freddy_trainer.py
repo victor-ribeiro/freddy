@@ -169,11 +169,11 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
-        # D = METRICS[metric](ds, batch_size=batch_size)
-        D = METRICS["codist"](ds, batch_size=batch_size)
+        D = METRICS[metric](ds, batch_size=batch_size)
+        # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = D @ relevance[V]
+        r = (D * relevance[V]).max(dim=1)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
@@ -377,7 +377,9 @@ class FreddyTrainer(SubsetTrainer):
         # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._relevance_score = shannon_entropy(self.delta)
+            self._relevance_score[self.subset] = shannon_entropy(
+                self.delta[self.subset]
+            )
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             # print(self.train_dataset.dataset[3])
             # print(self.delta)

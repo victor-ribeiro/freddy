@@ -138,7 +138,7 @@ def freddy(
         r = r @ v_i - np.exp(-r @ v_i)
         print(relevance[v])
         print(r)
-        print(np.maximum(relevance[v]), r)
+        print(np.maximum(relevance[v], r))
 
         exit()
         ##################

@@ -129,23 +129,23 @@ def freddy(
         v_i = eigenvectors[max_eigenval]
         # normalize relevance
         r = relevance[v]
-        # r = r / np.linalg.norm(r)
+        # sign alignment
         if r @ -v_i > 0:
             v_i = -v_i
         # linear penalty
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
         r = r @ v_i - np.exp(-r @ v_i)
-        print(v_i)
+        print(relevance[v])
         print(r)
+        print(np.maximum(relevance[v]), r)
 
         exit()
-        # sign alignment
-        sign = r @ v_i
         ##################
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
+
             c = alpha * (relevance[v] @ v_i)
 
             score_s = utility_score(s, localmax, acc=0, alpha=alpha, beta=beta)

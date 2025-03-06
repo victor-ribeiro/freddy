@@ -116,7 +116,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     # Linear programming setup
     # Objective: Maximize sum(r_i * x_i) - lambda * z
     # Variables: x_i (binary selection), z (slack for penalty)
-    c = np.hstack([-r, lambda_])  # Minimize -sum(r_i x_i) + lambda z
+    c = np.hstack([-r, [[lambda_]]])  # Minimize -sum(r_i x_i) + lambda z
 
     # Constraints:
     # 1. sum(x_i) = k (select exactly k items)

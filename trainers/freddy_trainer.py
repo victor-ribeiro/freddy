@@ -167,7 +167,7 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = D @ relevance[V]
+        r = (D * relevance[V]).max(axis=1)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
@@ -299,7 +299,7 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset = freddy(
             self.delta,
-            batch_size=32,
+            batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,

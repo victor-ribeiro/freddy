@@ -136,7 +136,6 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
     # Solve the linear program
     result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
-    print(result)
     # Extract selected items
     x = result.x[:n]
     selected_indices = np.where(x > 0.5)[0]  # Threshold to binary
@@ -170,10 +169,8 @@ def freddy(
         r = D.max(axis=1)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        print(eigenvals[max_eigenval])
-        print(eigenvals)
         v1 = eigenvectors[max_eigenval]
-        sset, score = linear_selector(r, v1, k=sample_size, lambda_=0.1)
+        sset, score = linear_selector(r, v1, k=sample_size, lambda_=1)
         # sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
         selected.append(V[sset])
         alignment.append(score)

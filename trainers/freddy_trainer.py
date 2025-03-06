@@ -119,30 +119,34 @@ def freddy(
     ):
         size = len(ds)
         v = list(V)
-        # D = METRICS["pdist"](ds, batch_size=batch_size)
         D = METRICS[metric](ds, batch_size=batch_size)
-        # D = METRICS["codist"](ds, batch_size=batch_size)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        ##################
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        # max_eigenvector = eigenvectors[max_eigenval].reshape(1, -1)
-        max_eigenvector = eigenvectors[max_eigenval]
+        v_i = eigenvectors[max_eigenval]
+        r = relevance[v]
+        r /= np.linalg.norm(r)
+        print(r)
+        print(r.sum())
+        exit()
+
+        # sign alignment
+        sign = r @ v_i
+        ##################
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[idx_s[1], :]
-            # print(f"s_1{s}, {idx_s}")
-            # s = s @ (relevance[v].reshape(-1, 1) @ max_eigenvector)
-            c = alpha * (relevance[v] @ max_eigenvector)
-            # score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            c = alpha * (relevance[v] @ v_i)
+
             score_s = utility_score(s, localmax, acc=0, alpha=alpha, beta=beta)
             inc = score_s - score - c
             if (inc < 0) or (not q):
                 break
             score_t, idx_t = q.head
             if inc > score_t:
-                # score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
                 score = utility_score(s, localmax, acc=0, alpha=alpha, beta=beta)
 
                 localmax = np.maximum(localmax, s)
@@ -151,11 +155,6 @@ def freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
-    # np.random.shuffle(sset)
-    # import matplotlib.pyplot as plt
-    # plt.plot(vals)
-    # plt.show()
-    # exit()
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)
@@ -265,7 +264,8 @@ class FreddyTrainer(SubsetTrainer):
             self.hist[-1]["reaL_error"] = self.cur_error
 
         # if epoch % 5 == 0:
-        if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
+        # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
+        if self.cur_error > 1 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._relevance_score = shannon_entropy(self.delta)
             # print(self.train_dataset.dataset[3])

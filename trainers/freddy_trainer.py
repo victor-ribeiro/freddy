@@ -171,7 +171,8 @@ def freddy(
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
-        sset, score = linear_selector(r, v1, k=sample_size, lambda_=0.1)
+        # sset, score = linear_selector(r, v1, k=sample_size, lambda_=0.1)
+        sset, score = linear_selector(r, v1, k=K, lambda_=0.1)
         print(sset)
         print(type(sset))
         selected.append(V[sset])

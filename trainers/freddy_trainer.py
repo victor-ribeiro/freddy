@@ -148,7 +148,7 @@ def freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
-    np.random.shuffle(sset)
+    # np.random.shuffle(sset)
     # import matplotlib.pyplot as plt
     # plt.plot(vals)
     # plt.show()
@@ -255,8 +255,6 @@ class FreddyTrainer(SubsetTrainer):
         train_loss /= len(self.train_loader)
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
-            self.train_dataset.clean()
-            self._update_train_loader_and_weights()
 
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
@@ -270,6 +268,9 @@ class FreddyTrainer(SubsetTrainer):
         if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._relevance_score = shannon_entropy(self.delta)
+            self._update_train_loader_and_weights()
+            print(self.subset.shape)
+            print(self.delta.shape)
         # self._relevance_score[self.subset] -= (
         #     shannon_entropy(self.delta[self.subset]).mean() * lr
         # )

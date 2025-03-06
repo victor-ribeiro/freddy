@@ -116,9 +116,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     # Linear programming setup
     # Objective: Maximize sum(r_i * x_i) - lambda * z
     # Variables: x_i (binary selection), z (slack for penalty)
-    c = np.hstack(
-        [-r, np.ones(n).reshape(1, n) * lambda_]
-    )  # Minimize -sum(r_i x_i) + lambda z
+    c = np.hstack([-r, lambda_])  # Minimize -sum(r_i x_i) + lambda z
 
     # Constraints:
     # 1. sum(x_i) = k (select exactly k items)
@@ -169,11 +167,11 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = D.max(axis=1)
+        r = D @ relevance[V]
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
-        sset, score = linear_selector(D, v1, k=sample_size * batch_size, lambda_=0.5)
+        sset, score = linear_selector(r, v1, k=sample_size * batch_size, lambda_=0.5)
         # sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
         selected.append(V[sset])
         alignment.append(score)
@@ -403,7 +401,7 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        # return self._update_delta((data, target))
+        return self._update_delta((data, target))
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
         g = torch.inner(f, grad.T)
@@ -423,6 +421,6 @@ class FreddyTrainer(SubsetTrainer):
             loss = self.model(data)
             delta_loss = self.model(data + e).softmax(dim=1)
         return loss - delta_loss
-        # return (loss - target).cpu().detach().numpy()
+        return (loss - target).cpu().detach().numpy()
         return loss - target
         # return loss - delta_loss

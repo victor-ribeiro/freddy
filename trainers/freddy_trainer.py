@@ -269,19 +269,9 @@ class FreddyTrainer(SubsetTrainer):
             self._update_train_loader_and_weights()
             print(self.subset.shape)
             print(self.delta.shape)
-        # self._relevance_score[self.subset] -= (
-        #     shannon_entropy(self.delta[self.subset]).mean() * lr
-        # )
         self.delta[self.subset] += self.cur_error * lr
         self._relevance_score -= self._relevance_score * lr
         self.cur_error = abs(self.cur_error - self._relevance_score[self.subset].mean())
-
-        # print(self.delta)
-        # print(self._relevance_score[self.subset])
-        # print(self._relevance_score[self.subset].mean())
-        # print((self._relevance_score[self.subset] < 0).sum())
-        # self._relevance_score -= self.train_loss.avg * lr
-        # self.cur_error = abs(self.cur_error - (train_loss / len(self.train_loader)))
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
@@ -305,34 +295,24 @@ class FreddyTrainer(SubsetTrainer):
         w = [*self.model.modules()]
         w = (w[-1].weight,)
         f = self._update_delta((data, target))
-        # return f
-        # f = torch.tensor(self.delta, device=self.args.device).float()
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
-
         g = torch.inner(f, grad.T)
-        # g = torch.inner(g, grad)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
         gg = torch.inner(g, hess)
-        # gg = torch.inner(gg, hess)
+
         return torch.inner(f, torch.inner(gg.T, g.T).T).cpu().detach().numpy()
-        exit()
-        return (f + g + (gg / 2)).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, target = train_data
         data = data.to(self.args.device)
         self.model.eval()
-        # e = torch.normal(0, 1, size=data.shape).to(self.args.device)
+        e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         with torch.no_grad():
             data = data.to(self.args.device)
             loss = self.model(data)
-            # delta_loss = self.model(data + e).softmax(dim=1)
-        # return loss - delta_loss
+            delta_loss = self.model(data + e).softmax(dim=1)
+        return loss - delta_loss
         # return (loss - target).cpu().detach().numpy()
         return loss - target
         # return loss - delta_loss
-
-    # def train(self):
-    #     self._select_subset(0, 0)
-    #     return super().train()

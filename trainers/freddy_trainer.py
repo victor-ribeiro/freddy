@@ -254,8 +254,6 @@ class FreddyTrainer(SubsetTrainer):
 
         train_loss /= len(self.train_loader)
 
-        if self.args.cache_dataset and self.args.clean_cache_iteration:
-
         if self.hist:
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
 

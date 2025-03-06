@@ -177,6 +177,7 @@ def freddy(
     selected = np.hstack(selected)
     alignment = np.hstack(alignment)
     print(len(selected), K)
+    print(len(np.unique(selected)), K)
     print(len(alignment), K)
     exit()
 

@@ -136,20 +136,14 @@ def freddy(
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
         r = r @ v_i - np.exp(-r @ v_i)
-        print(relevance[v])
-        print(r)
-        print(np.maximum(relevance[v], r))
-
-        exit()
+        r = np.maximum(relevance[v], r)
         ##################
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[idx_s[1], :]
-
-            c = alpha * (relevance[v] @ v_i)
+            s = D[idx_s[1], :] - r
 
             score_s = utility_score(s, localmax, acc=0, alpha=alpha, beta=beta)
-            inc = score_s - score - c
+            inc = score_s - score
             if (inc < 0) or (not q):
                 break
             score_t, idx_t = q.head

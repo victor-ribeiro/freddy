@@ -138,9 +138,9 @@ def freddy(
         # linear penalty
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
-        r = v_i.reshape(-1, 1) @ localmax.reshape(1, -1)
+        r = v_i * localmax
 
-        localmax = r @ v_i - np.exp(-r @ v_i)
+        localmax = r * v_i - np.exp(-r * v_i)
         # r = np.maximum(relevance[v], r)
         ##################
         while q and len(sset) < K:

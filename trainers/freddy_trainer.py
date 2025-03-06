@@ -299,6 +299,7 @@ class FreddyTrainer(SubsetTrainer):
         self._relevance_score = np.random.normal(0, 1, n)
         self.select_flag = True
         self.cur_error = 0
+        self.lambda_ = 0.5
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
@@ -307,7 +308,7 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset = freddy(
             self.delta,
-            lambda_=self.cur_error,
+            lambda_=self.lambda_
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
@@ -317,7 +318,7 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
         )
         self.subset = sset
-
+        self.lambda_ = min(self.lambda_*1.1, 1)
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score

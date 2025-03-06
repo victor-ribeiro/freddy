@@ -93,7 +93,7 @@ class Queue(list):
         self.append(item)
 
 
-def linear_selector(r, v1, k, lambda_=0.5):
+def linear_selector(r, v1, k, lambda_=0.25):
     from scipy.optimize import linprog
 
     """

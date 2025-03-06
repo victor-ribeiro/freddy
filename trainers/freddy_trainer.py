@@ -139,12 +139,10 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
     # Extract selected items
     x = result.x[:n]
-    print(x)
     selected_indices = np.where(x > 0)[0]  # Threshold to binary
 
     # Compute final alignment
     final_alignment = np.sum(r[selected_indices] * v1[selected_indices])
-    print(selected_indices)
     return selected_indices, final_alignment
 
 
@@ -181,6 +179,7 @@ def freddy(
     selected = np.hstack(selected)
     alignment = np.hstack(alignment)
     print(len(selected), K)
+    print(len(alignment), K)
     exit()
 
 

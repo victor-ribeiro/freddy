@@ -119,7 +119,8 @@ def freddy(
     ):
         size = len(ds)
         v = list(V)
-        D = METRICS[metric](ds, batch_size=batch_size)
+        D = METRICS["pdist"](ds, batch_size=batch_size)
+        # D = METRICS[metric](ds, batch_size=batch_size)
         # D = METRICS["codist"](ds, batch_size=batch_size)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -290,6 +291,7 @@ class FreddyTrainer(SubsetTrainer):
             dataset,
             batch_size=self.args.batch_size,
             num_workers=self.args.num_workers,
+            shuffle=False,
         )
         delta = map(self.calc_embbeding, dataset)
         self.delta = np.vstack([*delta])

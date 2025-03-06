@@ -106,8 +106,8 @@ def freddy(
     relevance=None,
 ):
     # basic config
-    # base_inc = base_inc(alpha)
-    base_inc = 0
+    base_inc = base_inc(alpha)
+    # base_inc = 0
     idx = np.arange(len(dataset))
     # idx = np.random.permutation(idx)
     q = Queue()
@@ -161,7 +161,7 @@ def freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
-            base_inc = min(1, base_inc + 10e-2)
+            # base_inc = min(1, base_inc + 10e-2)
     if return_vals:
         return np.array(vals), sset
     # import matplotlib.pyplot as plt
@@ -211,6 +211,7 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset = freddy(
             self.delta,
+            batch_size=32,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,

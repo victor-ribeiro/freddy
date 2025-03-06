@@ -140,7 +140,7 @@ def freddy(
         ##################
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[idx_s[1], :] - r
+            s = D[idx_s[1], :] + r
 
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score

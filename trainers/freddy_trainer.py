@@ -140,7 +140,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     # Extract selected items
     x = result.x[:n]
     # selected_indices = np.where(x > 0.5)[0]  # Threshold to binary
-    selected_indices = np.where(x > 0)[0]  # Threshold to binary
+    selected_indices = np.where(x > 0.5)[0]  # Threshold to binary
 
     # Compute final alignment
     final_alignment = np.sum(r[selected_indices] * v1[selected_indices])
@@ -167,14 +167,12 @@ def freddy(
     ):
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
-        r = relevance[V]
+        r = ds @ relevance[V]
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
         # sset, score = linear_selector(r, v1, k=sample_size, lambda_=0.1)
         sset, score = linear_selector(r, v1, k=K, lambda_=0)
-        print(sset)
-        print(type(sset))
         selected.append(V[sset])
         alignment.append(score)
 

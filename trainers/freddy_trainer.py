@@ -129,13 +129,14 @@ def freddy(
         v_i = eigenvectors[max_eigenval]
         # normalize relevance
         r = relevance[v]
-        r = r / np.linalg.norm(r)
+        # r = r / np.linalg.norm(r)
         if r @ -v_i > 0:
             v_i = -v_i
         # linear penalty
         print(-r @ v_i)
-        r = r @ v_i - np.max(0, -r @ v_i)
+        r = r @ v_i - np.max(0.0, -r @ v_i)
         # exponential penalty
+        r = r @ v_i - np.exp(-r @ v_i)
         print(v_i)
 
         exit()

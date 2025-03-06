@@ -142,13 +142,13 @@ def freddy(
             score, idx_s = q.head
             s = D[idx_s[1], :] - r
 
-            score_s = utility_score(s, localmax, acc=0, alpha=alpha, beta=beta)
+            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
                 break
             score_t, idx_t = q.head
             if inc > score_t:
-                score = utility_score(s, localmax, acc=0, alpha=alpha, beta=beta)
+                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
 
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
@@ -268,7 +268,8 @@ class FreddyTrainer(SubsetTrainer):
         # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._relevance_score = shannon_entropy(self.delta)
+            # self._relevance_score = shannon_entropy(self.delta)
+            self._relevance_score = np.linalg.norm(self.delta, axis=1)
             # print(self.train_dataset.dataset[3])
             # print(self.delta)
             # print(self.subset)

@@ -137,7 +137,6 @@ def freddy(
             c = alpha * (relevance[v] @ max_eigenvector)
             # score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             score_s = utility_score(s, localmax, acc=0, alpha=alpha, beta=beta)
-            print(f"{score}, {c}")
             inc = score_s - score - c
             if (inc < 0) or (not q):
                 break
@@ -265,8 +264,8 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
-        if epoch % 5 == 0:
+        # if epoch % 5 == 0:
+        if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._relevance_score = shannon_entropy(self.delta)
             # print(self.train_dataset.dataset[3])

@@ -132,7 +132,8 @@ def freddy(
         r = r / np.linalg.norm(r)
         if r @ -v_i > 0:
             v_i = -v_i
-            print(v_i)
+        r = r @ v_i - np.max(0, -r @ v_i)
+        print(v_i)
 
         exit()
         # sign alignment

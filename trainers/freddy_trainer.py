@@ -138,7 +138,11 @@ def freddy(
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
         v_i = v_i.reshape(1, -1) @ localmax
+        print(r.shape)
+        print(v_i.shape)
+
         r = r @ v_i - np.exp(-r @ v_i)
+        exit()
         # r = np.maximum(relevance[v], r)
         ##################
         while q and len(sset) < K:
@@ -159,7 +163,7 @@ def freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
-            base_inc += 10e-2
+            base_inc = min(1, base_inc + 10e-2)
     if return_vals:
         return np.array(vals), sset
     # import matplotlib.pyplot as plt

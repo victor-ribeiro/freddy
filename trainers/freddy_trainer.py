@@ -159,8 +159,13 @@ def freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
+            base_inc += 10e-2
     if return_vals:
         return np.array(vals), sset
+    # import matplotlib.pyplot as plt
+
+    # plt.plot(vals)
+    # plt.show()
     return np.array(sset)
 
 

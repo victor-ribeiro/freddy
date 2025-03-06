@@ -138,7 +138,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
     # Extract selected items
     x = result.x[:n]
-    selected_indices = np.where(x > 0.5)[0]  # Threshold to binary
+    selected_indices = np.where(x > 0)[0]  # Threshold to binary
 
     # Compute final alignment
     final_alignment = np.sum(r[selected_indices] * v1[selected_indices])
@@ -177,10 +177,7 @@ def freddy(
 
     selected = np.hstack(selected)
     alignment = np.hstack(alignment)
-    print(len(selected), K, len(dataset))
-    print(len(np.unique(selected)), K)
-    print(len(alignment), K)
-    exit()
+    return selected[:K]
 
 
 @_register

@@ -265,12 +265,12 @@ class FreddyTrainer(SubsetTrainer):
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._relevance_score = shannon_entropy(self.delta)
-            self._update_train_loader_and_weights()
             print(self.train_dataset.dataset[3])
             print(self.delta)
             print(self.subset)
             print(self.subset.shape)
             print(self.delta.shape)
+            self._update_train_loader_and_weights()
         # self.delta[self.subset] += self.cur_error * lr
         # self._relevance_score -= self._relevance_score * lr
         self.cur_error = abs(self.cur_error - self._relevance_score[self.subset].mean())

@@ -174,7 +174,7 @@ def freddy(
         print(eigenvals)
         v1 = eigenvectors[max_eigenval]
         # sset, score = linear_selector(r, v1, k=sample_size, lambda_=0.1)
-        sset, score = linear_selector(r, v1, k=K, lambda_=1)
+        sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
         selected.append(V[sset])
         alignment.append(score)
 

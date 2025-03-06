@@ -137,7 +137,7 @@ def freddy(
         # linear penalty
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
-        v_i = v_i.reshape(1, -1) @ localmax
+        v_i = v_i.reshape @ localmax.reshape(1, -1)
         print(r.shape)
         print(v_i.shape)
 

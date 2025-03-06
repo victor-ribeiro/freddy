@@ -137,7 +137,7 @@ def freddy(
         # linear penalty
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
-        v_i = v_i.reshape(-1, 1) @ localmax
+        v_i = v_i.reshape(1, -1) @ localmax
         r = r @ v_i - np.exp(-r @ v_i)
         # r = np.maximum(relevance[v], r)
         ##################

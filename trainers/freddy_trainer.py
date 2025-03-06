@@ -157,6 +157,7 @@ def freddy(
     relevance=None,
 ):
     sample_size = (K / len(dataset)) * len(dataset)
+    print(sample_size)
     idx = np.arange(len(dataset))
     selected, alignment = [], []
     for ds, V in zip(

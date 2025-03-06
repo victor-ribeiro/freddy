@@ -147,6 +147,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
 def freddy(
     dataset,
+    lambda_,
     base_inc=base_inc,
     alpha=0.15,
     metric="similarity",
@@ -171,7 +172,9 @@ def freddy(
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
-        sset, score = linear_selector(r, v1, k=sample_size * batch_size, lambda_=0.5)
+        sset, score = linear_selector(
+            r, v1, k=sample_size * batch_size, lambda_=lambda_
+        )
         # sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
         selected.append(V[sset])
         alignment.append(score)
@@ -299,6 +302,7 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset = freddy(
             self.delta,
+            lambda_=self.cur_error,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,

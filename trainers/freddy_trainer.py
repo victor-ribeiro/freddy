@@ -173,6 +173,8 @@ def freddy(
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
         sset, score = linear_selector(r, v1, k=sample_size)
+        print(sset)
+        print(type(sset))
         selected.append(V[sset])
         alignment.append(score)
 

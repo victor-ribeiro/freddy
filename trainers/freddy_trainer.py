@@ -157,6 +157,10 @@ def freddy(
     return_vals=False,
     relevance=None,
 ):
+    # TODO: ver depois no petros qual versão eu to usando. mas aparentemente esse encoding usando o gradiente e a hessiana funcionam
+    # [ ] teste com lambda_ dinâmico
+    # [ ] teste com diferentes tamanhos de batch
+
     sample_size = K / len(dataset)
     print(sample_size)
     idx = np.arange(len(dataset))
@@ -165,7 +169,8 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
-        D = METRICS[metric](ds, batch_size=batch_size)
+        # D = METRICS[metric](ds, batch_size=batch_size)
+        D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
         r = (D * relevance[V]).max(axis=1)

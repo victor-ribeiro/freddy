@@ -173,7 +173,6 @@ def freddy(
         V = np.array(V)
         # r = D @ relevance[V]
         r = D @ relevance[V]
-        print("r", r)
         # r = np.maximum(0, r)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
@@ -272,9 +271,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     abs_vector = np.abs(vector)  # Ensure non-negative
     total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
     p = abs_vector / total.reshape(-1, 1)
-    print("p1", p)
     # p = p[p > 0]  # Remove zeros to avoid log(0)
-    print("p2", p.sum(axis=1))
     # p += 1  # Remove zeros to avoid log(0)
     return (-(p * np.log2(p)) - p).sum(axis=1)
 
@@ -379,27 +376,15 @@ class FreddyTrainer(SubsetTrainer):
         # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
         if epoch % 15 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            print("_relevance_score", self._relevance_score.shape)
-            print("delta", self.delta.shape)
-            print("shannon_entropy", shannon_entropy(self.delta).shape)
             self._relevance_score[self.subset] = shannon_entropy(
                 self.delta[self.subset]
             )
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
-            # print(self.train_dataset.dataset[3])
-            # print(self.delta)
-            # print(self.subset)
-            # print(self.subset.shape)
-            # print(self.delta.shape)
             self._update_train_loader_and_weights()
-        # self.delta[self.subset] += self.cur_error * lr
-        # self._relevance_score -= self._relevance_score * lr
-        # self.cur_error = abs(self.cur_error - self._relevance_score[self.subset].mean())
         self.cur_error = abs(self.cur_error - train_loss)
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
-        print(len(dataset))
         dataset = DataLoader(
             dataset,
             batch_size=self.args.batch_size,

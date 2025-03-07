@@ -311,8 +311,10 @@ class FreddyTrainer(SubsetTrainer):
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            beta=self.args.beta,
+            # alpha=self.args.alpha,
+            # beta=self.args.beta,
+            alpha=self.cur_error,
+            beta=1 - self.cur_error,
             relevance=self._relevance_score,
         )
         self.subset = sset

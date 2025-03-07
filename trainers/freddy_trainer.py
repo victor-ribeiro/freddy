@@ -173,7 +173,9 @@ def freddy(
         V = np.array(V)
         # r = D @ relevance[V]
         r = D @ relevance[V]
-        # r = np.maximum(0, r)
+        r = np.maximum(0, r)
+        print(r)
+        exit()
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]
@@ -272,7 +274,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     p = abs_vector / total.reshape(-1, 1)
     # p = p[p > 0]  # Remove zeros to avoid log(0)
     # p += 1  # Remove zeros to avoid log(0)
-    return (-(p * np.log2(p)) - p).sum(axis=1)
+    return (-(p * np.log2(p))).sum(axis=1)
 
 
 class FreddyTrainer(SubsetTrainer):

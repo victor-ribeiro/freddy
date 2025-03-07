@@ -172,9 +172,8 @@ def freddy(
         # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = D.max(axis=1) * relevance[V]
+        r = np.log(1 + D.sum(axis=1)) * relevance[V]
         r = np.maximum(0, r)
-        print(r)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         # v1 = eigenvectors[max_eigenval]
@@ -384,6 +383,7 @@ class FreddyTrainer(SubsetTrainer):
             )
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             self._update_train_loader_and_weights()
+        self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
 
     def f_embedding(self):

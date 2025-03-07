@@ -145,7 +145,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, final_alignment
 
 
-def freddy(
+def _freddy(
     dataset,
     lambda_,
     base_inc=base_inc,
@@ -190,7 +190,7 @@ def freddy(
 
 
 @_register
-def _freddy(
+def freddy(
     dataset,
     base_inc=base_inc,
     alpha=0.15,
@@ -307,13 +307,12 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset = freddy(
             self.delta,
-            lambda_=self.lambda_,
+            # lambda_=self.lambda_,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             beta=self.args.beta,
-            # relevance=1 / self._relevance_score,
             relevance=self._relevance_score,
         )
         self.subset = sset

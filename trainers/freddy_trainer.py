@@ -126,8 +126,8 @@ def linear_selector(r, v1, k, lambda_=0.5):
     # Threshold to select top k items
     print(x)
     print(k)
+    print(np.argsort(x)[-k:])
     exit()
-    print(np.argsort(x)[:-k])
     selected_indices = np.argsort(x)[-k:][::-1].tolist()
     selected_indices.sort()
 
@@ -152,6 +152,8 @@ def freddy(
     return_vals=False,
     relevance=None,
 ):
+    import math
+
     # TODO: ver depois no petros qual versão eu to usando. mas aparentemente esse encoding usando o gradiente e a hessiana funcionam
     # [ ] teste com lambda_ dinâmico
     # [ ] teste com diferentes tamanhos de batch
@@ -174,7 +176,7 @@ def freddy(
         # v1 = eigenvectors[max_eigenval]
         v1 = eigenvectors[0]
         sset, score = linear_selector(
-            r, v1, k=sample_size * batch_size, lambda_=lambda_
+            r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
         )
         # sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
         selected.append(V[sset])

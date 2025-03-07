@@ -97,52 +97,43 @@ def linear_selector(r, v1, k, lambda_=0.5):
     from scipy.optimize import linprog, minimize
 
     """
-    Selects k items to maximize:
-    Total relevance - lambda * max(0, -alignment),
-    where alignment = sum(r_i * v1_i for selected items).
-
+    Solves the LP relaxation and rounds the solution to select k items.
+    
     Args:
         r (np.ndarray): Relevance scores (shape: [n])
-        v1 (np.ndarray): Principal eigenvector components (shape: [n])
-        lambda_ (float): Penalty strength for negative alignment
+        v1 (np.ndarray): r_i * eigenvector component (shape: [n])
+        lambda_ (float): Penalty strength
         k (int): Number of items to select
-
+        
     Returns:
-        selected_indices (np.ndarray): Indices of selected items
-        final_alignment (float): Final alignment value of selected set
+        selected_indices (list): Indices of selected items
+        cost (float): Final cost value
     """
     n = len(r)
 
-    # Linear programming setup
-    # Objective: Maximize sum(r_i * x_i) - lambda * z
-    # Variables: x_i (binary selection), z (slack for penalty)
-    c = np.hstack([-r, lambda_])  # Minimize -sum(r_i x_i) + lambda z
-
-    # Constraints:
-    # 1. sum(x_i) = k (select exactly k items)
+    # Linear program setup
+    c = np.hstack([-r, lambda_])  # Minimize -sum(r x_i) + lambda z
     A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
     b_eq = np.array([k])
-
-    # 2. z >= -sum(r_i v1_i x_i) (penalty slack)
-    A_ub = np.hstack([r * v1, 1]).reshape(1, n + 1)
+    A_ub = np.hstack([v1, 1]).reshape(1, n + 1)
     b_ub = np.array([0])
+    bounds = [(0, 1) for _ in range(n)] + [(0, None)]
 
-    # 3. z >= 0
-    A_ub = np.vstack([A_ub, [0] * n + [-1]])
-    b_ub = np.hstack([b_ub, 0])
-
-    # Bounds: x_i in [0, 1], z >= 0
-    bounds = [(0, 1)] * n + [(0, None)]
-
-    # Solve the linear program
+    # Solve LP
     result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
-    # Extract selected items
     x = result.x[:n]
-    selected_indices = np.where(x > 0)[0]  # Threshold to binary
 
-    # Compute final alignment
-    final_alignment = np.sum(r[selected_indices] * v1[selected_indices])
-    return selected_indices, final_alignment
+    # Threshold to select top k items
+    selected_indices = np.argsort(x)[-k:][::-1].tolist()
+    selected_indices.sort()
+
+    # Compute final cost
+    alignment = np.sum(v1[selected_indices])
+    relevance = np.sum(r[selected_indices])
+    penalty = lambda_ * max(0, -alignment)
+    cost = -relevance + penalty
+
+    return selected_indices, cost
 
 
 def freddy(

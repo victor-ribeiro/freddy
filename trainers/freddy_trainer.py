@@ -172,9 +172,9 @@ def freddy(
         # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = D * relevance[V]
+        r = D.max(axis=1) * relevance[V]
         # r = np.maximum(0, r)
-        print(r)
+        print(D)
         exit()
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]

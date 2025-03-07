@@ -384,7 +384,9 @@ class FreddyTrainer(SubsetTrainer):
             print("_relevance_score", self._relevance_score.shape)
             print("delta", self.delta.shape)
             print("shannon_entropy", shannon_entropy(self.delta).shape)
-            self._relevance_score = shannon_entropy(self.delta)
+            self._relevance_score[self.subset] = shannon_entropy(
+                self.delta[self.subset]
+            )
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             # print(self.train_dataset.dataset[3])
             # print(self.delta)

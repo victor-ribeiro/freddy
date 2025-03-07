@@ -278,7 +278,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     print("p2", p.shape)
     p += 1  # Remove zeros to avoid log(0)
     print("shannon_entropy -> inner", (-p * np.log2(p)).shape)
-    return -(p * np.log2(p)).sum(axis=1)
+    return (-(p * np.log2(p))).sum(axis=1)
 
 
 class FreddyTrainer(SubsetTrainer):

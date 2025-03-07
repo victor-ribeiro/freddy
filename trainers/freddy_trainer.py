@@ -296,7 +296,7 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score = np.random.normal(0, 1, n)
         self._relevance_score = np.random.normal(0, 1, n)
         self.select_flag = True
-        self.cur_error = 0
+        self.cur_error = 10e-7
         self.lambda_ = 0.5
 
     def _select_subset(self, epoch, training_step):

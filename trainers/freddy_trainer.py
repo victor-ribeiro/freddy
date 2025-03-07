@@ -94,7 +94,7 @@ class Queue(list):
 
 
 def linear_selector(r, v1, k, lambda_=0.5):
-    from scipy.optimize import linprog
+    from scipy.optimize import linprog, minimize
 
     """
     Selects k items to maximize:
@@ -145,7 +145,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, final_alignment
 
 
-def _freddy(
+def freddy(
     dataset,
     lambda_,
     base_inc=base_inc,
@@ -190,7 +190,7 @@ def _freddy(
 
 
 @_register
-def freddy(
+def _freddy(
     dataset,
     base_inc=base_inc,
     alpha=0.15,
@@ -306,8 +306,8 @@ class FreddyTrainer(SubsetTrainer):
         idx = np.where(self._relevance_score > 0)[0]
         self.f_embedding()
         sset = freddy(
-            self.delta[idx],
-            # lambda_=self.lambda_,
+            self.delta,
+            lambda_=self.lambda_,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,

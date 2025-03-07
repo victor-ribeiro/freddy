@@ -302,6 +302,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
+        idx = np.where(self._relevance_score > 0)
+        print(idx.sum())
         self.f_embedding()
         sset = freddy(
             self.delta,

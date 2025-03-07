@@ -162,7 +162,6 @@ def freddy(
     # [ ] teste com diferentes tamanhos de batch
 
     sample_size = K / len(dataset)
-    print(sample_size)
     idx = np.arange(len(dataset))
     selected, alignment = [], []
     for ds, V in zip(
@@ -173,9 +172,6 @@ def freddy(
         # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        print(D.shape)
-        print(relevance[V].shape)
-        print(relevance[V].reshape(-1, 1).shape)
         r = (D * relevance[V].reshape(-1, 1)).max(axis=1)
         r = np.maximum(0, r)
         eigenvals, eigenvectors = np.linalg.eigh(D)

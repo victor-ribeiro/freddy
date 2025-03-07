@@ -175,7 +175,7 @@ def freddy(
         # r = D @ relevance[V]
         print(D.shape)
         print(relevance[V].shape)
-        print(relevance[V].reshape(-1, 1)).shape)
+        print(relevance[V].reshape(-1, 1).shape)
         r = (D * relevance[V].reshape(-1, 1)).max(axis=1)
         r = np.maximum(0, r)
         eigenvals, eigenvectors = np.linalg.eigh(D)

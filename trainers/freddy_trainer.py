@@ -274,7 +274,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     print("total1", total.shape)
     p = abs_vector / total.reshape(-1, 1)  # _acho que está aqui o erro de shape
     print("p1", p.shape)
-    p = p[p > 0]  # Remove zeros to avoid log(0)
+    # p = p[p > 0]  # Remove zeros to avoid log(0)
     print("p2", p.shape)
     p += 1  # Remove zeros to avoid log(0)
     print("shannon_entropy -> inner", (-p * np.log2(p)).shape)

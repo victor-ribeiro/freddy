@@ -224,7 +224,7 @@ def freddy(
         ##################
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        v_i = eigenvectors[max_eigenval]
+        v_i = eigenvectors[max_eigenval] * relevance[v]
         # normalize relevance
         r = relevance[v]
         r /= np.linalg.norm(r)
@@ -239,8 +239,9 @@ def freddy(
         ##################
         while q and len(sset) < K:
             score, idx_s = q.head
+            s = D[idx_s[1], :] * v_i
             # s = D[idx_s[1], :] * relevance[idx_s[0]]
-            s = D[idx_s[1], :] - penalty
+            # s = D[idx_s[1], :] - penalty
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):

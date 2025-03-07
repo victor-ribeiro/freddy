@@ -378,6 +378,9 @@ class FreddyTrainer(SubsetTrainer):
         # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
+            print("_relevance_score", self._relevance_score.shape)
+            print("delta", self.delta.shape)
+            print("shannon_entropy", shannon_entropy(self.delta.shape))
             self._relevance_score = shannon_entropy(self.delta)
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             # print(self.train_dataset.dataset[3])

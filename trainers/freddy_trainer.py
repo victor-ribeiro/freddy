@@ -234,15 +234,12 @@ def freddy(
         # linear penalty
         # r = r @ v_i - max(0.0, -r @ v_i)
         # exponential penalty
-        r = v_i * localmax
+        # localmax = r * v_i - np.exp(-r * v_i)
 
-        localmax = r * v_i - np.exp(-r * v_i)
-        # r = np.maximum(relevance[v], r)
         ##################
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[idx_s[1], :] + r
-
+            s = D[idx_s[1], :] * relevance[idx_s[0]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):

@@ -272,7 +272,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
     p = abs_vector / total.reshape(-1, 1)
     print("p1", p)
-    p = p[p > 0]  # Remove zeros to avoid log(0)
+    # p = p[p > 0]  # Remove zeros to avoid log(0)
     print("p2", p.sum(axis=1))
     # p += 1  # Remove zeros to avoid log(0)
     return (-(p * np.log2(p)) - p).sum(axis=1)
@@ -319,7 +319,7 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
         )
         self.subset = sset
-        self.lambda_ = min(self.lambda_ * 1.1, 1)
+        # self.lambda_ = min(self.lambda_ * 1.1, 1)
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score

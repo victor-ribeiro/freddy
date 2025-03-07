@@ -173,12 +173,12 @@ def freddy(
         V = np.array(V)
         # r = D @ relevance[V]
         r = D.max(axis=1) * relevance[V]
-        # r = np.maximum(0, r)
+        r = np.maximum(0, r)
         print(r)
-        exit()
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        v1 = eigenvectors[max_eigenval]
+        # v1 = eigenvectors[max_eigenval]
+        v1 = eigenvectors[0]
         sset, score = linear_selector(
             r, v1, k=sample_size * batch_size, lambda_=lambda_
         )

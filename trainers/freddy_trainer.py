@@ -172,7 +172,7 @@ def freddy(
         # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = D @ relevance[V]
+        r = D * relevance[V]
         r = np.maximum(0, r)
         print(r)
         exit()

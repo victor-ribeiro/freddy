@@ -173,7 +173,7 @@ def freddy(
         V = np.array(V)
         # r = D @ relevance[V]
         r = D * relevance[V]
-        r = np.maximum(0, r)
+        # r = np.maximum(0, r)
         print(r)
         exit()
         eigenvals, eigenvectors = np.linalg.eigh(D)

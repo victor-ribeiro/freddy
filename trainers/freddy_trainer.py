@@ -125,6 +125,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
     # Threshold to select top k items
     print(x)
+    print(np.argsort(x)[-k:])
     exit()
     selected_indices = np.argsort(x)[-k:][::-1].tolist()
     selected_indices.sort()

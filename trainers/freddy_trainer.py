@@ -274,9 +274,9 @@ def _freddy(
 def shannon_entropy(vector, epsilon=1e-10):
     abs_vector = np.abs(vector)  # Ensure non-negative
     print("abs_vector", abs_vector.shape)
-    total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
+    total = abs_vector.sum(axis=0) + epsilon  # Avoid division by zero
     print("total1", total.shape)
-    total = total.reshape(-1, 1)
+    total = total
     print("total2", total.shape)
     p = abs_vector / total  # _acho que está aqui o erro de shape
     print("p1", p.shape)

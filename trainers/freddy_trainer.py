@@ -124,9 +124,9 @@ def linear_selector(r, v1, k, lambda_=0.5):
     x = result.x[:n]
 
     # Threshold to select top k items
-    selected_indices = np.argsort(x)[-k:][::-1].tolist()
-    print(selected_indices)
+    print(x)
     exit()
+    selected_indices = np.argsort(x)[-k:][::-1].tolist()
     selected_indices.sort()
 
     # Compute final cost

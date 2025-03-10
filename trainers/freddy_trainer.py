@@ -265,7 +265,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     p = abs_vector / total.reshape(-1, 1)
     # p = p[p > 0]  # Remove zeros to avoid log(0)
     # p += 1  # Remove zeros to avoid log(0)
-    return (-(p * np.log2(p))).sum(axis=1)
+    return (-(p * np.log2(1 + p))).sum(axis=1)
 
 
 class FreddyTrainer(SubsetTrainer):

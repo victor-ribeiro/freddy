@@ -322,15 +322,15 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        return self._update_delta((data, target)).cpu().detach().numpy()
-        # f = self._update_delta((data, target))
-        # grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
-        # g = torch.inner(f, grad.T)
+        # return self._update_delta((data, target)).cpu().detach().numpy()
+        f = self._update_delta((data, target))
+        grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
+        g = torch.inner(f, grad.T)
 
-        # hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
-        # gg = torch.inner(g, hess)
+        hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
+        gg = torch.inner(g, hess)
 
-        # return torch.inner(f, torch.inner(gg.T, g.T).T).cpu().detach().numpy()
+        return torch.inner(f, torch.inner(gg.T, g.T).T).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, target = train_data

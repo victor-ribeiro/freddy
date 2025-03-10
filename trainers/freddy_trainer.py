@@ -173,7 +173,7 @@ def freddy(
         v1 = eigenvectors[max_eigenval]
         if v1 @ r < 0:
             v1 = -v1
-        print("v1", v1, v1 @ r)
+        # print("v1", v1, v1 @ r)
         v1 = np.maximum(0, v1)
         sset, score = linear_selector(
             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_

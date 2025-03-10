@@ -136,8 +136,8 @@ def linear_selector(r, v1, k, lambda_=0.5):
     # Compute final cost
     alignment = v1[selected_indices]
     relevance = r[selected_indices]
-    penalty = lambda_ * np.maximum(0, alignment)
-    cost = relevance - penalty
+    penalty = lambda_ * np.maximum(0, -alignment)
+    cost = -relevance + penalty
     cost = np.log(1 + cost)
     return selected_indices, cost
 
@@ -166,7 +166,9 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = D.sum(axis=1)
+        r = shannon_entropy(D)
+        print(r.shape)
+        exit()
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval] * relevance[V]
@@ -225,8 +227,8 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset, score = freddy(
             self.delta,
-            # lambda_=self.lambda_,
-            lambda_=self.cur_error,
+            lambda_=self.lambda_,
+            # lambda_=self.cur_error,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
@@ -305,6 +307,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
+        self.lambda_ = min(1, self.cur_error)
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

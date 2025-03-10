@@ -138,7 +138,8 @@ def linear_selector(r, v1, k, lambda_=0.5):
     relevance = r[selected_indices]
     penalty = lambda_ * np.maximum(0, -alignment)
     cost = -relevance + penalty
-    cost = np.log(1 + cost)
+    # cost = np.log(1 + cost)
+    cost = cost
     return selected_indices, cost
 
 

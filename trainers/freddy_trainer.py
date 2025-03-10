@@ -283,8 +283,8 @@ class FreddyTrainer(SubsetTrainer):
                 #### teste a rodar
                 pred = self.model(data).softmax(dim=1)
                 self._relevance_score[data_idx] = (
-                    (self.train_criterion(pred, target)).cpu().detach().numpy()
-                )
+                    1 / self.train_criterion(pred, target)
+                ).cpu().detach().numpy() + 10e-8
 
             self.model.train()
             #### fim

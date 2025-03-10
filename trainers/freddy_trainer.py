@@ -113,14 +113,16 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
     # Linear program setup
     c = np.hstack([-r, lambda_])  # Minimize -sum(r x_i) + lambda z
+    # A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
     A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
-    b_eq = np.array([k])
+    # b_eq = np.array([k])
     A_ub = np.hstack([v1, 1]).reshape(1, n + 1)
     b_ub = np.array([0])
     bounds = [(0, 1) for _ in range(n)] + [(0, None)]
 
     # Solve LP
-    result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
+    # result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
+    result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, bounds=bounds)
     x = result.x[:n]
 
     # Threshold to select top k items
@@ -159,7 +161,7 @@ def freddy(
     ):
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
-        r = D.sum(axis=1) * relevance[V]
+        r = D @ relevance[V]
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]

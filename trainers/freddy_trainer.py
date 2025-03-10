@@ -113,19 +113,21 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
     # Linear program setup
     c = np.hstack([-r, lambda_])  # Minimize -sum(r x_i) + lambda z
-    # A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
-    A_eq = [np.ones(n)]
-    # b_eq = np.array([k])
+    A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
+    b_eq = np.array([k])
     A_ub = np.hstack([v1, 1]).reshape(1, n + 1)
     b_ub = np.array([0])
     bounds = [(0, 1) for _ in range(n)] + [(0, None)]
 
     # Solve LP
-    # result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
-    result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, bounds=bounds)
+    result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
     x = result.x[:n]
 
     # Threshold to select top k items
+    print(x)
+    print(k)
+    print(np.argsort(x)[-k:])
+    # exit()
     selected_indices = np.argsort(x)[-k:][::-1].tolist()
     selected_indices.sort()
 
@@ -161,15 +163,17 @@ def freddy(
     ):
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
-        r = D @ relevance[V]
+        # r = D @ relevance[V]
+        r = D.sum(axis=1) * relevance[V]
+        # r = np.maximum(0, r)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        v1 = eigenvectors[max_eigenval]
+        # v1 = eigenvectors[max_eigenval]
         v1 = eigenvectors[0]
         sset, score = linear_selector(
             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
         )
-        sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
+        # sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
         selected.append(V[sset])
         alignment.append(score)
 
@@ -394,7 +398,7 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        return self._update_delta((data, target)).cpu().detach().numpy()
+        # return self._update_delta((data, target))
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
         g = torch.inner(f, grad.T)
@@ -415,5 +419,5 @@ class FreddyTrainer(SubsetTrainer):
             delta_loss = self.model(data + e).softmax(dim=1)
         # return (loss - delta_loss).cpu().detach().numpy()
         # return (loss - target).cpu().detach().numpy()
-        return target - loss
+        # return loss - target
         return loss - delta_loss

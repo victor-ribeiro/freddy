@@ -124,9 +124,6 @@ def linear_selector(r, v1, k, lambda_=0.5):
     x = result.x[:n]
 
     # Threshold to select top k items
-    print(x)
-    print(k)
-    print(np.argsort(x)[-k:])
     # exit()
     selected_indices = np.argsort(x)[-k:][::-1].tolist()
     selected_indices.sort()
@@ -168,8 +165,8 @@ def freddy(
         # r = np.maximum(0, r)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        print(max_eigenval)
         v1 = eigenvectors[max_eigenval]
+        print("v1", v1)
         v1 = np.maximum(0, v1)
         sset, score = linear_selector(
             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_

@@ -166,10 +166,10 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        r = shannon_entropy(D)
+        r = shannon_entropy(D) * relevance[V]
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        v1 = eigenvectors[max_eigenval] * relevance[V]
+        v1 = eigenvectors[max_eigenval]
         if v1 @ r < 0:
             v1 = -v1
         # print("v1", v1, v1 @ r)
@@ -281,13 +281,9 @@ class FreddyTrainer(SubsetTrainer):
             self.model.eval()
             with torch.no_grad():
                 #### teste a rodar
-                pred = self.model(data)
+                pred = self.model(data).softmax(dim=1)
                 self._relevance_score[data_idx] = (
-                    1
-                    / (self.train_criterion(pred, target) + 10e-8)
-                    .cpu()
-                    .detach()
-                    .numpy()
+                    (self.train_criterion(pred, target) + 10e-8).cpu().detach().numpy()
                 )
             self.model.train()
             #### fim

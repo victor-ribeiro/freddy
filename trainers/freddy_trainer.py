@@ -226,7 +226,8 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset, score = freddy(
             self.delta,
-            lambda_=self.lambda_,
+            # lambda_=self.lambda_,
+            lambda_=self.cur_error,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
@@ -304,7 +305,7 @@ class FreddyTrainer(SubsetTrainer):
             self.hist[-1]["reaL_error"] = self.cur_error
 
         # self._relevance_score += self._relevance_score * lr
-        # self.cur_error = abs(self.cur_error - train_loss)
+        self.cur_error = abs(self.cur_error - train_loss)
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

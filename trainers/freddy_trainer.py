@@ -168,6 +168,7 @@ def freddy(
         # r = np.maximum(0, r)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
+        print(max_eigenval)
         v1 = eigenvectors[max_eigenval]
         v1 = np.maximum(0, v1)
         sset, score = linear_selector(

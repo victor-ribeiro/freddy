@@ -167,8 +167,6 @@ def freddy(
         V = np.array(V)
         # r = D @ relevance[V]
         r = shannon_entropy(D)
-        print(r.shape)
-        exit()
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval] * relevance[V]

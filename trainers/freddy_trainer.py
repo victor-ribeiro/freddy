@@ -138,7 +138,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     relevance = r[selected_indices]
     penalty = lambda_ * np.maximum(0, -alignment)
     cost = -relevance + penalty
-    cost = np.log(1 + cost)
+    # cost = np.log(1 + cost)
     return selected_indices, cost
 
 
@@ -167,8 +167,8 @@ def freddy(
         V = np.array(V)
         # r = D @ relevance[V]
         # r = D.sum(axis=1) * relevance[V]
-        r = shannon_entropy(D) * relevance[V]
-        # r = shannon_entropy(ds) * relevance[V]
+        # r = shannon_entropy(D) * relevance[V]
+        r = shannon_entropy(ds) * relevance[V]
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]

@@ -161,13 +161,15 @@ def freddy(
         # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        print(1 + D.sum(axis=1) * relevance[V])
         r = np.log(1 + D.sum(axis=1) * relevance[V])
+        print(r)
         r = np.maximum(0, r)
+        print(r)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         # v1 = eigenvectors[max_eigenval]
         v1 = eigenvectors[0]
+        print(v1)
         sset, score = linear_selector(
             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
         )

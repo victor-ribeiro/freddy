@@ -305,7 +305,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
-        self.lambda_ = min(1, self.cur_error)
+        self.lambda_ = min(1, 1 - self.cur_error)
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

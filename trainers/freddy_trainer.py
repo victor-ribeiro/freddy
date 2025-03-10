@@ -248,10 +248,6 @@ class FreddyTrainer(SubsetTrainer):
 
         lr = self.lr_scheduler.get_last_lr()[0]
 
-        if epoch % 5 == 0:
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
-
         data_start = time.time()
         pbar = tqdm(
             enumerate(self.train_loader), total=len(self.train_loader), file=sys.stdout
@@ -287,8 +283,8 @@ class FreddyTrainer(SubsetTrainer):
                 # self._relevance_score[data_idx] = (
                 #     1 / self.train_criterion(pred, target)
                 # ).cpu().detach().numpy() + 10e-8
-                self._relevance_score[data_idx] = (
-                    self.train_criterion(pred, target).cpu().detach().numpy()
+                self._relevance_score[data_idx] = 1 / (
+                    self.train_criterion(pred, target).cpu().detach().numpy() + 10e-8
                 )
 
             self.model.train()
@@ -307,6 +303,9 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
         self.lambda_ = min(1, self.cur_error)
+        if epoch % 5 == 0:
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
@@ -327,7 +326,7 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        # return self._update_delta((data, target)).cpu().detach().numpy()
+        return self._update_delta((data, target)).cpu().detach().numpy()
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
         g = torch.inner(f, grad.T)

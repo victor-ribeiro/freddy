@@ -139,7 +139,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     penalty = lambda_ * np.maximum(0, -alignment)
     cost = -relevance + penalty
     # cost = np.log(1 + cost)
-    cost = cost
+    # cost = cost
     return selected_indices, cost
 
 
@@ -167,6 +167,7 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
+        # r = D.sum(axis=1) * relevance[V]
         r = shannon_entropy(ds) * relevance[V]
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
@@ -174,7 +175,7 @@ def freddy(
         if v1 @ r < 0:
             v1 = -v1
         # print("v1", v1, v1 @ r)
-        v1 = np.maximum(0, v1)
+        # v1 = np.maximum(0, v1)
         sset, score = linear_selector(
             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
         )

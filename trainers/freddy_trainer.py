@@ -179,84 +179,7 @@ def freddy(
 
     selected = np.hstack(selected)
     alignment = np.hstack(alignment)
-    return selected[:K]
-
-
-@_register
-def _freddy(
-    dataset,
-    base_inc=base_inc,
-    alpha=0.15,
-    metric="similarity",
-    K=1,
-    batch_size=128,
-    beta=0.75,
-    return_vals=False,
-    relevance=None,
-):
-    # basic config
-    base_inc = base_inc(alpha)
-    # base_inc = 0
-    idx = np.arange(len(dataset))
-    # idx = np.random.permutation(idx)
-    q = Queue()
-    sset = []
-    vals = []
-    argmax = 0
-    inc = 0
-    for ds, V in zip(
-        batched(dataset, batch_size),
-        batched(idx, batch_size),
-    ):
-        size = len(ds)
-        v = list(V)
-        D = METRICS[metric](ds, batch_size=batch_size)
-        localmax = np.amax(D, axis=1)
-        argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
-        ##################
-        eigenvals, eigenvectors = np.linalg.eigh(D)
-        max_eigenval = np.argsort(eigenvals)[-1]
-        v_i = eigenvectors[max_eigenval] * relevance[v]
-        # normalize relevance
-        r = relevance[v]
-        r /= np.linalg.norm(r)
-        # sign alignment
-        if r @ -v_i > 0:
-            v_i = -v_i
-        # linear penalty
-        # penalty = r * v_i - max(0.0, -r @ v_i)
-        # exponential penalty
-        penalty = r * v_i - np.exp(-r * v_i)
-
-        ##################
-        while q and len(sset) < K:
-            score, idx_s = q.head
-            s = D[idx_s[1], :] * v_i
-            # s = D[idx_s[1], :] * relevance[idx_s[0]]
-            # s = D[idx_s[1], :] - penalty
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            inc = score_s - score
-            if (inc < 0) or (not q):
-                break
-            score_t, idx_t = q.head
-            if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-
-                localmax = np.maximum(localmax, s)
-                sset.append(idx_s[0])
-                vals.append(score)
-            else:
-                q.push(inc, idx_s)
-            q.push(score_t, idx_t)
-            # base_inc = min(1, base_inc + 10e-2)
-    if return_vals:
-        return np.array(vals), sset
-    # import matplotlib.pyplot as plt
-
-    # plt.plot(vals)
-    # plt.show()
-    return np.array(sset)
+    return selected[:K], alignment[:K]
 
 
 def shannon_entropy(vector, epsilon=1e-10):
@@ -287,7 +210,7 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection = []
         self.delta = np.random.normal(0, 1, (n, self.args.num_classes))
         # self._relevance_score = np.random.normal(0, 1, n)
-        self._relevance_score = np.random.normal(0, 1, n)
+        self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 10e-7
         self.lambda_ = 0.5
@@ -296,9 +219,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        idx = np.where(self._relevance_score > 0)[0]
         self.f_embedding()
-        sset = freddy(
+        sset, score = freddy(
             self.delta,
             lambda_=self.lambda_,
             batch_size=128,
@@ -310,6 +232,8 @@ class FreddyTrainer(SubsetTrainer):
             beta=1 - self.cur_error,
             relevance=self._relevance_score,
         )
+        print(len(sset), len(score))
+        exit()
         self.subset = sset
         # self.lambda_ = min(self.lambda_ * 1.1, 1)
         self.selected[sset] += 1
@@ -329,9 +253,9 @@ class FreddyTrainer(SubsetTrainer):
         # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._relevance_score[self.subset] = shannon_entropy(
-                self.delta[self.subset]
-            )
+            # self._relevance_score[self.subset] = shannon_entropy(
+            #     self.delta[self.subset]
+            # )
             # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             self._update_train_loader_and_weights()
 
@@ -375,7 +299,7 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        self._relevance_score += self._relevance_score * lr
+        # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
 
     def f_embedding(self):

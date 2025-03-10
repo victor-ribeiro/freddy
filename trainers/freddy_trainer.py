@@ -267,9 +267,6 @@ class FreddyTrainer(SubsetTrainer):
             data_start = time.time()
             #### teste a rodar
             # self._relevance_score[data_idx] = self.train_criterion(data, target)
-            coisa = 1 / (self.train_criterion(data, target) + 10e-8)
-            print(coisa)
-            exit()
             #### fim
             # update progress bar
             pbar.set_description(
@@ -284,6 +281,12 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
+            self.model.eval()
+            with torch.no_grad():
+                pred = self.model(data)
+                coisa = 1 / (self.train_criterion(pred, target) + 10e-8)
+                print(coisa)
+            exit()
         self._val_epoch(epoch)
 
         train_loss /= len(self.train_loader)

@@ -138,8 +138,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     relevance = r[selected_indices]
     penalty = lambda_ * np.maximum(0, -alignment)
     cost = -relevance + penalty
-    # cost = np.log(1 + cost)
-    # cost = cost
+    cost = np.log(1 + cost)
     return selected_indices, cost
 
 
@@ -284,7 +283,7 @@ class FreddyTrainer(SubsetTrainer):
             self.model.eval()
             with torch.no_grad():
                 #### teste a rodar
-                pred = self.model(data).softmax(dim=1)
+                pred = self.model(data)
                 self._relevance_score[data_idx] = (
                     1 / self.train_criterion(pred, target)
                 ).cpu().detach().numpy() + 10e-8
@@ -344,6 +343,6 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return loss
+        # return loss
         return loss - target
         return loss - delta_loss

@@ -124,10 +124,6 @@ def linear_selector(r, v1, k, lambda_=0.5):
     x = result.x[:n]
 
     # Threshold to select top k items
-    print(x)
-    print(k)
-    print(np.argsort(x)[-k:])
-    # exit()
     selected_indices = np.argsort(x)[-k:][::-1].tolist()
     selected_indices.sort()
 
@@ -153,10 +149,6 @@ def freddy(
     relevance=None,
 ):
     import math
-
-    # TODO: ver depois no petros qual versão eu to usando. mas aparentemente esse encoding usando o gradiente e a hessiana funcionam
-    # [ ] teste com lambda_ dinâmico
-    # [ ] teste com diferentes tamanhos de batch
 
     sample_size = K / len(dataset)
     idx = np.arange(len(dataset))
@@ -403,7 +395,7 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        # return self._update_delta((data, target))
+        return self._update_delta((data, target)).cpu().detach().numpy()
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
         g = torch.inner(f, grad.T)

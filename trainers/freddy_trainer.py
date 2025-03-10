@@ -128,12 +128,17 @@ def linear_selector(r, v1, k, lambda_=0.5):
     selected_indices = np.argsort(x)[-k:][::-1].tolist()
     selected_indices.sort()
 
+    # # Compute final cost
+    # alignment = np.sum(v1[selected_indices])
+    # relevance = np.sum(r[selected_indices])
+    # penalty = lambda_ * max(0, -alignment)
+    # cost = -relevance + penalty
     # Compute final cost
-    alignment = np.sum(v1[selected_indices])
-    relevance = np.sum(r[selected_indices])
-    penalty = lambda_ * max(0, -alignment)
-    cost = -relevance + penalty
-
+    alignment = v1[selected_indices]
+    relevance = r[selected_indices]
+    penalty = lambda_ * np.maximum(0, alignment)
+    cost = relevance - penalty
+    cost = np.log(1 + cost)
     return selected_indices, cost
 
 
@@ -173,7 +178,6 @@ def freddy(
         sset, score = linear_selector(
             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
         )
-        # sset, score = linear_selector(r, v1, k=K, lambda_=0.5)
         selected.append(V[sset])
         alignment.append(score)
 
@@ -232,8 +236,13 @@ class FreddyTrainer(SubsetTrainer):
             beta=1 - self.cur_error,
             relevance=self._relevance_score,
         )
-        print(len(sset), len(score))
-        exit()
+        # import matplotlib.pyplot as plt
+
+        # plt.plot(score)
+        # plt.show()
+        # print(len(sset), len(score))
+        # exit()
+        self._relevance_score[sset] = score
         self.subset = sset
         # self.lambda_ = min(self.lambda_ * 1.1, 1)
         self.selected[sset] += 1
@@ -249,14 +258,9 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         lr = self.lr_scheduler.get_last_lr()[0]
-        # if self.cur_error > 1 or not epoch:
-        # if self._relevance_score[self.subset].mean() < 10e-4 or not epoch:
+
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            # self._relevance_score[self.subset] = shannon_entropy(
-            #     self.delta[self.subset]
-            # )
-            # self._relevance_score = np.linalg.norm(self.delta, axis=1)
             self._update_train_loader_and_weights()
 
         data_start = time.time()
@@ -300,7 +304,7 @@ class FreddyTrainer(SubsetTrainer):
             self.hist[-1]["reaL_error"] = self.cur_error
 
         # self._relevance_score += self._relevance_score * lr
-        self.cur_error = abs(self.cur_error - train_loss)
+        # self.cur_error = abs(self.cur_error - train_loss)
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

@@ -161,7 +161,6 @@ def freddy(
 
         V = np.array(V)
         r = D @ relevance[V]
-        r = np.log(1 + s)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval]

@@ -113,7 +113,8 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
     # Linear program setup
     c = np.hstack([-r, lambda_])  # Minimize -sum(r x_i) + lambda z
-    A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
+    # A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
+    A_eq = np.hstack([np.ones(n), 0])
     # b_eq = np.array([k])
     A_ub = np.hstack([v1, 1]).reshape(1, n + 1)
     b_ub = np.array([0])

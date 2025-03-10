@@ -189,8 +189,6 @@ def shannon_entropy(vector, epsilon=1e-10):
     abs_vector = np.abs(vector)  # Ensure non-negative
     total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
     p = abs_vector / total.reshape(-1, 1)
-    # p = p[p > 0]  # Remove zeros to avoid log(0)
-    # p += 1  # Remove zeros to avoid log(0)
     return (-(p * np.log2(1 + p))).sum(axis=1)
 
 
@@ -212,7 +210,6 @@ class FreddyTrainer(SubsetTrainer):
         n = len(train_dataset)
         self.epoch_selection = []
         self.delta = np.random.normal(0, 1, (n, self.args.num_classes))
-        # self._relevance_score = np.random.normal(0, 1, n)
         self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 10e-7
@@ -226,25 +223,15 @@ class FreddyTrainer(SubsetTrainer):
         sset, score = freddy(
             self.delta,
             lambda_=self.lambda_,
-            # lambda_=self.cur_error,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
-            # alpha=self.args.alpha,
-            # beta=self.args.beta,
             alpha=self.cur_error,
             beta=1 - self.cur_error,
             relevance=self._relevance_score,
         )
-        # import matplotlib.pyplot as plt
-
-        # plt.plot(score)
-        # plt.show()
-        # print(len(sset), len(score))
-        # exit()
-        self._relevance_score[sset] = score
+        # self._relevance_score[sset] = score
         self.subset = sset
-        # self.lambda_ = min(self.lambda_ * 1.1, 1)
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score
@@ -278,7 +265,12 @@ class FreddyTrainer(SubsetTrainer):
             loss, train_acc = self._forward_and_backward(data, target, data_idx)
             train_loss += loss.item()
             data_start = time.time()
-
+            #### teste a rodar
+            # self._relevance_score[data_idx] = self.train_criterion(data, target)
+            coisa = 1 / (self.train_criterion(data, target) + 10e-8)
+            print(coisa)
+            exit()
+            #### fim
             # update progress bar
             pbar.set_description(
                 "{}: {}/{} [{}/{} ({:.0f}%)] Loss: {:.6f} Acc: {:.6f}".format(
@@ -320,22 +312,21 @@ class FreddyTrainer(SubsetTrainer):
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data
-        # data, target = data.cpu(), target.cpu()
         data, target = data.to(self.args.device), target.to(self.args.device)
         target = torch.nn.functional.one_hot(target, self.args.num_classes).float()
         pred = self.model(data).softmax(dim=1)
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        # return self._update_delta((data, target)).cpu().detach().numpy()
-        f = self._update_delta((data, target))
-        grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
-        g = torch.inner(f, grad.T)
+        return self._update_delta((data, target)).cpu().detach().numpy()
+        # f = self._update_delta((data, target))
+        # grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
+        # g = torch.inner(f, grad.T)
 
-        hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
-        gg = torch.inner(g, hess)
+        # hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
+        # gg = torch.inner(g, hess)
 
-        return torch.inner(f, torch.inner(gg.T, g.T).T).cpu().detach().numpy()
+        # return torch.inner(f, torch.inner(gg.T, g.T).T).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, target = train_data
@@ -346,7 +337,5 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e).softmax(dim=1)
-        # return (loss - delta_loss).cpu().detach().numpy()
-        # return (loss - target).cpu().detach().numpy()
-        # return loss - target
+        return loss - target
         return loss - delta_loss

@@ -54,6 +54,7 @@ def similarity(dataset, metric="euclidean", batch_size=1):
 
 def base_inc(alpha=1):
     alpha = abs(alpha)
+    print(alpha)
     return math.log(1 + alpha)
 
 

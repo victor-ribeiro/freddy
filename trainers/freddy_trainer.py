@@ -127,7 +127,7 @@ def freddy(
             v1 = -v1
         v1 = np.maximum(0, v1)
         g = np.dot(v1.reshape(-1, 1), np.random.normal(0, 1, (1, size)))
-        D += D @ g
+        D = D @ g
 
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -356,12 +356,12 @@ class FreddyTrainer(SubsetTrainer):
             with torch.no_grad():
                 #### teste a rodar
                 pred = self.model(data)
-                #     # self._relevance_score[data_idx] = (
-                #     #     1 / self.train_criterion(pred, target)
-                #     #     # ).cpu().detach().numpy() + 10e-8
                 self._relevance_score[data_idx] = (
-                    self.train_criterion(pred, target).cpu().detach().numpy()
-                )
+                    1 / self.train_criterion(pred, target)
+                ).cpu().detach().numpy() + 10e-8
+                # self._relevance_score[data_idx] = (
+                #     self.train_criterion(pred, target).cpu().detach().numpy()
+                # )
 
             # self.model.train()
             #### fim

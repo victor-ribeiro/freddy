@@ -353,6 +353,6 @@ class FreddyTrainer(SubsetTrainer):
             # loss = self.model(data).softmax(dim=1)
             loss = self.model(data)
             delta_loss = self.model(data + e).softmax(dim=1)
-        return loss
-        return loss - target
+        # return loss
+        # return loss - target
         return loss - delta_loss

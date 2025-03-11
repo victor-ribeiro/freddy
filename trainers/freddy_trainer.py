@@ -290,7 +290,8 @@ class FreddyTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
-        self.f_embedding()
+        if not epoch or (1.5 > self.cur_error > 0.5):
+            self.f_embedding()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         sset, score = freddy(
@@ -317,7 +318,6 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         # lr = self.lr_scheduler.get_last_lr()[0]
-        # if not epoch or (1.5 > self.cur_error > 0.5):
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
@@ -422,5 +422,5 @@ class FreddyTrainer(SubsetTrainer):
             loss = self.model(data)
             delta_loss = self.model(data + e)
         # return loss
-        return loss - target
-        # return loss - delta_loss
+        # return loss - target
+        return loss - delta_loss

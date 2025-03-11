@@ -126,7 +126,7 @@ def freddy(
         if v1 @ relevance[V] < 0:
             v1 = -v1
         v1 = np.maximum(0, v1)
-        g = v1 @ np.random.normal(0, 1, size)
+        g = np.inner(v1, np.random.normal(0, 1, (1, size)))
         print(g.shape)
         exit()
         D += D @ g.reshape(-1, 1)

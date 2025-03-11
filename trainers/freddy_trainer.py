@@ -312,7 +312,13 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        lr = self.lr_scheduler.get_last_lr()[0]
+        # lr = self.lr_scheduler.get_last_lr()[0]
+        if not epoch or (1.5 > self.cur_error > 0.5):
+            self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
+            # self.lambda_ = max(
+            #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
+            # )
 
         data_start = time.time()
         pbar = tqdm(
@@ -370,12 +376,6 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = abs(self.cur_error - train_loss)
         self.cur_error = self._relevance_score[self.subset].mean()
         # if epoch % 5 == 0:
-        if not epoch or (1.5 > self.cur_error > 0.5):
-            self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
-            # self.lambda_ = max(
-            #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
-            # )
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

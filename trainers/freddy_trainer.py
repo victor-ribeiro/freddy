@@ -285,12 +285,12 @@ class FreddyTrainer(SubsetTrainer):
             with torch.no_grad():
                 #### teste a rodar
                 pred = self.model(data)
-                # self._relevance_score[data_idx] = (
-                #     1 / self.train_criterion(pred, target)
-                # ).cpu().detach().numpy() + 10e-8
                 self._relevance_score[data_idx] = (
-                    self.train_criterion(pred, target).cpu().detach().numpy()
-                )
+                    1 / self.train_criterion(pred, target)
+                ).cpu().detach().numpy() + 10e-8
+                # self._relevance_score[data_idx] = (
+                #     self.train_criterion(pred, target).cpu().detach().numpy()
+                # )
 
             self.model.train()
             #### fim
@@ -307,7 +307,8 @@ class FreddyTrainer(SubsetTrainer):
 
         # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
-        if epoch % 5 == 0:
+        # if epoch % 5 == 0:
+        if not epoch or self.cur_error > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             # self.lambda_ = max(

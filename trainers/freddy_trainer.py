@@ -93,6 +93,66 @@ class Queue(list):
         self.append(item)
 
 
+@_register
+def freddy(
+    dataset,
+    base_inc=base_inc,
+    alpha=0.15,
+    metric="similarity",
+    K=1,
+    batch_size=128,
+    beta=0.75,
+    return_vals=False,
+    importance=None,
+):
+    # basic config
+    base_inc = base_inc(alpha)
+    idx = np.arange(len(dataset))
+    # idx = np.random.permutation(idx)
+    q = Queue()
+    sset = []
+    vals = []
+    argmax = 0
+    inc = 0
+    for ds, V in zip(
+        batched(dataset, batch_size),
+        batched(idx, batch_size),
+    ):
+        D = METRICS[metric](ds, batch_size=batch_size)
+        lambda_, v1 = np.linalg.eigh(D)
+        i = np.argmax(v1)
+        print(i)
+        exit()
+        size = len(D)
+        localmax = np.amax(D, axis=1)
+        argmax += localmax.sum()
+        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        while q and len(sset) < K:
+            score, idx_s = q.head
+            s = D[:, idx_s[1]] * importance[idx_s[1]]
+            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            inc = score_s - score
+            if (inc < 0) or (not q):
+                break
+            score_t, idx_t = q.head
+            if inc > score_t:
+                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+                localmax = np.maximum(localmax, s)
+                sset.append(idx_s[0])
+                vals.append(score)
+            else:
+                q.push(inc, idx_s)
+            q.push(score_t, idx_t)
+            if np.mean(alignment) < -0.1:
+                lambda_ = min(lambda_ * 1.5, 10)
+            else:
+                lambda_ = max(lambda_ * 0.8, 0.5)
+    np.random.shuffle(sset)
+    if return_vals:
+        return np.array(vals), sset
+    return np.array(sset)
+
+
 def linear_selector(r, v1, k, lambda_=0.5):
     from scipy.optimize import linprog, minimize
 
@@ -142,7 +202,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, cost
 
 
-def freddy(
+def _freddy(
     dataset,
     lambda_,
     base_inc=base_inc,

@@ -127,6 +127,8 @@ def freddy(
             v1 = -v1
         v1 = np.maximum(0, v1)
         g = v1 @ np.random.normal(0, 1, size).reshape(-1, 1)
+        print(g.shape)
+        exit()
         D += D @ g.reshape(-1, 1)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()

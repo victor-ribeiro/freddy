@@ -237,7 +237,7 @@ class FreddyTrainer(SubsetTrainer):
             beta=1 - self.cur_error,
             relevance=self._relevance_score,
         )
-        # self._relevance_score[sset] = score
+        self._relevance_score[sset] = score
         self.subset = sset
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected

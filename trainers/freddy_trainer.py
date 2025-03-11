@@ -181,6 +181,10 @@ def freddy(
         )
         selected.append(V[sset])
         alignment.append(score)
+        if np.mean(alignment) < -0.1:
+            lambda_ = min(lambda_ * 1.5, 10)
+        else:
+            lambda_ = max(lambda_ * 0.8, 0.5)
 
     selected = np.hstack(selected)
     alignment = np.hstack(alignment)
@@ -305,9 +309,9 @@ class FreddyTrainer(SubsetTrainer):
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
-        self.lambda_ = max(
-            0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
-        )
+            # self.lambda_ = max(
+            #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
+            # )
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset
@@ -345,7 +349,8 @@ class FreddyTrainer(SubsetTrainer):
         e = torch.normal(0, 1, size=data.shape).to(self.args.device)
         with torch.no_grad():
             data = data.to(self.args.device)
-            loss = self.model(data).softmax(dim=1)
+            # loss = self.model(data).softmax(dim=1)
+            loss = self.model(data)
             delta_loss = self.model(data + e).softmax(dim=1)
         return loss
         return loss - target

@@ -107,7 +107,6 @@ def freddy(
     relevance=None,
 ):
     # basic config
-    alpha = 0.2
     base_inc = base_inc(alpha)
     base_inc = 0
     idx = np.arange(len(dataset))

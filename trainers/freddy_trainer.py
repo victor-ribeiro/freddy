@@ -141,10 +141,10 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                alpha = min(alpha * 1.2, 1)
+                # alpha = min(alpha * 1.2, 1)
             else:
                 q.push(inc, idx_s)
-                alpha = max(alpha * 0.8, 0.5)
+                # alpha = max(alpha * 0.8, 0.5)
             q.push(score_t, idx_t)
 
     np.random.shuffle(sset)
@@ -414,7 +414,7 @@ class FreddyTrainer(SubsetTrainer):
         with torch.no_grad():
             data = data.to(self.args.device)
             # loss = self.model(data).softmax(dim=1)
-            loss = self.model(data)
+            loss = self.model(data).softmax(axis=1)
             delta_loss = self.model(data + e)
         # return loss
         return loss - target

@@ -220,7 +220,7 @@ def _freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
-        D = METRICS[metric](ds, batch_size=batch_size)
+        D = METRICS[metric](ds, batch_size=batch_size) * relevance
         # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
@@ -290,8 +290,7 @@ class FreddyTrainer(SubsetTrainer):
             batch_size=256,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
-            alpha=self.cur_error,
-            beta=1 - self.cur_error,
+            alpha=self.args.alpha,
             relevance=self._relevance_score,
         )
         print(f"selected {len(sset)}")
@@ -351,10 +350,10 @@ class FreddyTrainer(SubsetTrainer):
                 pred = self.model(data)
                 # self._relevance_score[data_idx] = (
                 #     1 / self.train_criterion(pred, target)
-            #     # ).cpu().detach().numpy() + 10e-8
-            #     self._relevance_score[data_idx] = (
-            #         self.train_criterion(pred, target).cpu().detach().numpy()
-            #     )
+                #     # ).cpu().detach().numpy() + 10e-8
+                self._relevance_score[data_idx] = (
+                    self.train_criterion(pred, target).cpu().detach().numpy()
+                )
 
             # self.model.train()
             #### fim

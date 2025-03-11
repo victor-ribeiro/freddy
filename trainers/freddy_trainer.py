@@ -163,8 +163,8 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
-        # D = METRICS[metric](ds, batch_size=batch_size)
-        D = METRICS["codist"](ds, batch_size=batch_size)
+        D = METRICS[metric](ds, batch_size=batch_size)
+        # D = METRICS["codist"](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
         r = D.sum(axis=1)
@@ -178,7 +178,7 @@ def freddy(
         # print("v1", v1, v1 @ r)
         v1 = np.maximum(0, v1)
         sset, score = linear_selector(
-            r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
+            r + v1, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
         )
         selected.append(V[sset])
         alignment.append(score)

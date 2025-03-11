@@ -278,7 +278,7 @@ class FreddyTrainer(SubsetTrainer):
         n = len(train_dataset)
         self.epoch_selection = []
         self.delta = np.random.normal(0, 1, (n, self.args.num_classes))
-        self._relevance_score = np.ones(n)
+        # self._relevance_score = np.ones(n)
         self.select_flag = True
         self.cur_error = 10e-7
         self.lambda_ = 0.5
@@ -287,7 +287,6 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        self.f_embedding()
         sset, score = freddy(
             self.delta,
             # lambda_=self.lambda_,
@@ -298,6 +297,7 @@ class FreddyTrainer(SubsetTrainer):
             beta=1 - self.cur_error,
             relevance=self._relevance_score,
         )
+        self.f_embedding()
         self._relevance_score[sset] = score
         self.subset = sset
         self.selected[sset] += 1

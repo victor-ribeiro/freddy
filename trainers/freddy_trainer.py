@@ -107,7 +107,7 @@ def freddy(
 ):
     # basic config
     alpha = 0.2
-    # base_inc = base_inc(alpha)
+    base_inc = base_inc(alpha)
     base_inc = 0
     idx = np.arange(len(dataset))
     # idx = np.random.permutation(idx)
@@ -115,7 +115,6 @@ def freddy(
     sset = []
     vals = []
     argmax = 0
-    base_inc = 0
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),
@@ -139,7 +138,6 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                base_inc = score
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)

@@ -411,7 +411,7 @@ class FreddyTrainer(SubsetTrainer):
         with torch.no_grad():
             data = data.to(self.args.device)
             # loss = self.model(data).softmax(dim=1)
-            loss = self.model(data).softmax(dim=1)
+            loss = self.model(data)
             delta_loss = self.model(data + e)
         # return loss
         return loss - target

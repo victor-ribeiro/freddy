@@ -130,7 +130,7 @@ def freddy(
         size = len(D)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
             s = D[:, idx_s[1]] * relevance[V]

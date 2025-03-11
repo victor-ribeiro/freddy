@@ -150,7 +150,7 @@ def freddy(
                 vals.append(score)
                 # alpha = min(alpha * 1.2, 1)
             else:
-                q.push(inc, idx_s)
+                q.push(inc, idx_t)
                 # alpha = max(alpha * 0.8, 0.5)
             q.push(score_t, idx_t)
 

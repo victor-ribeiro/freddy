@@ -417,5 +417,5 @@ class FreddyTrainer(SubsetTrainer):
             loss = self.model(data)
             delta_loss = self.model(data + e)
         # return loss
-        # return loss - target
-        return loss - delta_loss
+        return loss - target
+        # return loss - delta_loss

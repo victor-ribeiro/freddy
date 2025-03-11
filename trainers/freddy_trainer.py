@@ -133,7 +133,7 @@ def freddy(
         argmax += localmax.sum()
         # argmax += 0
         print(len(D), size)
-        _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(size))]
+        _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(len(D)))]
         while q and len(sset) < K:
             score, idx_s = q.head
             # print(len(D), size, idx_s)
@@ -150,7 +150,7 @@ def freddy(
                 vals.append(score)
                 # alpha = min(alpha * 1.2, 1)
             else:
-                q.push(inc, idx_t)
+                q.push(inc, idx_s)
                 # alpha = max(alpha * 0.8, 0.5)
             q.push(score_t, idx_t)
 

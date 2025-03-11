@@ -119,25 +119,16 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
-        V = list(V)
         D = METRICS[metric](ds, batch_size=batch_size)
-        lambda_, v1 = np.linalg.eigh(D)
-        i = np.argmax(lambda_)
-        v1 = v1[i]
-        if v1 @ relevance[V] < 0:
-            v1 = -v1
-        v1 = np.maximum(0, v1)
-
         size = len(D)
+        # localmax = np.median(D, axis=0)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
-        # argmax += 0
-        print(len(D), size)
-        _ = [q.push(base_inc * relevance[i[0]], i) for i in zip(V, range(len(D)))]
+        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            # print(len(D), size, idx_s)
-            s = D[:, idx_s[1]] * relevance[V]
+            s = D[:, idx_s[1]]
+            s = score + (s * inc) + (np.gradient(s) * (inc**2) * 0.5)
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -148,13 +139,9 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                # alpha = min(alpha * 1.2, 1)
             else:
                 q.push(inc, idx_s)
-                # alpha = max(alpha * 0.8, 0.5)
-            q.push(score_t, idx_s)
-
-    # np.random.shuffle(sset)
+            q.push(score_t, idx_t)
     return sset, np.array(vals)
     if return_vals:
         return np.array(vals), sset

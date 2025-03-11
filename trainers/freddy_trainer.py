@@ -152,7 +152,7 @@ def freddy(
             else:
                 q.push(inc, idx_s)
                 # alpha = max(alpha * 0.8, 0.5)
-            q.push(score_t, idx_t)
+            q.push(score_t, idx_s)
 
     # np.random.shuffle(sset)
     return sset, np.array(vals)

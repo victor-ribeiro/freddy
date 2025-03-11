@@ -106,7 +106,6 @@ def freddy(
     relevance=None,
 ):
     # basic config
-    alpha = 0.2
     base_inc = base_inc(alpha)
     base_inc = 0
     idx = np.arange(len(dataset))
@@ -307,7 +306,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # lr = self.lr_scheduler.get_last_lr()[0]
         # if not epoch or (1.5 > self.cur_error > 0.5):
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             # self.lambda_ = max(

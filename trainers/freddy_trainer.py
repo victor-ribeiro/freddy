@@ -109,6 +109,8 @@ def freddy(
     alpha = 0.5
     base_inc = base_inc(alpha)
     idx = np.arange(len(dataset))
+    idx = np.random.permutation(idx)
+
     q = Queue()
     sset = []
     vals = []

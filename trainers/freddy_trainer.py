@@ -309,7 +309,7 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = abs(self.cur_error - train_loss)
         self.cur_error = self._relevance_score[self.subset].mean()
         # if epoch % 5 == 0:
-        if not epoch or not (1.5 > self.cur_error > 10e-2):
+        if not epoch or not (1.5 > self.cur_error > 0.5):
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             # self.lambda_ = max(

@@ -109,7 +109,6 @@ def freddy(
     base_inc = base_inc(alpha)
     base_inc = 0
     idx = np.arange(len(dataset))
-    # idx = np.random.permutation(idx)
     q = Queue()
     sset = []
     vals = []
@@ -118,15 +117,16 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
+        V = list(V)
         D = METRICS[metric](ds, batch_size=batch_size)
         size = len(D)
-        # localmax = np.median(D, axis=0)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]]
+            s = D[:, idx_s[1]] * relevance[V]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -137,8 +137,10 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
+                alpha = min(0.15, alpha * 1.2)
             else:
                 q.push(inc, idx_s)
+                alpha = min(0.15, alpha * 0.8)
             q.push(score_t, idx_t)
     return sset, np.array(vals)
     if return_vals:
@@ -407,7 +409,7 @@ class FreddyTrainer(SubsetTrainer):
         with torch.no_grad():
             data = data.to(self.args.device)
             # loss = self.model(data).softmax(dim=1)
-            loss = self.model(data)
+            loss = self.model(data).softmax(dim=1)
             delta_loss = self.model(data + e)
         # return loss
         return loss - target

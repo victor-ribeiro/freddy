@@ -103,7 +103,7 @@ def freddy(
     batch_size=128,
     beta=0.75,
     return_vals=False,
-    importance=None,
+    relevance=None,
 ):
     # basic config
     base_inc = base_inc(alpha)
@@ -129,7 +129,7 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]] * importance[idx_s[1]]
+            s = D[:, idx_s[1]] * relevance[idx_s[1]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):

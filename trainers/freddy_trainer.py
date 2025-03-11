@@ -141,7 +141,7 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                alpha = min(alpha * 1.5, 10)
+                alpha = min(alpha * 1.2, 1)
             else:
                 q.push(inc, idx_s)
                 alpha = max(alpha * 0.8, 0.5)

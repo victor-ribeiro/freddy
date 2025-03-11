@@ -166,9 +166,9 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
         # r = D @ relevance[V]
-        # r = D.sum(axis=1) * relevance[V]
+        r = D.sum(axis=1)
         # r = shannon_entropy(D) * relevance[V]
-        r = shannon_entropy(ds)
+        # r = shannon_entropy(ds)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval] * relevance[V]
@@ -283,8 +283,8 @@ class FreddyTrainer(SubsetTrainer):
                 # self._relevance_score[data_idx] = (
                 #     1 / self.train_criterion(pred, target)
                 # ).cpu().detach().numpy() + 10e-8
-                self._relevance_score[data_idx] = 1 / (
-                    self.train_criterion(pred, target).cpu().detach().numpy() + 10e-8
+                self._relevance_score[data_idx] = (
+                    self.train_criterion(pred, target).cpu().detach().numpy()
                 )
 
             self.model.train()
@@ -302,7 +302,9 @@ class FreddyTrainer(SubsetTrainer):
 
         # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
-        self.lambda_ = max(0.5, self.lambda_ + (self.cur_error) * lr)
+        self.lambda_ = max(
+            0.5, self.lambda_ + (self._relevance_score[self.subset].mean) * lr
+        )
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()

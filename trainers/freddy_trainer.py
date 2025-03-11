@@ -115,7 +115,7 @@ def freddy(
     sset = []
     vals = []
     argmax = 0
-    inc = 0
+    base_inc = 0
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),

@@ -123,7 +123,7 @@ def freddy(
         lambda_, v1 = np.linalg.eigh(D)
         i = np.argmax(lambda_)
         v1 = np.maximum(0, v1[i])
-        print(relevance[V] @ v1)
+
         size = len(D)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -141,14 +141,12 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
+                alpha = min(lambda_ * 1.5, 10)
             else:
                 q.push(inc, idx_s)
+                alpha = max(lambda_ * 0.8, 0.5)
             q.push(score_t, idx_t)
 
-            if np.mean(vals) < -0.1:
-                lambda_ = min(lambda_ * 1.5, 10)
-            else:
-                lambda_ = max(lambda_ * 0.8, 0.5)
     np.random.shuffle(sset)
     return np.array(vals), sset
     if return_vals:

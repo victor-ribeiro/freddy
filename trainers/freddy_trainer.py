@@ -168,10 +168,10 @@ def freddy(
         # r = D @ relevance[V]
         # r = D.sum(axis=1) * relevance[V]
         # r = shannon_entropy(D) * relevance[V]
-        r = shannon_entropy(ds) * relevance[V]
+        r = shannon_entropy(ds)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
-        v1 = eigenvectors[max_eigenval]
+        v1 = eigenvectors[max_eigenval] * relevance[V]
         if v1 @ r < 0:
             v1 = -v1
         # print("v1", v1, v1 @ r)
@@ -302,7 +302,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
-        self.lambda_ = min(1, self.cur_error)
+        self.lambda_ = max(0.5, self.lambda_ + (self.cur_error) * lr)
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()

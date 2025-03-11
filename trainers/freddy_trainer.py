@@ -148,7 +148,7 @@ def freddy(
             q.push(score_t, idx_t)
 
     np.random.shuffle(sset)
-    return np.array(vals), sset
+    return sset, np.array(vals)
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)

@@ -296,7 +296,7 @@ class FreddyTrainer(SubsetTrainer):
         sset, score = freddy(
             self.delta,
             # lambda_=self.lambda_,
-            batch_size=128,
+            batch_size=256,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
             alpha=self.cur_error,

@@ -108,7 +108,6 @@ def freddy(
     # basic config
     alpha = 0.5
     base_inc = base_inc(alpha)
-    base_inc = 0
     idx = np.arange(len(dataset))
     q = Queue()
     sset = []

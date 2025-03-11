@@ -106,6 +106,7 @@ def freddy(
     relevance=None,
 ):
     # basic config
+    alpha = 0.2
     base_inc = base_inc(alpha)
     idx = np.arange(len(dataset))
     # idx = np.random.permutation(idx)
@@ -145,10 +146,10 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                # alpha = min(alpha * 1.2, 1)
+                alpha = min(alpha * 1.2, 1)
             else:
                 q.push(inc, idx_s)
-                # alpha = max(alpha * 0.8, 0.5)
+                alpha = max(alpha * 0.8, 0.5)
             q.push(score_t, idx_t)
 
     np.random.shuffle(sset)

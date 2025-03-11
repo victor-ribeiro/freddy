@@ -144,11 +144,13 @@ def freddy(
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
-            if np.mean(alignment) < -0.1:
+
+            if np.mean(vals) < -0.1:
                 lambda_ = min(lambda_ * 1.5, 10)
             else:
                 lambda_ = max(lambda_ * 0.8, 0.5)
     np.random.shuffle(sset)
+    return np.array(vals), sset
     if return_vals:
         return np.array(vals), sset
     return np.array(sset)

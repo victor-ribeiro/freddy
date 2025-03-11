@@ -126,6 +126,7 @@ def freddy(
 
         while q and len(sset) < K:
             score, idx_s = q.head
+            print(relevance[V])
             s = D[:, idx_s[1]] * relevance[V]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score

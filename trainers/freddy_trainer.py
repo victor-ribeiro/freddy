@@ -118,11 +118,12 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
+        V = list(V)
         D = METRICS[metric](ds, batch_size=batch_size)
         lambda_, v1 = np.linalg.eigh(D)
         i = np.argmax(lambda_)
         v1 = v1[i]
-        print(D @ v1)
+        print(relevance[V] @ v1)
         size = len(D)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()

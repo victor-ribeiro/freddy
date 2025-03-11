@@ -120,7 +120,7 @@ def freddy(
     ):
         D = METRICS[metric](ds, batch_size=batch_size)
         lambda_, v1 = np.linalg.eigh(D)
-        i = np.argmax(v1)
+        i = np.argmax(lambda_)
         v1 = v1[i]
         print(D @ v1)
         size = len(D)

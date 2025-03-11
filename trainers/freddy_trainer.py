@@ -129,6 +129,7 @@ def freddy(
         g = np.dot(v1.reshape(-1, 1), np.random.normal(0, 1, (1, size)))
         D += D @ g
         print(g.shape)
+        print(D.shape)
         exit()
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()

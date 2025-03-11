@@ -342,18 +342,18 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            self.model.eval()
-            with torch.no_grad():
-                #### teste a rodar
-                pred = self.model(data)
-                # self._relevance_score[data_idx] = (
-                #     1 / self.train_criterion(pred, target)
-                # ).cpu().detach().numpy() + 10e-8
-                self._relevance_score[data_idx] = (
-                    self.train_criterion(pred, target).cpu().detach().numpy()
-                )
+            # self.model.eval()
+            # with torch.no_grad():
+            #     #### teste a rodar
+            #     pred = self.model(data)
+            #     # self._relevance_score[data_idx] = (
+            #     #     1 / self.train_criterion(pred, target)
+            #     # ).cpu().detach().numpy() + 10e-8
+            #     self._relevance_score[data_idx] = (
+            #         self.train_criterion(pred, target).cpu().detach().numpy()
+            #     )
 
-            self.model.train()
+            # self.model.train()
             #### fim
         self._val_epoch(epoch)
 

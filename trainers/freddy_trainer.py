@@ -54,7 +54,6 @@ def similarity(dataset, metric="euclidean", batch_size=1):
 
 def base_inc(alpha=1):
     alpha = abs(alpha)
-    print(alpha)
     return math.log(1 + alpha)
 
 
@@ -127,7 +126,6 @@ def freddy(
 
         while q and len(sset) < K:
             score, idx_s = q.head
-            print(relevance[V])
             s = D[:, idx_s[1]] * relevance[V]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
@@ -144,6 +142,7 @@ def freddy(
                 q.push(inc, idx_s)
                 alpha = max(0.1, alpha * 0.8)
             q.push(score_t, idx_t)
+    print(f"alpha: {alpha:.6f}")
     return sset, np.array(vals)
     if return_vals:
         return np.array(vals), sset

@@ -297,6 +297,7 @@ class FreddyTrainer(SubsetTrainer):
             beta=1 - self.cur_error,
             relevance=self._relevance_score,
         )
+        print(f"selected {len(sset)}")
         self.f_embedding()
         # self._relevance_score[sset] = score
         self.subset = sset
@@ -306,7 +307,6 @@ class FreddyTrainer(SubsetTrainer):
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
         self.subset_weights = np.ones(self.sample_size)
         self.model.train()
-        print(f"selected {len(sset)}")
 
     def _train_epoch(self, epoch):
         self.model.train()

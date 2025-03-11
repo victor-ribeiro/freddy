@@ -229,7 +229,7 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         sset, score = freddy(
             self.delta,
-            lambda_=self.cur_error,
+            lambda_=self.lambda_,
             batch_size=128,
             K=self.sample_size,
             metric=self.args.freddy_similarity,

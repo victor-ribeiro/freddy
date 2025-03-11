@@ -302,12 +302,12 @@ class FreddyTrainer(SubsetTrainer):
 
         # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
-        self.lambda_ = max(
-            0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
-        )
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
+        self.lambda_ = max(
+            0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
+        )
 
     def f_embedding(self):
         dataset = self.train_dataset.dataset

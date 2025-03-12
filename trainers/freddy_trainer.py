@@ -94,7 +94,7 @@ class Queue(list):
 
 
 @_register
-def freddy(
+def _freddy(
     dataset,
     base_inc=base_inc,
     alpha=0.15,
@@ -128,9 +128,9 @@ def freddy(
         if v1 @ relevance[V] < 0:
             v1 = -v1
         v1 = np.maximum(0, v1)
-        g = np.dot(v1.reshape(-1, 1), np.random.normal(0, 1, (1, size)))
+        g = -np.dot(v1.reshape(-1, 1), np.random.normal(0, 1, (1, size)))
 
-        D = D @ g
+        D += D * g
 
         localmax = np.amax(D, axis=1)
         # argmax += localmax.sum()
@@ -151,7 +151,7 @@ def freddy(
                 vals.append(score)
                 alpha = min(1, alpha * 1.1)
             else:
-                alpha = max(0.5, alpha * 0.8)
+                alpha = max(0.1, alpha * 0.8)
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     print(f"alpha: {alpha:.6f}")
@@ -210,7 +210,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, cost
 
 
-def _freddy(
+def freddy(
     dataset,
     lambda_,
     base_inc=base_inc,
@@ -298,7 +298,7 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection.append(epoch)
         sset, score = freddy(
             self.delta,
-            # lambda_=self.lambda_,
+            lambda_=self.lambda_,
             batch_size=256,
             K=self.sample_size,
             metric=self.args.freddy_similarity,

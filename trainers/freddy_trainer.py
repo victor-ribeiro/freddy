@@ -388,8 +388,8 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score += self._relevance_score * lr
         # self.cur_error = abs(self.cur_error - train_loss)
         # print(shannon_entropy(self.delta[self.subset].mean()).shape)
-        self._relevance_score += 1 / (
-            shannon_entropy(self.delta[self.subset].mean()) + 10e-8
+        self._relevance_score += 1 - (
+            1 / (shannon_entropy(self.delta[self.subset].mean()) + 10e-8)
         )
         self.cur_error = self._relevance_score[self.subset].mean()
 

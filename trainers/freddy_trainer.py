@@ -270,7 +270,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     # p = abs_vector / total.reshape(-1, 1)
     # return (-(p * np.log2(1 + p))).sum(axis=1)
     abs_vector = np.abs(vector)  # Ensure non-negative
-    total = abs_vector + epsilon  # Avoid division by zero
+    total = abs_vector.sum() + epsilon  # Avoid division by zero
     p = abs_vector.sum() / total
     return -(p * np.log2(1 + p))
 

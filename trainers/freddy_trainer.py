@@ -150,7 +150,7 @@ def freddy(
                 sset.append(idx_s[0])
                 vals.append(score)
                 alpha = min(10, alpha * 1.1)
-                base_inc += inc
+                base_inc += score
             else:
                 alpha = max(0.5, alpha * 0.8)
                 q.push(inc, idx_s)

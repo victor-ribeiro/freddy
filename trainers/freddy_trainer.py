@@ -130,7 +130,8 @@ def freddy(
             v1 = -v1
         v1 = np.maximum(0, v1)
         direct = v1 + direct[:size]
-
+        print(np.eye(size) * relevance[V])
+        exit()
         g = direct.reshape(-1, 1) @ (np.eye(size) * relevance[V])
         print(D)
         D += D * g

@@ -268,7 +268,7 @@ def shannon_entropy(vector, epsilon=1e-10):
     abs_vector = np.abs(vector)  # Ensure non-negative
     total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
     p = abs_vector / total.reshape(-1, 1)
-    return (-(p * np.log2(1 + p))).sum(axis=1)
+    return (p * np.log2(1 + p)).sum(axis=1)
 
 
 class FreddyTrainer(SubsetTrainer):
@@ -296,8 +296,8 @@ class FreddyTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
-        # if not epoch or (1.5 > self.cur_error > 0.5):
-        self.f_embedding()
+        if not epoch or not (1.5 > self.cur_error > 0.5):
+            self.f_embedding()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         sset, score = freddy(

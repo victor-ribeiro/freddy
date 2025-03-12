@@ -4,6 +4,8 @@ import math
 from itertools import batched
 from functools import reduce
 from sklearn.metrics import pairwise_distances
+from sklearn.cluster import BisectingKMeans
+
 
 import torch
 
@@ -210,6 +212,36 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, cost
 
 
+def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
+    val = np.zeros(max_iter)
+    base = np.log(1 + alpha)
+    for idx, n in enumerate(range(max_iter)):
+        # print(val)
+        sampler = BisectingKMeans(n_clusters=n + 2)
+        sampler.fit(dataset)
+        if val[:idx].sum() == 0:
+
+            val[idx] = np.log(1 + sampler.inertia_ * alpha / base)
+            continue
+
+        val[idx] = np.log(1 + sampler.inertia_ * alpha / val[val > 0].max() / base)
+
+        if abs(val[:idx].min() - val[idx]) < tol:
+            return sampler.cluster_centers_
+    # return sampler.cluster_centers_
+    return ValueError("Does not converge")
+
+
+def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=300):
+    clusters = _n_cluster(dataset, alpha, max_iter, tol)
+    dist = pairwise_distances(clusters, dataset).mean(axis=0)
+    dist -= np.max(dist)
+    dist = np.abs(dist)[::-1]
+    sset = np.argsort(dist, kind="heapsort")
+
+    return sset[:K]
+
+
 def freddy(
     dataset,
     lambda_,
@@ -290,15 +322,16 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        sset, score = freddy(
-            self.delta,
-            lambda_=self.lambda_,
-            batch_size=256,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            relevance=self._relevance_score,
-        )
+        # sset, score = freddy(
+        #     self.delta,
+        #     lambda_=self.lambda_,
+        #     batch_size=256,
+        #     K=self.sample_size,
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
+        #     relevance=self._relevance_score,
+        # )
+        sset = kmeans_sampler(self.delta)
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset

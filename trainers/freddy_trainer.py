@@ -134,7 +134,7 @@ def freddy(
         # g = direct.reshape(-1, 1) @ (np.eye(size) * relevance[V])
         g = direct * (np.eye(size) * relevance[V])
 
-        D += D @ g
+        D = D @ g
         print(D)
         exit()
 

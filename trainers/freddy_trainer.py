@@ -128,7 +128,7 @@ def freddy(
             v1 = -v1
         v1 = np.maximum(0, v1)
         g = np.dot(v1.reshape(-1, 1), np.random.normal(0, 1, (1, size)))
-        D = D @ g
+        D += D * g
 
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -147,9 +147,9 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                alpha = min(0.9, alpha * 1.2)
-            else:
                 alpha = max(0.1, alpha * 0.8)
+            else:
+                alpha = min(1, alpha * 1.2)
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     print(f"alpha: {alpha:.6f}")

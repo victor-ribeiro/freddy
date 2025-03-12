@@ -94,71 +94,71 @@ class Queue(list):
         self.append(item)
 
 
-@_register
-def freddy(
-    dataset,
-    base_inc=base_inc,
-    alpha=0.15,
-    metric="similarity",
-    K=1,
-    batch_size=128,
-    beta=1,
-    return_vals=False,
-    relevance=None,
-):
-    # basic config
-    # alpha = 0.5
-    # base_inc = base_inc(alpha)
-    base_inc = 0
-    idx = np.arange(len(dataset))
-    idx = np.random.permutation(idx)
-    q = Queue()
-    sset = []
-    vals = []
-    argmax = 0
-    for ds, V in zip(
-        batched(dataset, batch_size),
-        batched(idx, batch_size),
-    ):
-        V = list(V)
-        D = METRICS[metric](ds, batch_size=batch_size)
-        size = len(D)
-        lambda_, v1 = np.linalg.eigh(D)
-        i = np.argmax(lambda_)
-        v1 = v1[i]
-        if v1 @ relevance[V] < 0:
-            v1 = -v1
-        v1 = np.maximum(0, v1)
-        D = np.dot(v1.reshape(-1, 1), relevance[V].reshape(1, -1))
-        # D = D * relevance[V]
+# @_register
+# def freddy(
+#     dataset,
+#     base_inc=base_inc,
+#     alpha=0.15,
+#     metric="similarity",
+#     K=1,
+#     batch_size=128,
+#     beta=1,
+#     return_vals=False,
+#     relevance=None,
+# ):
+#     # basic config
+#     # alpha = 0.5
+#     # base_inc = base_inc(alpha)
+#     base_inc = 0
+#     idx = np.arange(len(dataset))
+#     idx = np.random.permutation(idx)
+#     q = Queue()
+#     sset = []
+#     vals = []
+#     argmax = 0
+#     for ds, V in zip(
+#         batched(dataset, batch_size),
+#         batched(idx, batch_size),
+#     ):
+#         V = list(V)
+#         D = METRICS[metric](ds, batch_size=batch_size)
+#         size = len(D)
+#         lambda_, v1 = np.linalg.eigh(D)
+#         i = np.argmax(lambda_)
+#         v1 = v1[i]
+#         if v1 @ relevance[V] < 0:
+#             v1 = -v1
+#         v1 = np.maximum(0, v1)
+#         D = np.dot(v1.reshape(-1, 1), relevance[V].reshape(1, -1))
+#         # D = D * relevance[V]
 
-        localmax = np.amax(D, axis=1)
-        argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+#         localmax = np.amax(D, axis=1)
+#         argmax += localmax.sum()
+#         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
 
-        while q and len(sset) < K:
-            score, idx_s = q.head
-            s = D[:, idx_s[1]]
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            inc = score_s - score
-            if (inc < 0) or (not q):
-                break
-            score_t, idx_t = q.head
-            if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                localmax = np.maximum(localmax, s)
-                sset.append(idx_s[0])
-                vals.append(score)
-                alpha = min(1, alpha * 1.1)
-            else:
-                alpha = max(0.5, alpha * 0.8)
-                q.push(inc, idx_s)
-            q.push(score_t, idx_t)
-    print(f"alpha: {alpha:.6f}")
-    return sset, np.array(vals)
-    if return_vals:
-        return np.array(vals), sset
-    return np.array(sset)
+#         while q and len(sset) < K:
+#             score, idx_s = q.head
+#             s = D[:, idx_s[1]]
+#             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+#             inc = score_s - score
+#             if (inc < 0) or (not q):
+#                 break
+#             score_t, idx_t = q.head
+#             if inc > score_t:
+#                 score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+#                 localmax = np.maximum(localmax, s)
+#                 sset.append(idx_s[0])
+#                 vals.append(score)
+#                 alpha = min(1, alpha * 1.1)
+#             else:
+#                 alpha = max(0.5, alpha * 0.8)
+#                 q.push(inc, idx_s)
+#             q.push(score_t, idx_t)
+#     print(f"alpha: {alpha:.6f}")
+#     return sset, np.array(vals)
+#     if return_vals:
+#         return np.array(vals), sset
+#     return np.array(sset)
 
 
 def linear_selector(r, v1, k, lambda_=0.5):
@@ -210,7 +210,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, cost
 
 
-def _freddy(
+def freddy(
     dataset,
     lambda_,
     base_inc=base_inc,
@@ -236,7 +236,7 @@ def _freddy(
         V = np.array(V)
         # r = D @ relevance[V]
         r = D.sum(axis=1)
-        r = shannon_entropy(D) * relevance[V]
+        r = D * relevance[V]
         # r = shannon_entropy(ds)
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
@@ -296,7 +296,7 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection.append(epoch)
         sset, score = freddy(
             self.delta,
-            # lambda_=self.lambda_,
+            lambda_=self.lambda_,
             batch_size=256,
             K=self.sample_size,
             metric=self.args.freddy_similarity,

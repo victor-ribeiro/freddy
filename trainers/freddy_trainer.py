@@ -116,7 +116,6 @@ def freddy(
     sset = []
     vals = []
     argmax = 0
-    direct = np.zeros(K)
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),
@@ -130,12 +129,8 @@ def freddy(
         if v1 @ relevance[V] < 0:
             v1 = -v1
         v1 = np.maximum(0, v1)
-        direct = v1 + direct[:size]
-
-        # g = direct.reshape(-1, 1) @ (np.eye(size) * relevance[V])
-        g = direct * (np.eye(size) @ relevance[V])
-
-        D += D @ g
+        D = np.dot(D.reshape(-1, 1), relevance[V])
+        D = D * relevance[V]
 
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -154,9 +149,9 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                # alpha = min(1, alpha * 1.1)
+                alpha = min(1, alpha * 1.1)
             else:
-                # alpha = max(0.1, alpha * 0.8)
+                alpha = max(0.5, alpha * 0.8)
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     print(f"alpha: {alpha:.6f}")

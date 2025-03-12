@@ -331,7 +331,7 @@ class FreddyTrainer(SubsetTrainer):
         #     alpha=self.args.alpha,
         #     relevance=self._relevance_score,
         # )
-        sset = kmeans_sampler(self.delta)
+        sset = kmeans_sampler(self.delta, K=self.sample_size)
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset

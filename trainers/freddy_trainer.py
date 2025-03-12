@@ -2,6 +2,7 @@ import numpy as np
 import heapq
 import math
 from itertools import batched
+from functools import reduce
 from sklearn.metrics import pairwise_distances
 
 import torch
@@ -414,16 +415,17 @@ class FreddyTrainer(SubsetTrainer):
         grad = torch.autograd.grad(
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )[0]
+        grad = reduce(lambda x, y: x + y)
         g = torch.inner(data, grad.T)
         g = torch.inner(g, grad.T)
 
-        hess = torch.autograd.grad(
-            grad, self.model.parameters(), retain_graph=True, grad_outputs=grad
-        )[0]
-        gg = torch.inner(f, hess.T)
-        gg = torch.inner(gg, hess)
+        # hess = torch.autograd.grad(
+        #     grad, self.model.parameters(), retain_graph=True, grad_outputs=grad
+        # )[0]
+        # gg = torch.inner(f, hess.T)
+        # gg = torch.inner(gg, hess)
 
-        return (f + torch.inner(f, g) + torch.inner(f, gg.T)).cpu().detach().numpy()
+        return (f + torch.inner(f, g)).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, target = train_data

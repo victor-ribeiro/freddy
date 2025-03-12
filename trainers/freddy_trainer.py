@@ -129,7 +129,7 @@ def freddy(
         if v1 @ relevance[V] < 0:
             v1 = -v1
         v1 = np.maximum(0, v1)
-        D = np.dot(v1, relevance[V])
+        D = np.dot(v1.reshape(-1, 1), relevance[V].reshape(1, -1))
         # D = D * relevance[V]
 
         localmax = np.amax(D, axis=1)

@@ -363,13 +363,13 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             self.model.eval()
-            with torch.no_grad():
-                #### teste a rodar
-                pred = self.model(data).cpu().detach().numpy()
-                self._relevance_score[data_idx] = shannon_entropy(pred)
-                # self._relevance_score[data_idx] = (
-                #     self.train_criterion(pred, target).cpu().detach().numpy()
-                # )
+            # with torch.no_grad():
+            #     #### teste a rodar
+            #     pred = self.model(data).cpu().detach().numpy()
+            #     self._relevance_score[data_idx] = shannon_entropy(pred)
+            #     # self._relevance_score[data_idx] = (
+            #     #     self.train_criterion(pred, target).cpu().detach().numpy()
+            #     # )
 
             self.model.train()
             #### fim
@@ -386,6 +386,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # self._relevance_score += self._relevance_score * lr
         # self.cur_error = abs(self.cur_error - train_loss)
+        self._relevance_score = shannon_entropy(self.delta[self.subset].mean())
         self.cur_error = self._relevance_score[self.subset].mean()
 
     def f_embedding(self):

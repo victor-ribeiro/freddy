@@ -232,11 +232,11 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
     return ValueError("Does not converge")
 
 
-def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=300):
+def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=300, relevance=None):
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
     dist = pairwise_distances(clusters, dataset).mean(axis=0)
     dist -= np.max(dist)
-    dist = np.abs(dist)[::-1]
+    dist = np.abs(dist)[::-1] * relevance
     sset = np.argsort(dist, kind="heapsort")
 
     return sset[:K]
@@ -331,7 +331,9 @@ class FreddyTrainer(SubsetTrainer):
         #     alpha=self.args.alpha,
         #     relevance=self._relevance_score,
         # )
-        sset = kmeans_sampler(self.delta, K=self.sample_size)
+        sset = kmeans_sampler(
+            self.delta, K=self.sample_size, relevance=self._relevance_score
+        )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset
@@ -346,7 +348,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        # lr = self.lr_scheduler.get_last_lr()[0]
+        lr = self.lr_scheduler.get_last_lr()[0]
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
@@ -382,6 +384,7 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
+            self._relevance_score[self.subset] -= loss.item() * lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar
@@ -408,7 +411,7 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = abs(self.cur_error - train_loss)
         # print(shannon_entropy(self.delta[self.subset].mean()).shape)
         # if not epoch or not (1.5 > self.cur_error > 10e-4):
-        self._relevance_score = 1 / (shannon_entropy(self.delta) + 10e-8)
+        # self._relevance_score +=  (shannon_entropy(self.delta) + 10e-8)
         print(self._relevance_score[self.subset])
 
         # self.cur_error = self._relevance_score[self.subset].mean()

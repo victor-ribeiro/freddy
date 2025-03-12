@@ -300,8 +300,8 @@ class FreddyTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
-        if not epoch or (1.5 > self.cur_error > 0.5):
-            self.f_embedding()
+        # if not epoch or (1.5 > self.cur_error > 0.5):
+        self.f_embedding()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         sset, score = freddy(
@@ -388,9 +388,8 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score += self._relevance_score * lr
         # self.cur_error = abs(self.cur_error - train_loss)
         # print(shannon_entropy(self.delta[self.subset].mean()).shape)
-        self._relevance_score += 1 - (
-            1 / (shannon_entropy(self.delta[self.subset].mean()) + 10e-8)
-        )
+        self._relevance_score = 1 - shannon_entropy(self.delta[self.subset].mean())
+
         self.cur_error = self._relevance_score[self.subset].mean()
 
     def f_embedding(self):

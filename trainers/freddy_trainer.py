@@ -107,7 +107,8 @@ def freddy(
 ):
     # basic config
     alpha = 0.5
-    base_inc = base_inc(alpha)
+    # base_inc = base_inc(alpha)
+    base_inc = 0
     idx = np.arange(len(dataset))
     idx = np.random.permutation(idx)
     q = Queue()
@@ -127,11 +128,9 @@ def freddy(
         if v1 @ relevance[V] < 0:
             v1 = -v1
         v1 = np.maximum(0, v1)
-        g = np.dot(
-            v1.reshape(-1, 1),
-            np.random.normal(relevance.mean(), relevance.std(), (1, size)),
-        )
-        D += D * g
+        g = np.dot(v1.reshape(-1, 1), 0, 1, (1, size))
+
+        D = D @ g
 
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -151,6 +150,7 @@ def freddy(
                 sset.append(idx_s[0])
                 vals.append(score)
                 alpha = min(10, alpha * 1.1)
+                base += inc
             else:
                 alpha = max(0.5, alpha * 0.8)
                 q.push(inc, idx_s)

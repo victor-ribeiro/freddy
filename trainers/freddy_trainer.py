@@ -408,7 +408,7 @@ class FreddyTrainer(SubsetTrainer):
         target = torch.nn.functional.one_hot(target, self.args.num_classes).float()
         pred = self.model(data).softmax(dim=1)
         loss = self.val_criterion(pred, target)
-        w = [m for m in self.model.modules() if m.requires_grad_()]
+        w = [m for m in self.model.parameters() if m.requires_grad_()]
         # w = (w[-1].weight,)
         # return self._update_delta((data, target)).cpu().detach().numpy()
         f = self._update_delta((data, target))

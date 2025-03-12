@@ -413,7 +413,7 @@ class FreddyTrainer(SubsetTrainer):
         # return self._update_delta((data, target)).cpu().detach().numpy()
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(
-            data, self.model.parameters(), retain_graph=True, create_graph=True
+            pred, self.model.parameters(), retain_graph=True, create_graph=True
         )[0]
         grad = reduce(lambda x, y: x + y, grad)
         g = torch.inner(data, grad.T)

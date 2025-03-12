@@ -415,7 +415,7 @@ class FreddyTrainer(SubsetTrainer):
         grad = torch.autograd.grad(
             loss, self.model.parameters(), retain_graph=True, create_graph=True
         )[0]
-        grad = reduce(lambda x, y: x + y)
+        grad = reduce(lambda x, y: x + y, grad)
         g = torch.inner(data, grad.T)
         g = torch.inner(g, grad.T)
 

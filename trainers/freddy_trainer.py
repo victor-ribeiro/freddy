@@ -362,7 +362,7 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            self.model.eval()
+            # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar
             #     pred = self.model(data).cpu().detach().numpy()
@@ -371,7 +371,7 @@ class FreddyTrainer(SubsetTrainer):
             #     #     self.train_criterion(pred, target).cpu().detach().numpy()
             #     # )
 
-            self.model.train()
+            # self.model.train()
             #### fim
         self._val_epoch(epoch)
 
@@ -387,7 +387,7 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score += self._relevance_score * lr
         # self.cur_error = abs(self.cur_error - train_loss)
         # print(shannon_entropy(self.delta[self.subset].mean()).shape)
-        self._relevance_score += shannon_entropy(self.delta[self.subset].mean())
+        self._relevance_score += 1 - shannon_entropy(self.delta[self.subset].mean())
         self.cur_error = self._relevance_score[self.subset].mean()
 
     def f_embedding(self):
@@ -410,7 +410,7 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        # return self._update_delta((data, target)).cpu().detach().numpy()
+        return self._update_delta((data, target)).cpu().detach().numpy()
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
         g = torch.inner(f, grad.T)

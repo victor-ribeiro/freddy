@@ -385,7 +385,7 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = self._relevance_score[self.subset].mean()
 
     def f_embedding(self):
-	print("Collecting embedding")
+        print("Collecting embedding")
         dataset = self.train_dataset.dataset
         dataset = DataLoader(
             dataset,

@@ -384,7 +384,7 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            self._relevance_score[self.subset] -= loss.item() * lr
+            self._relevance_score[data_idx] -= loss.item() * lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

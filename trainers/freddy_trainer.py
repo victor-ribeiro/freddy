@@ -136,7 +136,7 @@ def freddy(
         D = D @ g
 
         localmax = np.amax(D, axis=1)
-        # argmax += localmax.sum()
+        argmax += localmax.sum()
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
 
         while q and len(sset) < K:

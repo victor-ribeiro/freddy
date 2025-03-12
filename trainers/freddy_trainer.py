@@ -404,26 +404,25 @@ class FreddyTrainer(SubsetTrainer):
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data
+        # data, target = data.cpu(), target.cpu()
         data, target = data.to(self.args.device), target.to(self.args.device)
-        target = torch.nn.functional.one_hot(target, self.args.num_classes).float()
-        pred = self.model(data).softmax(dim=1)
+        pred = self.model(data)
         loss = self.val_criterion(pred, target)
-        w = [m for m in self.model.parameters() if m.requires_grad_()]
-        # w = (w[-1].weight,)
-        # return self._update_delta((data, target)).cpu().detach().numpy()
+        model = self.model
+        w = [*model.modules()]
+        w = (w[-1].weight,)
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
-        grad = reduce(lambda x, y: x + y, grad)
-        g = torch.inner(data.T, grad.T)
-        g = torch.inner(g, grad.T)
 
-        # hess = torch.autograd.grad(
-        #     grad, self.model.parameters(), retain_graph=True, grad_outputs=grad
-        # )[0]
-        # gg = torch.inner(f, hess.T)
-        # gg = torch.inner(gg, hess)
+        g = torch.inner(f, grad.T)
+        g = torch.inner(g, grad)
 
-        return (f + torch.inner(f, g)).cpu().detach().numpy()
+        hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
+        gg = torch.inner(f, hess.T)
+        gg = torch.inner(gg, hess)
+        # W = g + (gg / 2)
+        # return torch.inner(torch.inner(f, W), W.T).cpu().detach().numpy()
+        return (f + g + (gg / 2)).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, target = train_data

@@ -234,7 +234,6 @@ def freddy(
         D = METRICS[metric](ds, batch_size=batch_size)
         V = np.array(V)
         r = D.sum(axis=1)
-        r = D * relevance[V]
         eigenvals, eigenvectors = np.linalg.eigh(D)
         max_eigenval = np.argsort(eigenvals)[-1]
         v1 = eigenvectors[max_eigenval] * relevance[V]

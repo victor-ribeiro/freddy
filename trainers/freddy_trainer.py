@@ -381,14 +381,14 @@ class FreddyTrainer(SubsetTrainer):
             self.hist[-1]["reaL_error"] = self.cur_error
 
         # self._relevance_score += self._relevance_score * lr
-        # self.cur_error = abs(self.cur_error - train_loss)
+        self.cur_error = abs(self.cur_error - train_loss)
         # print(shannon_entropy(self.delta[self.subset].mean()).shape)
         if not epoch or not (1.5 > self.cur_error > 10e-4):
             self.f_embedding()
         self._relevance_score[self.subset] = shannon_entropy(self.delta[self.subset])
         print(self._relevance_score[self.subset])
 
-        self.cur_error = self._relevance_score[self.subset].mean()
+        # self.cur_error = self._relevance_score[self.subset].mean()
 
     def f_embedding(self):
         print("Collecting embedding")

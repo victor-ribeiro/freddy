@@ -264,10 +264,14 @@ def _freddy(
 
 
 def shannon_entropy(vector, epsilon=1e-10):
+    # abs_vector = np.abs(vector)  # Ensure non-negative
+    # total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
+    # p = abs_vector / total.reshape(-1, 1)
+    # return (-(p * np.log2(1 + p))).sum(axis=1)
     abs_vector = np.abs(vector)  # Ensure non-negative
-    total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
-    p = abs_vector / total.reshape(-1, 1)
-    return (-(p * np.log2(1 + p))).sum(axis=1)
+    total = abs_vector + epsilon  # Avoid division by zero
+    p = abs_vector / total
+    return -(p * np.log2(1 + p))
 
 
 class FreddyTrainer(SubsetTrainer):

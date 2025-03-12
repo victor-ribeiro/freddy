@@ -134,9 +134,7 @@ def freddy(
         # g = direct.reshape(-1, 1) @ (np.eye(size) * relevance[V])
         g = direct * (np.eye(size) * relevance[V])
 
-        D = D @ g
-        print(D)
-        exit()
+        D += D @ g
 
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()

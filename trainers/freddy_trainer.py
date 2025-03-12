@@ -101,7 +101,7 @@ def freddy(
     metric="similarity",
     K=1,
     batch_size=128,
-    beta=0.75,
+    beta=0,
     return_vals=False,
     relevance=None,
 ):
@@ -147,9 +147,9 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                # alpha = min(1, alpha * 1.1)
+                alpha = min(1, alpha * 1.1)
             else:
-                # alpha = max(0.1, alpha * 0.8)
+                alpha = max(0.1, alpha * 0.8)
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     print(f"alpha: {alpha:.6f}")

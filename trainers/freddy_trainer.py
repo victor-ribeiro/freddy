@@ -375,9 +375,7 @@ class FreddyTrainer(SubsetTrainer):
         # print(shannon_entropy(self.delta[self.subset].mean()).shape)
         if not epoch or not (1.5 > self.cur_error > 10e-4):
             self.f_embedding()
-        self._relevance_score[self.subset] = 1 / (
-            shannon_entropy(self.delta[self.subset]) + 10e-8
-        )
+        self._relevance_score = 1 / (shannon_entropy(self.delta) + 10e-8)
         print(self._relevance_score[self.subset])
 
         # self.cur_error = self._relevance_score[self.subset].mean()

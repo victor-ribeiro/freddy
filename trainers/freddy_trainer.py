@@ -106,7 +106,7 @@ def freddy(
     relevance=None,
 ):
     # basic config
-    alpha = 0.5
+    # alpha = 0.5
     # base_inc = base_inc(alpha)
     base_inc = 0
     idx = np.arange(len(dataset))
@@ -153,9 +153,9 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                alpha = min(1, alpha * 1.1)
+                # alpha = min(1, alpha * 1.1)
             else:
-                alpha = max(0.1, alpha * 0.8)
+                # alpha = max(0.1, alpha * 0.8)
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     print(f"alpha: {alpha:.6f}")
@@ -409,15 +409,17 @@ class FreddyTrainer(SubsetTrainer):
         loss = self.val_criterion(pred, target)
         w = [*self.model.modules()]
         w = (w[-1].weight,)
-        return self._update_delta((data, target)).cpu().detach().numpy()
+        # return self._update_delta((data, target)).cpu().detach().numpy()
         f = self._update_delta((data, target))
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
         g = torch.inner(f, grad.T)
+        g = torch.inner(f, g)
 
         hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
-        gg = torch.inner(g, hess)
+        gg = torch.inner(f, hess.T)
+        gg = torch.inner(gg, hess.T)
 
-        return torch.inner(f, torch.inner(gg.T, g.T).T).cpu().detach().numpy()
+        return (f + torch.inner(f, g) + torch.inner(f, gg.T)).cpu().detach().numpy()
 
     def _update_delta(self, train_data):
         data, target = train_data

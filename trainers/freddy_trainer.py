@@ -363,8 +363,8 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             self.model.eval()
-            # with torch.no_grad():
-            #     #### teste a rodar
+            with torch.no_grad():
+                #     #### teste a rodar
                 pred = self.model(data).cpu().detach().numpy()
                 self._relevance_score[data_idx] = shannon_entropy(pred)
             #     # self._relevance_score[data_idx] = (

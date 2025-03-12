@@ -128,7 +128,7 @@ def freddy(
         if v1 @ relevance[V] < 0:
             v1 = -v1
         v1 = np.maximum(0, v1)
-        g = np.dot(v1.reshape(-1, 1), 0, 1, (1, size))
+        g = np.dot(v1.reshape(-1, 1), np.random.normal(0, 1, (1, size)))
 
         D = D @ g
 

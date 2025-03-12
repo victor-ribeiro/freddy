@@ -131,9 +131,9 @@ def freddy(
         v1 = np.maximum(0, v1)
         direct = v1 + direct[:size]
 
-        g = -np.dot(direct.reshape(-1, 1), np.random.normal(0, 1, (1, size)))
+        g = direct.reshape(-1, 1) * np.eye(size)
 
-        D += D * g
+        D = D @ g
 
         localmax = np.amax(D, axis=1)
         # argmax += localmax.sum()
@@ -362,10 +362,7 @@ class FreddyTrainer(SubsetTrainer):
             with torch.no_grad():
                 #### teste a rodar
                 pred = self.model(data)
-                self._relevance_score[data_idx] = (
-                    1 / (self.train_criterion(pred, target)).cpu().detach().numpy()
-                    + 10e-8
-                )
+                self._relevance_score[data_idx] = shannon_entropy(pred)
                 # self._relevance_score[data_idx] = (
                 #     self.train_criterion(pred, target).cpu().detach().numpy()
                 # )

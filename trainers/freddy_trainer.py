@@ -292,8 +292,8 @@ class FreddyTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
-        if not epoch or (1.5 > self.cur_error > 0.5):
-            self.f_embedding()
+        # if not epoch or (1.5 > self.cur_error > 0.5):
+        self.f_embedding()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         sset, score = freddy(

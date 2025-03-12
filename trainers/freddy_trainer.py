@@ -147,9 +147,9 @@ def freddy(
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
                 vals.append(score)
-                alpha = max(0.1, alpha * 0.8)
-            else:
                 alpha = min(1, alpha * 1.2)
+            else:
+                alpha = max(0.1, alpha * 0.8)
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
     print(f"alpha: {alpha:.6f}")
@@ -249,9 +249,9 @@ def _freddy(
         selected.append(V[sset])
         alignment.append(score)
         if np.mean(alignment) < -0.1:
-            lambda_ = min(lambda_ * 1.5, 10)
-        else:
             lambda_ = max(lambda_ * 0.8, 0.5)
+        else:
+            lambda_ = min(lambda_ * 1.5, 10)
 
     selected = np.hstack(selected)
     alignment = np.hstack(alignment)

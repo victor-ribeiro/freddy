@@ -385,6 +385,7 @@ class FreddyTrainer(SubsetTrainer):
         # self.cur_error = self._relevance_score[self.subset].mean()
 
     def f_embedding(self):
+	print("Collecting embedding")
         dataset = self.train_dataset.dataset
         dataset = DataLoader(
             dataset,
@@ -396,7 +397,6 @@ class FreddyTrainer(SubsetTrainer):
         self.delta = np.vstack([*delta])
 
     def calc_embbeding(self, train_data, ord=1):
-        print("Collecting embedding")
         data, target = train_data
         data, target = data.to(self.args.device), target.to(self.args.device)
         target = torch.nn.functional.one_hot(target, self.args.num_classes).float()

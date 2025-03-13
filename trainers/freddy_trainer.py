@@ -401,7 +401,7 @@ class FreddyTrainer(SubsetTrainer):
         if self._relevance_score[self.subset].mean() < 0:
             self._relevance_score[self.subset] = 1
 
-        if (epoch + 1) % 5 == 0:
+        if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             # self.lambda_ = max(

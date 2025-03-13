@@ -308,15 +308,13 @@ class FreddyTrainer(SubsetTrainer):
         )
 
         self.model.eval()
-        feat = map(
-            lambda x: (
-                self.model.cpu()(x[0]).detach().numpy(),
-                one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
-            ),
-            dataset,
-        )
+        feat = []
+        for data, target in dataset:
+            pred = (self.model.cpu()(data).detach().numpy(),)
+            target = one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes)
+            self.targets[epoch] += target
+            feat.append(np.abs(pred - target))
 
-        feat = map(lambda x: x[1] - x[0], feat)
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
 
@@ -336,6 +334,7 @@ class FreddyTrainer(SubsetTrainer):
             tol=10e-3,
         )
         print(f"selected {len(sset)}")
+        print(f"selected {self.targets.sum(axis=1)}")
         # self._relevance_score[sset] = score
         self.subset = sset
         self.selected[sset] += 1
@@ -374,10 +373,7 @@ class FreddyTrainer(SubsetTrainer):
         )
         train_loss = 0
         for batch_idx, (data, target, data_idx) in pbar:
-            histogram = torch.nn.functional.one_hot(target).detach().numpy
-            self.targets[epoch] += histogram
             data, target = data.to(self.args.device), target.to(self.args.device)
-            target = torch.nn.functional.one_hot(target)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)
 

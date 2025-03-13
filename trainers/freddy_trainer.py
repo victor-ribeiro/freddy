@@ -311,7 +311,9 @@ class FreddyTrainer(SubsetTrainer):
         feat = []
         for data, target in dataset:
             pred = (self.model.cpu()(data).detach().numpy(),)
-            target = one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes)
+            target = one_hot_coding(
+                target.cpu().detach().numpy(), self.args.num_classes
+            )
             self.targets[epoch] += target
             feat.append(np.abs(pred - target))
 

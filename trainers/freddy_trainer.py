@@ -230,11 +230,11 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         if val[:idx].sum() == 0:
 
             val[idx] = np.log(1 + (sampler.inertia_ * alpha / base))
-            val[idx] += np.exp(val[idx] - relevance[idx]) * 0.5
+            # val[idx] += np.exp(val[idx] - relevance[idx]) * 0.5
             continue
 
         val[idx] = np.log(1 + (sampler.inertia_ * alpha / val[val > 0].max() / base))
-        val[idx] += np.exp(val[idx] - relevance[idx]) * 0.5
+        # val[idx] += np.exp(val[idx] - relevance[idx]) * 0.5
 
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
@@ -253,7 +253,10 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+    dist = (
+        pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+        * relevance
+    )
     dist -= np.sum(dist)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")
@@ -406,7 +409,8 @@ class FreddyTrainer(SubsetTrainer):
         if self._relevance_score[self.subset].mean() < 0:
             self._relevance_score[self.subset] = 1
 
-        if not epoch or (epoch + 1) % 5 == 0:
+        # if not epoch or (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             # self._update_train_loader_and_weights()
             # self.lambda_ = max(

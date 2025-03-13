@@ -180,7 +180,8 @@ class BaseTrainer:
         self.batch_backward_time.update(backward_time)
 
         # update training loss and accuracy
-        train_acc = (output.argmax(dim=1) == target).float().mean().item()
+        # train_acc = (output.argmax(dim=1) == target).float().mean().item()
+        train_acc = (output.argmax(dim=0) == target).float().mean().item()
         self.train_loss.update(loss.item(), data.size(0))
         self.train_acc.update(train_acc, data.size(0))
 

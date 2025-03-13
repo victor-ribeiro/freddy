@@ -233,6 +233,7 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
 
 
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
+    dataset += dataset * relevance.reshape(-1, 1)
     idx = np.where(relevance > 0)
     min_size = math.ceil(len(dataset) * 0.8)
     if len(idx) > min_size:
@@ -242,7 +243,7 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
         relevance = relevance[:min_size]
         dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
-    dist = pairwise_distances(clusters, dataset).mean(axis=0) * relevance.reshape(-1, 1)
+    dist = pairwise_distances(clusters, dataset).mean(axis=0)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")
@@ -395,7 +396,10 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            self._relevance_score[data_idx] -= loss.item() * lr
+            if self._relevance_score[data_idx].mean() < 0:
+                self._relevance_score[data_idx] += loss.item() * lr
+            else:
+                self._relevance_score[data_idx] -= loss.item() * lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

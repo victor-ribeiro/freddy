@@ -292,7 +292,7 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = 10e-7
         self.lambda_ = 0.5
         self.lr = 0.1
-        self.targets = np.ones(self.args.num_classes)
+        self.targets = np.ones((self.args.epochs, self.args.num_classes))
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()

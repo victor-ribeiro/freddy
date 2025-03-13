@@ -124,13 +124,17 @@ def freddy(
     sset = []
     vals = []
     argmax = 0
+    centers = _n_cluster(dataset)
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
         V = list(V)
-        D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
-        D += D * -relevance[V]
+        # D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
+        D = pairwise_distances(ds, centers)
+        print(D.shape)
+        exit()
+        D += np.exp(D * -relevance[V])
         size = len(D)
         # lambda_, v1 = np.linalg.eigh(D)
         # i = np.argmax(lambda_)
@@ -257,49 +261,51 @@ def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=Non
     return sset[:K]
 
 
-def freddy(
-    dataset,
-    lambda_,
-    base_inc=base_inc,
-    alpha=0.15,
-    metric="similarity",
-    K=1,
-    batch_size=256,
-    beta=0,
-    return_vals=False,
-    relevance=None,
-):
-    import math
+# def freddy(
+#     dataset,
+#     lambda_,
+#     base_inc=base_inc,
+#     alpha=0.15,
+#     metric="similarity",
+#     K=1,
+#     batch_size=256,
+#     beta=0,
+#     return_vals=False,
+#     relevance=None,
+# ):
+#     import math
 
-    sample_size = K / len(dataset)
-    idx = np.arange(len(dataset))
-    selected, alignment = [], []
-    for ds, V in zip(
-        batched(dataset, batch_size),
-        batched(idx, batch_size),
-    ):
-        D = METRICS[metric](ds, batch_size=batch_size)
-        V = np.array(V)
-        r = D.sum(axis=1)
-        eigenvals, eigenvectors = np.linalg.eigh(D)
-        max_eigenval = np.argsort(eigenvals)[-1]
-        v1 = eigenvectors[max_eigenval] * relevance[V]
-        if v1 @ relevance[V] < 0:
-            v1 = -v1
-        v1 = np.maximum(0, v1)
-        sset, score = linear_selector(
-            r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
-        )
-        selected.append(V[sset])
-        alignment.append(score)
-        if np.mean(alignment) < -0.1:
-            lambda_ = max(lambda_ * 0.8, 0.5)
-        else:
-            lambda_ = min(lambda_ * 1.5, 10)
+#     cst = _n_cluster(dataset=)
 
-    selected = np.hstack(selected)
-    alignment = np.hstack(alignment)
-    return selected[:K], alignment[:K]
+#     sample_size = K / len(dataset)
+#     idx = np.arange(len(dataset))
+#     selected, alignment = [], []
+#     for ds, V in zip(
+#         batched(dataset, batch_size),
+#         batched(idx, batch_size),
+#     ):
+#         D = METRICS[metric](ds, batch_size=batch_size)
+#         V = np.array(V)
+#         r = D.sum(axis=1)
+#         eigenvals, eigenvectors = np.linalg.eigh(D)
+#         max_eigenval = np.argsort(eigenvals)[-1]
+#         v1 = eigenvectors[max_eigenval] * relevance[V]
+#         if v1 @ relevance[V] < 0:
+#             v1 = -v1
+#         v1 = np.maximum(0, v1)
+#         sset, score = linear_selector(
+#             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
+#         )
+#         selected.append(V[sset])
+#         alignment.append(score)
+#         if np.mean(alignment) < -0.1:
+#             lambda_ = max(lambda_ * 0.8, 0.5)
+#         else:
+#             lambda_ = min(lambda_ * 1.5, 10)
+
+#     selected = np.hstack(selected)
+#     alignment = np.hstack(alignment)
+#     return selected[:K], alignment[:K]
 
 
 def shannon_entropy(vector, epsilon=1e-10):
@@ -336,18 +342,18 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        # sset, score = freddy(
-        #     self.delta,
-        #     lambda_=self.lambda_,
-        #     batch_size=256,
-        #     K=self.sample_size,
-        #     metric=self.args.freddy_similarity,
-        #     alpha=self.args.alpha,
-        #     relevance=self._relevance_score,
-        # )
-        sset = kmeans_sampler(
-            self.delta, K=self.sample_size, relevance=self._relevance_score
+        sset, score = freddy(
+            self.delta,
+            lambda_=self.lambda_,
+            batch_size=256,
+            K=self.sample_size,
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
+            relevance=self._relevance_score,
         )
+        # sset = kmeans_sampler(
+        #     self.delta, K=self.sample_size, relevance=self._relevance_score
+        # )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset

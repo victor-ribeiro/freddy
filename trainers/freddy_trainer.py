@@ -344,7 +344,7 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection.append(epoch)
         sset, score = freddy(
             self.delta,
-            lambda_=self.lambda_,
+            # lambda_=self.lambda_,
             batch_size=256,
             K=self.sample_size,
             metric=self.args.freddy_similarity,

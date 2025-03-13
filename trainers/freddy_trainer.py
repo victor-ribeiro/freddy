@@ -334,7 +334,6 @@ class FreddyTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
-        self.f_embedding()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
         # sset, score = freddy(
@@ -373,6 +372,9 @@ class FreddyTrainer(SubsetTrainer):
             # self.lambda_ = max(
             #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
             # )
+
+        if epoch % 15 == 0:
+            self.f_embedding()
 
         data_start = time.time()
         pbar = tqdm(

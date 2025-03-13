@@ -115,11 +115,12 @@ def freddy(
     idx = np.arange(len(dataset))
     idx = np.random.permutation(idx)
     q = Queue()
-    dataset += dataset * np.exp(relevance.reshape(-1, 1))
+
     idx = np.where(relevance > 0)
     min_size = math.ceil(len(dataset) * 0.8)
     if len(idx) > min_size:
         dataset = dataset[idx]
+
     sset = []
     vals = []
     argmax = 0

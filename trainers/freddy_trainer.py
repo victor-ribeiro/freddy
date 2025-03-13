@@ -319,7 +319,7 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         target = np.vstack([*lbl])
-        print(target[:2])
+        print(target[:2].sum(axis=0))
         exit()
         # sset, score = freddy(
         #     feat,

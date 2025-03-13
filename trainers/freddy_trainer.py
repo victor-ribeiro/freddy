@@ -377,6 +377,7 @@ class FreddyTrainer(SubsetTrainer):
             # exit()
             # load data to device and record data loading time
             histogram = target.sum(dim=1)
+            print(target)
             print(histogram)
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start

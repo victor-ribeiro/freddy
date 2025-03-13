@@ -373,8 +373,8 @@ class FreddyTrainer(SubsetTrainer):
         )
         train_loss = 0
         for batch_idx, (data, target, data_idx) in pbar:
-            target = torch.nn.functional.one_hot(target)
-            histogram = target.sum(dim=1)
+            target = torch.nn.functional.one_hot(target).float()
+            histogram = target.sum(dim=0)
             print(histogram)
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start

@@ -384,6 +384,13 @@ class FreddyTrainer(SubsetTrainer):
         self.train_checkpoint["importance"] = self._relevance_score
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
         self.subset_weights = np.ones(self.sample_size)
+        self.train_loader = DataLoader(
+            Subset((self.train_dataset, self.subset)),
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            num_workers=self.args.num_workers,
+            pin_memory=True,
+        )
         self.model.train()
 
     def _train_epoch(self, epoch):
@@ -393,7 +400,7 @@ class FreddyTrainer(SubsetTrainer):
         if self._relevance_score[self.subset].mean() < 0:
             self._relevance_score[self.subset] = 1
 
-        if epoch % 5 == 0:
+        if (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()
             # self.lambda_ = max(
@@ -429,9 +436,9 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             if self._relevance_score[data_idx].mean() < 0:
-                self._relevance_score[data_idx] -= loss.item() * self.lr
+                self._relevance_score[data_idx] -= self.grad_norm * self.lr
             else:
-                self._relevance_score[data_idx] += loss.item() * self.lr
+                self._relevance_score[data_idx] += self.grad_norm * self.lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

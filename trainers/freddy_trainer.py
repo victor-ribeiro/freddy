@@ -130,6 +130,7 @@ def freddy(
     ):
         V = list(V)
         D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
+        D += D * -relevance[V]
         size = len(D)
         # lambda_, v1 = np.linalg.eigh(D)
         # i = np.argmax(lambda_)

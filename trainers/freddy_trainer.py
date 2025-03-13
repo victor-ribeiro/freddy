@@ -311,8 +311,8 @@ class FreddyTrainer(SubsetTrainer):
         feat = []
         for data, target in dataset:
             pred = (self.model.cpu()(data).detach().numpy(),)
-            target = one_hot_coding(
-                target.cpu().detach().numpy(), self.args.num_classes
+            target = (
+                one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
             )
             print(target)
             self.targets[epoch] += target.sum(axis=0)

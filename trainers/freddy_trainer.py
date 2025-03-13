@@ -233,7 +233,7 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
             continue
 
         val[idx] = np.log(1 + sampler.inertia_ * alpha / val[val > 0].max() / base)
-        val[idx] += np.exp(val - relevance[idx])
+        val[idx] += np.exp(val[idx] - relevance[idx])
 
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_

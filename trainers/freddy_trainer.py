@@ -449,7 +449,7 @@ class FreddyTrainer(SubsetTrainer):
             shuffle=False,
         )
         delta = map(self.calc_embbeding, dataset)
-        self.delta += np.vstack([*delta]) * 10e-3
+        self.delta = np.vstack([*delta])
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data

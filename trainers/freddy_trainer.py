@@ -251,7 +251,7 @@ def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=Non
     #     relevance = relevance[:min_size]
     #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
-    print(f"Found {len(clusters)} clusters")
+    print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).mean(axis=0)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]

@@ -230,11 +230,11 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         if val[:idx].sum() == 0:
 
             val[idx] = np.log(1 + (sampler.inertia_ * alpha / base))
-            # val[idx] += np.exp(val[idx] - relevance[idx]) * 0.5
+            # val[idx] += np.exp(val[idx] - relevance[idx])
             continue
 
         val[idx] = np.log(1 + (sampler.inertia_ * alpha / val[val > 0].max() / base))
-        # val[idx] += np.exp(val[idx] - relevance[idx]) * 0.5
+        # val[idx] += np.exp(val[idx] - relevance[idx])
 
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
@@ -253,15 +253,14 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = (
-        pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
-        * relevance
-    )
+    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+
     dist -= np.sum(dist)
-    dist = np.abs(dist)[::-1]
+    dist = np.abs(dist)[::-1] * relevance
     sset = np.argsort(dist, kind="heapsort")
 
-    return sset[-K:]
+    # return sset[-K:]
+    return sset[:K]
 
 
 # def freddy(
@@ -448,11 +447,11 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             if self._relevance_score[data_idx].mean() < 0:
-                # self._relevance_score[data_idx] += loss.item() * self.lr
-                self._relevance_score[data_idx] += np.cos(self.grad_norm * self.lr)
-            else:
                 # self._relevance_score[data_idx] -= loss.item() * self.lr
                 self._relevance_score[data_idx] -= np.cos(self.grad_norm * self.lr)
+            else:
+                # self._relevance_score[data_idx] += loss.item() * self.lr
+                self._relevance_score[data_idx] += np.cos(self.grad_norm * self.lr)
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

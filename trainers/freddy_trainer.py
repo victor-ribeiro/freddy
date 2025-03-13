@@ -336,7 +336,7 @@ class FreddyTrainer(SubsetTrainer):
         self.select_flag = True
         self.cur_error = 10e-7
         self.lambda_ = 0.5
-        self.lr = 0
+        self.lr = 0.1
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
@@ -368,7 +368,6 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        self.lr = self.lr_scheduler.get_last_lr()[0]
         if self._relevance_score[self.subset].mean() < 0:
             self._relevance_score[self.subset] = 1
 
@@ -442,6 +441,7 @@ class FreddyTrainer(SubsetTrainer):
         # if not epoch or not (1.5 > self.cur_error > 10e-4):
         # self._relevance_score +=  (shannon_entropy(self.delta) + 10e-8)
         print(self._relevance_score[self.subset])
+        self.lr = self.lr_scheduler.get_last_lr()[0]
 
         # self.cur_error = self._relevance_score[self.subset].mean()
 

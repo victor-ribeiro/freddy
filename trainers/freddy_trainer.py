@@ -232,7 +232,7 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
     return ValueError("Does not converge")
 
 
-def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=None):
+def kmeans_sampler(dataset, K, alpha=1.25, tol=10e-3, max_iter=500, relevance=None):
     dataset += dataset * -relevance.reshape(-1, 1)
     idx = np.where(relevance > 0)
     min_size = math.ceil(len(dataset) * 0.8)

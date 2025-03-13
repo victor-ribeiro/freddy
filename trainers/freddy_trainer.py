@@ -319,8 +319,6 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         target = np.vstack([*lbl])
-        print(target[:2].sum(axis=0))
-        exit()
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,
@@ -338,6 +336,8 @@ class FreddyTrainer(SubsetTrainer):
         )
 
         print(f"selected {len(sset)}")
+        print(target[sset:2].sum(axis=0))
+        exit()
         print(f"selected {self.targets[epoch]}")
         # self._relevance_score[sset] = score
         self.subset = sset

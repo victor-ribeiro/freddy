@@ -379,7 +379,7 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             relevance=self._relevance_score,
             tol=self.lr,
-            alpha=self.grad_norm * self.lr,
+            # alpha=self.grad_norm * self.lr,
         )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score

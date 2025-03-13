@@ -336,7 +336,7 @@ class FreddyTrainer(SubsetTrainer):
         )
 
         score = np.log(1 * feat) + np.log(
-            self.targets.sum(axis=0) / (self.targets.sum() + 10e-8)
+            self.targets.sum(axis=0) / (self.targets.sum() + 10e-4)
         )
         print(score)
         self._relevance_score = (1 / (score + 10e-8)).sum(axis=1)

@@ -337,18 +337,18 @@ class FreddyTrainer(SubsetTrainer):
         self.f_embedding()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        sset, score = freddy(
-            self.delta,
-            lambda_=self.lambda_,
-            batch_size=256,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            relevance=self._relevance_score,
-        )
-        # sset = kmeans_sampler(
-        #     self.delta, K=self.sample_size, relevance=self._relevance_score
+        # sset, score = freddy(
+        #     self.delta,
+        #     lambda_=self.lambda_,
+        #     batch_size=256,
+        #     K=self.sample_size,
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
+        #     relevance=self._relevance_score,
         # )
+        sset = kmeans_sampler(
+            self.delta, K=self.sample_size, relevance=self._relevance_score
+        )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset

@@ -314,7 +314,7 @@ class FreddyTrainer(SubsetTrainer):
             pred = self.model.cpu()(data).detach().numpy()
             tgt = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
             feat.append(np.abs(pred - tgt))
-            lbl.append(np.abs(pred - tgt))
+            lbl.append(tgt)
 
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])

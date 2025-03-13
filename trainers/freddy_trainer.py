@@ -259,55 +259,8 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     dist = np.abs(dist)[::-1] * relevance
     sset = np.argsort(dist, kind="heapsort")
 
-    # return sset[-K:]
-    return sset[:K]
-
-
-# def freddy(
-#     dataset,
-#     lambda_,
-#     base_inc=base_inc,
-#     alpha=0.15,
-#     metric="similarity",
-#     K=1,
-#     batch_size=256,
-#     beta=0,
-#     return_vals=False,
-#     relevance=None,
-# ):
-#     import math
-
-#     cst = _n_cluster(dataset=)
-
-#     sample_size = K / len(dataset)
-#     idx = np.arange(len(dataset))
-#     selected, alignment = [], []
-#     for ds, V in zip(
-#         batched(dataset, batch_size),
-#         batched(idx, batch_size),
-#     ):
-#         D = METRICS[metric](ds, batch_size=batch_size)
-#         V = np.array(V)
-#         r = D.sum(axis=1)
-#         eigenvals, eigenvectors = np.linalg.eigh(D)
-#         max_eigenval = np.argsort(eigenvals)[-1]
-#         v1 = eigenvectors[max_eigenval] * relevance[V]
-#         if v1 @ relevance[V] < 0:
-#             v1 = -v1
-#         v1 = np.maximum(0, v1)
-#         sset, score = linear_selector(
-#             r, v1, k=math.ceil(sample_size * batch_size), lambda_=lambda_
-#         )
-#         selected.append(V[sset])
-#         alignment.append(score)
-#         if np.mean(alignment) < -0.1:
-#             lambda_ = max(lambda_ * 0.8, 0.5)
-#         else:
-#             lambda_ = min(lambda_ * 1.5, 10)
-
-#     selected = np.hstack(selected)
-#     alignment = np.hstack(alignment)
-#     return selected[:K], alignment[:K]
+    return sset[-K:]
+    # return sset[:K]
 
 
 def shannon_entropy(vector, epsilon=1e-10):
@@ -340,6 +293,7 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = 10e-7
         self.lambda_ = 0.5
         self.lr = 0.1
+        self.targets = np.ones(self.args.num_classes)
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
@@ -367,23 +321,23 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
 
-        # sset, score = freddy(
-        #     feat,
-        #     # lambda_=self.lambda_,
-        #     batch_size=256,
-        #     K=self.sample_size,
-        #     metric=self.args.freddy_similarity,
-        #     alpha=self.args.alpha,
-        #     relevance=self._relevance_score,
-        # )
-        sset = kmeans_sampler(
+        sset, score = freddy(
             feat,
+            # lambda_=self.lambda_,
+            batch_size=256,
             K=self.sample_size,
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
             relevance=self._relevance_score,
-            tol=10e-3,
-            # tol=self.lr,
-            # alpha=self.grad_norm * self.lr,
         )
+        # sset = kmeans_sampler(
+        #     feat,
+        #     K=self.sample_size,
+        #     relevance=self._relevance_score,
+        #     tol=10e-3,
+        # tol=self.lr,
+        # alpha=self.grad_norm * self.lr,
+        # )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset
@@ -425,6 +379,8 @@ class FreddyTrainer(SubsetTrainer):
             # print(target)
             # exit()
             # load data to device and record data loading time
+            histogram = target.sum(dim=0)
+            print(histogram)
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)
@@ -481,55 +437,4 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score +=  (shannon_entropy(self.delta) + 10e-8)
         print(self._relevance_score[self.subset])
         self.lr = self.lr_scheduler.get_last_lr()[0]
-
         # self.cur_error = self._relevance_score[self.subset].mean()
-
-    def f_embedding(self):
-        print("Collecting embedding")
-        dataset = self.train_dataset.dataset
-        dataset = DataLoader(
-            dataset,
-            batch_size=self.args.batch_size,
-            num_workers=self.args.num_workers,
-            shuffle=False,
-        )
-        delta = map(self.calc_embbeding, dataset)
-        self.delta = np.vstack([*delta])
-
-    def calc_embbeding(self, train_data, ord=1):
-        data, target = train_data
-        # data, target = data.cpu(), target.cpu()
-        data, target = data.to(self.args.device), target.to(self.args.device)
-        target = torch.nn.functional.one_hot(target).float()
-        pred = self.model(data)
-        loss = self.val_criterion(pred, target)
-        model = self.model
-        w = [*model.modules()]
-        w = (w[-1].weight,)
-        f = self._update_delta((data, target)).cpu().detach().numpy()
-        return f
-        grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
-
-        g = torch.inner(f, grad.T)
-        g = torch.inner(g, grad)
-
-        hess = torch.autograd.grad(grad, w, retain_graph=True, grad_outputs=grad)[0]
-        gg = torch.inner(f, hess.T)
-        gg = torch.inner(gg, hess)
-        # W = g + (gg / 2)
-        # return torch.inner(torch.inner(f, W), W.T).cpu().detach().numpy()
-        return (f + g + (gg / 2)).cpu().detach().numpy()
-
-    def _update_delta(self, train_data):
-        data, target = train_data
-        data = data.to(self.args.device)
-        self.model.eval()
-        e = torch.normal(0, 1, size=data.shape).to(self.args.device)
-        with torch.no_grad():
-            data = data.to(self.args.device)
-            # loss = self.model(data).softmax(dim=1)
-            loss = self.model(data)
-            # delta_loss = self.model(data + e)
-        # return loss
-        return loss - target
-        # return loss - delta_loss

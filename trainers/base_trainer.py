@@ -73,6 +73,7 @@ class BaseTrainer:
         else:
             self.train_weights = torch.ones(len(self.train_dataset))
         self.train_weights = self.train_weights.to(self.args.device)
+        self.grad_norm = 0
 
         # the default optimizer is SGD
         self.optimizer = torch.optim.SGD(
@@ -130,6 +131,7 @@ class BaseTrainer:
             grad_norm = [*self.model.to(self.args.device).modules()]
             grad_norm = grad_norm.pop()
             grad_norm = grad_norm.weight.grad.data.norm(2).item()
+            self.grad_norm = grad_norm
 
             hist = {
                 "train_loss": self.train_loss.avg,

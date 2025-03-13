@@ -124,7 +124,7 @@ def freddy(
     sset = []
     vals = []
     argmax = 0
-    centers = _n_cluster(dataset)
+    centers = _n_cluster(dataset, alpha=2)
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),

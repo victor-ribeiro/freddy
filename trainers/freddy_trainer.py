@@ -233,7 +233,6 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
 
 
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
-    dataset *= relevance.reshape(-1, 1)
     idx = np.where(relevance > 0)
     min_size = math.ceil(len(dataset) * 0.8)
     if len(idx) > min_size:
@@ -243,7 +242,7 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
         relevance = relevance[:min_size]
         dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
-    dist = pairwise_distances(clusters, dataset).mean(axis=0)
+    dist = pairwise_distances(clusters, dataset).mean(axis=0) / relevance.reshape(-1, 1)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")
@@ -358,6 +357,9 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         lr = self.lr_scheduler.get_last_lr()[0]
+        if self._relevance_score[self.subset].mean() < 0:
+            self._relevance_score[self.subset] = 1
+
         if epoch % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()

@@ -318,7 +318,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
-        target = np.vstack([*target])
+        target = np.vstack([*lbl])
 
         # sset, score = freddy(
         #     feat,

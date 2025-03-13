@@ -321,23 +321,21 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
 
-        sset, score = freddy(
-            feat,
-            # lambda_=self.lambda_,
-            batch_size=256,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            relevance=self._relevance_score,
-        )
-        # sset = kmeans_sampler(
+        # sset, score = freddy(
         #     feat,
+        #     # lambda_=self.lambda_,
+        #     batch_size=256,
         #     K=self.sample_size,
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
         #     relevance=self._relevance_score,
-        #     tol=10e-3,
-        # tol=self.lr,
-        # alpha=self.grad_norm * self.lr,
         # )
+        sset = kmeans_sampler(
+            feat,
+            K=self.sample_size,
+            relevance=self._relevance_score,
+            tol=10e-3,
+        )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset

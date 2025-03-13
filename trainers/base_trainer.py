@@ -198,7 +198,6 @@ class BaseTrainer:
         )
         for batch_idx, (data, target, data_idx) in pbar:
             # load data to device and record data loading time
-            target = torch.nn.functional.one_hot(target)
             data, target = data.to(self.device), target.to(self.device)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)

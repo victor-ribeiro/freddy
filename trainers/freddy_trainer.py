@@ -314,7 +314,7 @@ class FreddyTrainer(SubsetTrainer):
             target = (
                 one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
             )
-            self.targets[epoch:] += target.sum(axis=0)
+            self.targets[epoch:] += target[sset].sum(axis=0)
             feat.append(np.abs(pred - target))
 
         # feat = map(np.abs, feat)

@@ -313,7 +313,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             tgt = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(np.abs(pred - tgt))
+            feat.append(pred - tgt)
             lbl.append(tgt)
 
         # feat = map(np.abs, feat)
@@ -337,7 +337,8 @@ class FreddyTrainer(SubsetTrainer):
 
         self.targets[epoch] += target[sset].sum(axis=0)
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
-        # self._relevance_score[sset] = score
+        score = np.log(1 * feat) + np.log(1 + self.targets.sum(axis=0))
+        self._relevance_score = (1 / (score + 10e-8)).sum(axis=1)
         self.subset = sset
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
@@ -397,11 +398,11 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             if self._relevance_score[data_idx].mean() < 0:
-                # self._relevance_score[data_idx] -= loss.item() * self.lr
-                self._relevance_score[data_idx] -= self.grad_norm * self.lr
+                self._relevance_score[data_idx] -= loss.item() * self.lr
+                # self._relevance_score[data_idx] -= self.grad_norm * self.lr
             else:
-                # self._relevance_score[data_idx] += loss.item() * self.lr
-                self._relevance_score[data_idx] += self.grad_norm * self.lr
+                self._relevance_score[data_idx] += loss.item() * self.lr
+                # self._relevance_score[data_idx] += self.grad_norm * self.lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

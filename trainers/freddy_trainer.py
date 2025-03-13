@@ -423,8 +423,8 @@ class FreddyTrainer(SubsetTrainer):
         )
         train_loss = 0
         for batch_idx, (data, target, data_idx) in pbar:
-            print(target)
-            exit()
+            # print(target)
+            # exit()
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start

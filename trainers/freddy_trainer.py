@@ -385,7 +385,7 @@ class FreddyTrainer(SubsetTrainer):
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
         self.subset_weights = np.ones(self.sample_size)
         self.train_loader = DataLoader(
-            Subset((self.train_dataset, self.subset)),
+            Subset(self.train_dataset, self.subset),
             batch_size=self.args.batch_size,
             shuffle=True,
             num_workers=self.args.num_workers,

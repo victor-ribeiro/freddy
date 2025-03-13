@@ -378,7 +378,8 @@ class FreddyTrainer(SubsetTrainer):
             feat,
             K=self.sample_size,
             relevance=self._relevance_score,
-            tol=self.lr,
+            tol=10e-3,
+            # tol=self.lr,
             # alpha=self.grad_norm * self.lr,
         )
         print(f"selected {len(sset)}")

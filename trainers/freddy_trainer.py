@@ -448,10 +448,10 @@ class FreddyTrainer(SubsetTrainer):
             )
             if self._relevance_score[data_idx].mean() < 0:
                 # self._relevance_score[data_idx] -= loss.item() * self.lr
-                self._relevance_score[data_idx] -= np.cos(self.grad_norm * self.lr)
+                self._relevance_score[data_idx] -= self.grad_norm * self.lr
             else:
                 # self._relevance_score[data_idx] += loss.item() * self.lr
-                self._relevance_score[data_idx] += np.cos(self.grad_norm * self.lr)
+                self._relevance_score[data_idx] += self.grad_norm * self.lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

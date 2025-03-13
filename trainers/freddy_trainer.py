@@ -447,7 +447,7 @@ class FreddyTrainer(SubsetTrainer):
             shuffle=False,
         )
         delta = map(self.calc_embbeding, dataset)
-        self.delta += np.vstack([*delta])
+        self.delta += np.vstack([*delta]) * 10e-3
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data
@@ -458,7 +458,8 @@ class FreddyTrainer(SubsetTrainer):
         model = self.model
         w = [*model.modules()]
         w = (w[-1].weight,)
-        f = self._update_delta((data, target))
+        f = self._update_delta((data, target)).cpu().detach().numpy()
+        return f
         grad = torch.autograd.grad(loss, w, retain_graph=True, create_graph=True)[0]
 
         g = torch.inner(f, grad.T)
@@ -480,7 +481,7 @@ class FreddyTrainer(SubsetTrainer):
             data = data.to(self.args.device)
             # loss = self.model(data).softmax(dim=1)
             loss = self.model(data)
-            delta_loss = self.model(data + e)
+            # delta_loss = self.model(data + e)
         # return loss
-        # return loss - target
-        return loss - delta_loss
+        return loss - target
+        # return loss - delta_loss

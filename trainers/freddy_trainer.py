@@ -342,8 +342,30 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
+
+        dataset = self.train_dataset.dataset
+        dataset = DataLoader(
+            dataset,
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            num_workers=self.args.num_workers,
+        )
+
+        self.model.eval()
+        feat = map(
+            lambda x: (
+                self.model.cpu()(x[0]).detach().numpy(),
+                one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+            ),
+            dataset,
+        )
+
+        feat = map(lambda x: x[1] - x[0], feat)
+        # feat = map(np.abs, feat)
+        feat = np.vstack([*feat])
+
         # sset, score = freddy(
-        #     self.delta,
+        #     feat,
         #     # lambda_=self.lambda_,
         #     batch_size=256,
         #     K=self.sample_size,
@@ -352,7 +374,7 @@ class FreddyTrainer(SubsetTrainer):
         #     relevance=self._relevance_score,
         # )
         sset = kmeans_sampler(
-            self.delta, K=self.sample_size, relevance=self._relevance_score, tol=self.lr
+            feat, K=self.sample_size, relevance=self._relevance_score, tol=self.lr
         )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
@@ -377,9 +399,6 @@ class FreddyTrainer(SubsetTrainer):
             # self.lambda_ = max(
             #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
             # )
-
-        if epoch % 15 == 0:
-            self.f_embedding()
 
         data_start = time.time()
         pbar = tqdm(
@@ -410,9 +429,9 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             if self._relevance_score[data_idx].mean() < 0:
-                self._relevance_score[data_idx] += loss.item() * self.lr
-            else:
                 self._relevance_score[data_idx] -= loss.item() * self.lr
+            else:
+                self._relevance_score[data_idx] += loss.item() * self.lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

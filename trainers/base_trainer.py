@@ -170,8 +170,6 @@ class BaseTrainer:
         output = self.model.to(self.device)(data)
         forward_time = time.time() - forward_start
         self.batch_forward_time.update(forward_time)
-        print(target)
-        exit()
         loss = self.train_criterion(output, target)
         loss = (loss * self.train_weights[data_idx]).mean()
 

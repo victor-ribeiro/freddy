@@ -254,7 +254,7 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
-    dist -= np.max(dist)
+    dist -= np.max(dist, axis=0)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")
 
@@ -375,7 +375,11 @@ class FreddyTrainer(SubsetTrainer):
         #     relevance=self._relevance_score,
         # )
         sset = kmeans_sampler(
-            feat, K=self.sample_size, relevance=self._relevance_score, tol=self.lr
+            feat,
+            K=self.sample_size,
+            relevance=self._relevance_score,
+            tol=self.lr,
+            alpha=self.grad_norm * self.lr,
         )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
@@ -437,9 +441,9 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             if self._relevance_score[data_idx].mean() < 0:
-                self._relevance_score[data_idx] -= self.grad_norm * self.lr
+                self._relevance_score[data_idx] -= loss * self.lr
             else:
-                self._relevance_score[data_idx] += self.grad_norm * self.lr
+                self._relevance_score[data_idx] += loss * self.lr
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

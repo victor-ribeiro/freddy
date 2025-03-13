@@ -360,9 +360,6 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        if self._relevance_score[self.subset].mean() < 0:
-            self._relevance_score[self.subset] = 1
-
         # if (epoch + 1) % 5 == 0:
         if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)

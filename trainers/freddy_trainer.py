@@ -110,8 +110,8 @@ def freddy(
 ):
     # basic config
     # alpha = 0.5
-    # base_inc = base_inc(alpha)
-    base_inc = 0
+    base_inc = base_inc(alpha)
+    # base_inc = 0
     idx = np.arange(len(dataset))
     idx = np.random.permutation(idx)
     q = Queue()
@@ -129,14 +129,14 @@ def freddy(
         batched(idx, batch_size),
     ):
         V = list(V)
-        D = METRICS[metric](ds, batch_size=batch_size)
+        D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
         size = len(D)
-        lambda_, v1 = np.linalg.eigh(D)
-        i = np.argmax(lambda_)
-        v1 = v1[i]
-        if v1 @ relevance[V] < 0:
-            v1 = -v1
-        v1 = np.maximum(0, v1) * relevance[V]
+        # lambda_, v1 = np.linalg.eigh(D)
+        # i = np.argmax(lambda_)
+        # v1 = v1[i]
+        # if v1 @ relevance[V] < 0:
+        # v1 = -v1
+        # v1 = np.maximum(0, v1) * relevance[V]
         # D = np.dot(v1.reshape(-1, 1), relevance[V].reshape(1, -1))
 
         localmax = np.amax(D, axis=1)
@@ -446,7 +446,7 @@ class FreddyTrainer(SubsetTrainer):
             shuffle=False,
         )
         delta = map(self.calc_embbeding, dataset)
-        self.delta = np.vstack([*delta])
+        self.delta += np.vstack([*delta])
 
     def calc_embbeding(self, train_data, ord=1):
         data, target = train_data

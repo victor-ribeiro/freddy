@@ -310,7 +310,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         for data, target in dataset:
-            pred = (self.model.cpu()(data).detach().numpy(),)
+            pred = self.model.cpu()(data).detach().numpy()
             target = (
                 one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
             )
@@ -318,7 +318,7 @@ class FreddyTrainer(SubsetTrainer):
             feat.append(np.abs(pred - target))
 
         # feat = map(np.abs, feat)
-        feat = np.hstack([*feat])
+        feat = np.vstack([*feat])
 
         # sset, score = freddy(
         #     feat,

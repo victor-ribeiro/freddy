@@ -342,6 +342,7 @@ class FreddyTrainer(SubsetTrainer):
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score
         self.train_checkpoint["epoch_selection"] = self.epoch_selection
+        self.train_checkpoint["class_histogram"] = self.targets
         self.subset_weights = np.ones(self.sample_size)
         self.train_loader = DataLoader(
             Subset(self.train_dataset, self.subset),
@@ -373,10 +374,10 @@ class FreddyTrainer(SubsetTrainer):
         )
         train_loss = 0
         for batch_idx, (data, target, data_idx) in pbar:
-            target = torch.nn.functional.one_hot(target)
-            histogram = target.sum(dim=0)
-            print(histogram)
+            histogram = torch.nn.functional.one_hot(target).detach().numpy
+            self.targets[epoch] += histogram
             data, target = data.to(self.args.device), target.to(self.args.device)
+            target = torch.nn.functional.one_hot(target)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)
 

@@ -242,7 +242,7 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
         relevance = relevance[:min_size]
         dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
-    dist = pairwise_distances(clusters, dataset).mean(axis=0) / relevance.reshape(-1, 1)
+    dist = pairwise_distances(clusters, dataset).mean(axis=0) * relevance.reshape(-1, 1)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")

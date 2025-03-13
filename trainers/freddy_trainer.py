@@ -225,7 +225,7 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     base = np.log(1 + alpha)
     for idx, n in enumerate(range(max_iter)):
         # print(val)
-        sampler = BisectingKMeans(n_clusters=n + 2)
+        sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
 
@@ -253,7 +253,7 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, w=relevance).sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="chebyshev").sum(axis=0)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")

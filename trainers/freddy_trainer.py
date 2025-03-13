@@ -314,8 +314,6 @@ class FreddyTrainer(SubsetTrainer):
             target = (
                 one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
             )
-            print(target.sum(axis=0))
-            exit()
             self.targets[epoch] += target.sum(axis=0)
             feat.append(np.abs(pred - target))
 
@@ -338,7 +336,7 @@ class FreddyTrainer(SubsetTrainer):
             tol=10e-3,
         )
         print(f"selected {len(sset)}")
-        print(f"selected {self.targets.sum(axis=1)}")
+        print(f"selected {self.targets.sum(axis=0)}")
         # self._relevance_score[sset] = score
         self.subset = sset
         self.selected[sset] += 1

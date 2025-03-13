@@ -253,12 +253,12 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="rogerstanimoto").sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")
 
-    return sset[:K]
+    return sset[-K:]
 
 
 # def freddy(

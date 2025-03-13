@@ -238,10 +238,10 @@ def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=Non
     min_size = math.ceil(len(dataset) * 0.8)
     if len(idx) > min_size:
         dataset = dataset[idx]
-    else:
-        idx = np.argsort(relevance)[::-1][:min_size]
-        relevance = relevance[:min_size]
-        dataset = dataset[:min_size]
+    # else:
+    #     idx = np.argsort(relevance)[::-1][:min_size]
+    #     relevance = relevance[:min_size]
+    #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
     dist = pairwise_distances(clusters, dataset).mean(axis=0)
     dist -= np.max(dist)

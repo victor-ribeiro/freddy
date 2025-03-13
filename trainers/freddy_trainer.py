@@ -130,8 +130,7 @@ def freddy(
         batched(idx, batch_size),
     ):
         V = list(V)
-        # D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
-        D = pairwise_distances(centers, ds)
+        D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
         # D += np.exp(D * -relevance[V])
         size = len(D)
         # lambda_, v1 = np.linalg.eigh(D)
@@ -377,7 +376,7 @@ class FreddyTrainer(SubsetTrainer):
             # print(target)
             # exit()
             # load data to device and record data loading time
-            histogram = target.sum(dim=0)
+            histogram = target.sum(dim=1)
             print(histogram)
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start

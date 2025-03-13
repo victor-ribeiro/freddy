@@ -292,7 +292,7 @@ class FreddyTrainer(SubsetTrainer):
         self.cur_error = 10e-7
         self.lambda_ = 0.5
         self.lr = 0.1
-        self.targets = np.ones((self.args.epochs, self.args.num_classes))
+        self.targets = np.zeros((self.args.epochs, self.args.num_classes))
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
@@ -335,12 +335,12 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
             tol=10e-3,
         )
-        self.targets[epoch:] += target[sset].sum(axis=0)
 
         print(f"selected {len(sset)}")
         print(f"selected {self.targets.sum(axis=0)}")
         # self._relevance_score[sset] = score
         self.subset = sset
+        self.targets[epoch:] += target[self.subset].sum(axis=0)
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
         self.train_checkpoint["importance"] = self._relevance_score

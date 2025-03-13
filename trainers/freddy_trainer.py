@@ -242,7 +242,7 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     return ValueError("Does not converge")
 
 
-def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=None):
+def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
     # idx = np.where(relevance > 0)
     # min_size = math.ceil(len(dataset) * 0.8)
     # if len(idx) > min_size:
@@ -253,7 +253,7 @@ def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=Non
     #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="correlation").sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="rogerstanimoto").sum(axis=0)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]
     sset = np.argsort(dist, kind="heapsort")

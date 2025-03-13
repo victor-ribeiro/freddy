@@ -251,6 +251,7 @@ def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=Non
     #     relevance = relevance[:min_size]
     #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
+    print(f"Found {len(clusters)} clusters")
     dist = pairwise_distances(clusters, dataset).mean(axis=0)
     dist -= np.max(dist)
     dist = np.abs(dist)[::-1]
@@ -340,18 +341,18 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        sset, score = freddy(
-            self.delta,
-            # lambda_=self.lambda_,
-            batch_size=256,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            relevance=self._relevance_score,
-        )
-        # sset = kmeans_sampler(
-        #     self.delta, K=self.sample_size, relevance=self._relevance_score
+        # sset, score = freddy(
+        #     self.delta,
+        #     # lambda_=self.lambda_,
+        #     batch_size=256,
+        #     K=self.sample_size,
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
+        #     relevance=self._relevance_score,
         # )
+        sset = kmeans_sampler(
+            self.delta, K=self.sample_size, relevance=self._relevance_score, tol=10e-3
+        )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
         self.subset = sset

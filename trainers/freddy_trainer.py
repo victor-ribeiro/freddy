@@ -131,7 +131,7 @@ def freddy(
     ):
         V = list(V)
         # D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
-        D = pairwise_distances(ds, centers)
+        D = pairwise_distances(centers, ds)
         # D += np.exp(D * -relevance[V])
         size = len(D)
         # lambda_, v1 = np.linalg.eigh(D)

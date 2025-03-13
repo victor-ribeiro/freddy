@@ -220,7 +220,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, cost
 
 
-def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
+def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
     base = np.log(1 + alpha)
     for idx, n in enumerate(range(max_iter)):
@@ -233,6 +233,7 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
             continue
 
         val[idx] = np.log(1 + sampler.inertia_ * alpha / val[val > 0].max() / base)
+        val[idx] += np.exp(val - relevance[idx])
 
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
@@ -241,7 +242,6 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
 
 
 def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=None):
-    dataset += dataset * np.exp(relevance.reshape(-1, 1))
     idx = np.where(relevance > 0)
     min_size = math.ceil(len(dataset) * 0.8)
     if len(idx) > min_size:
@@ -250,7 +250,7 @@ def kmeans_sampler(dataset, K, alpha=1.5, tol=10e-3, max_iter=500, relevance=Non
     #     idx = np.argsort(relevance)[::-1][:min_size]
     #     relevance = relevance[:min_size]
     #     dataset = dataset[:min_size]
-    clusters = _n_cluster(dataset, alpha, max_iter, tol)
+    clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).mean(axis=0)
     dist -= np.max(dist)

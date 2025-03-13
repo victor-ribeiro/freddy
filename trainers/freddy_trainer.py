@@ -132,9 +132,7 @@ def freddy(
         V = list(V)
         # D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
         D = pairwise_distances(ds, centers)
-        print(D.shape)
-        exit()
-        D += np.exp(D * -relevance[V])
+        # D += np.exp(D * -relevance[V])
         size = len(D)
         # lambda_, v1 = np.linalg.eigh(D)
         # i = np.argmax(lambda_)
@@ -150,7 +148,7 @@ def freddy(
 
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]]
+            s = D[idx_s[1], :]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):

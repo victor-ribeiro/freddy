@@ -409,8 +409,8 @@ class FreddyTrainer(SubsetTrainer):
         if self._relevance_score[self.subset].mean() < 0:
             self._relevance_score[self.subset] = 1
 
-        # if not epoch or (epoch + 1) % 5 == 0:
-        if (epoch + 1) % 5 == 0:
+        # if (epoch + 1) % 5 == 0:
+        if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             # self._update_train_loader_and_weights()
             # self.lambda_ = max(
@@ -423,6 +423,8 @@ class FreddyTrainer(SubsetTrainer):
         )
         train_loss = 0
         for batch_idx, (data, target, data_idx) in pbar:
+            print(target)
+            exit()
             # load data to device and record data loading time
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start
@@ -446,9 +448,11 @@ class FreddyTrainer(SubsetTrainer):
                 )
             )
             if self._relevance_score[data_idx].mean() < 0:
-                self._relevance_score[data_idx] += loss.item() * self.lr
+                # self._relevance_score[data_idx] += loss.item() * self.lr
+                self._relevance_score[data_idx] += np.cos(self.grad_norm * self.lr)
             else:
-                self._relevance_score[data_idx] -= loss.item() * self.lr
+                # self._relevance_score[data_idx] -= loss.item() * self.lr
+                self._relevance_score[data_idx] -= np.cos(self.grad_norm * self.lr)
             # self.model.eval()
             # with torch.no_grad():
             #     #     #### teste a rodar

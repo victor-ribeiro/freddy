@@ -336,6 +336,7 @@ class FreddyTrainer(SubsetTrainer):
         self.select_flag = True
         self.cur_error = 10e-7
         self.lambda_ = 0.5
+        self.lr = 0
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
@@ -351,7 +352,7 @@ class FreddyTrainer(SubsetTrainer):
         #     relevance=self._relevance_score,
         # )
         sset = kmeans_sampler(
-            self.delta, K=self.sample_size, relevance=self._relevance_score, tol=10e-3
+            self.delta, K=self.sample_size, relevance=self._relevance_score, tol=self.lr
         )
         print(f"selected {len(sset)}")
         # self._relevance_score[sset] = score
@@ -367,7 +368,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        lr = self.lr_scheduler.get_last_lr()[0]
+        self.lr = self.lr_scheduler.get_last_lr()[0]
         if self._relevance_score[self.subset].mean() < 0:
             self._relevance_score[self.subset] = 1
 

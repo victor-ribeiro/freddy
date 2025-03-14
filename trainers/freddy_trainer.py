@@ -237,10 +237,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
             break
             # return sampler.cluster_centers_
     val = val[val > 0]
-    import matplotlib.pyplot as plt
 
-    plt.plot(val)
-    plt.show()
     return sampler.cluster_centers_
     return ValueError("Does not converge")
 

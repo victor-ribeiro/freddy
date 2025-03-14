@@ -319,22 +319,22 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         target = np.vstack([*lbl])
-        # sset, score = freddy(
-        #     feat,
-        #     # lambda_=self.lambda_,
-        #     batch_size=256,
-        #     K=self.sample_size,
-        #     metric=self.args.freddy_similarity,
-        #     alpha=self.args.alpha,
-        #     relevance=self._relevance_score,
-        # )
-        sset = kmeans_sampler(
+        sset, score = freddy(
             feat,
+            # lambda_=self.lambda_,
+            batch_size=256,
             K=self.sample_size,
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
             relevance=self._relevance_score,
-            alpha=1.5,
-            tol=10e-2,
         )
+        # sset = kmeans_sampler(
+        #     feat,
+        #     K=self.sample_size,
+        #     relevance=self._relevance_score,
+        #     alpha=1.5,
+        #     tol=10e-3,
+        # )
 
         self.targets[epoch] += target[sset].sum(axis=0)
         p = self.targets.sum(axis=0) / len(sset)

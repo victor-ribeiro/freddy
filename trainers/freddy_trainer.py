@@ -226,18 +226,15 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
 
-            val[idx] = np.log(1 + (sampler.inertia_)) - base
+            val[idx] = np.log(1 + (sampler.inertia_ * alpha)) - base
             # val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 
-        val[idx] = np.log(sampler.inertia_ / val[val > 0].mean()) - base
+        val[idx] = np.log(sampler.inertia_ / val[val > 0].mean() / alpha) - base
         # val[idx] += np.exp(val[idx] - relevance.sum())
-        alpha = np.log(k + 2)
+        # alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
-            break
-            # return sampler.cluster_centers_
-
-    return sampler.cluster_centers_
+            return sampler.cluster_centers_
     return ValueError("Does not converge")
 
 
@@ -253,7 +250,7 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     dist -= np.sum(dist)
     dist = np.abs(dist)
     sset = np.argsort(dist, kind="heapsort")[::-1]
-
+    print(sset)
     return sset[:K]
 
 

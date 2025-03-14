@@ -362,7 +362,7 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         # if (epoch + 1) % 5 == 0:
-        if not epoch or (epoch + 1) % 10 == 0:
+        if not epoch or (epoch + 1) % 7 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             # self._update_train_loader_and_weights()
             # self.lambda_ = max(

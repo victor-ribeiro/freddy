@@ -334,7 +334,7 @@ class FreddyTrainer(SubsetTrainer):
             * (-(p * np.log2(1 + p))).sum()
             / np.log2(len(dataset))
         )
-        self._relevance_score = (1 / (score + 10e-8)).sum()
+        self._relevance_score = 1 / (score + 10e-8)
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
         self.subset = sset
         self.selected[sset] += 1

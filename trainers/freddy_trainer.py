@@ -328,11 +328,11 @@ class FreddyTrainer(SubsetTrainer):
         #     relevance=self._relevance_score,
         # )
         sset = kmeans_sampler(
-            feat**2,
+            feat**2 + feat,
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=1.5,
-            tol=10e-3,
+            tol=10e-2,
         )
 
         self.targets[epoch] += target[sset].sum(axis=0)

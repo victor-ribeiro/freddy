@@ -228,11 +228,11 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         if val[:idx].sum() == 0:
 
             val[idx] = np.log(1 + (sampler.inertia_ * alpha / base))
-            val[idx] += np.exp(val[idx] - relevance[idx])
+            # val[idx] += np.exp(val[idx] - relevance[idx])
             continue
 
-        val[idx] = np.log(1 + (sampler.inertia_ * alpha / val[val > 0].max() / base))
-        val[idx] += np.exp(val[idx] - relevance[idx])
+        val[idx] = np.log(1 + (sampler.inertia_ * alpha / val[val > 0].sum() / base))
+        # val[idx] += np.exp(val[idx] - relevance[idx])
 
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
@@ -241,14 +241,6 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 
 
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
-    # idx = np.where(relevance > 0)
-    # min_size = math.ceil(len(dataset) * 0.8)
-    # if len(idx) > min_size:
-    #     dataset = dataset[idx]
-    # else:
-    #     idx = np.argsort(relevance)[::-1][:min_size]
-    #     relevance = relevance[:min_size]
-    #     dataset = dataset[:min_size]
     clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)

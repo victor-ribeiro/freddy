@@ -251,8 +251,8 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
         metric="sqeuclidean",
     ).sum(axis=0)
 
-    dist -= np.mean(dist)
-    dist = np.log(np.abs(dist))
+    dist -= np.sum(dist)
+    dist = np.abs(dist)
     sset = np.argsort(dist, kind="heapsort")[::-1]
 
     return sset[:K]
@@ -309,7 +309,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(label - pred)
+            feat.append(pred - label)
             lbl.append(label)
 
         # feat = map(np.abs, feat)
@@ -328,7 +328,7 @@ class FreddyTrainer(SubsetTrainer):
             feat,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=1.5,
+            alpha=1,
             tol=10e-3,
         )
 

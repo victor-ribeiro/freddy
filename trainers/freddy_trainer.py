@@ -241,10 +241,10 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 
 
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
-    # idx = np.where(relevance > 0)
-    # min_size = math.ceil(len(dataset) * 0.8)
-    # if len(idx) > min_size:
-    #     dataset = dataset[idx]
+    idx = np.where(relevance > 0)
+    min_size = math.ceil(len(dataset) * 0.8)
+    if len(idx) > min_size:
+        dataset = dataset[idx]
     # else:
     #     idx = np.argsort(relevance)[::-1][:min_size]
     #     relevance = relevance[:min_size]
@@ -318,22 +318,22 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         target = np.vstack([*lbl])
-        sset, score = freddy(
-            feat,
-            # lambda_=self.lambda_,
-            batch_size=256,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            relevance=self._relevance_score,
-        )
-        # sset = kmeans_sampler(
+        # sset, score = freddy(
         #     feat,
+        #     # lambda_=self.lambda_,
+        #     batch_size=256,
         #     K=self.sample_size,
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
         #     relevance=self._relevance_score,
-        #     alpha=1.5,
-        #     tol=10e-3,
         # )
+        sset = kmeans_sampler(
+            feat,
+            K=self.sample_size,
+            relevance=self._relevance_score,
+            alpha=1.5,
+            tol=10e-3,
+        )
 
         self.targets[epoch] += target[sset].sum(axis=0)
         p = self.targets.sum(axis=0) / len(sset)

@@ -309,7 +309,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
-        target = np.vstack([*tgt])
+        tgt = np.vstack([*tgt])
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,
@@ -327,7 +327,7 @@ class FreddyTrainer(SubsetTrainer):
             tol=10e-3,
         )
 
-        self.targets[epoch] += target[sset].sum(axis=0)
+        self.targets[epoch] += tgt[sset].sum(axis=0)
         p = self.targets.sum(axis=0) / len(sset)
         score = (
             np.linalg.norm(feat, axis=1)

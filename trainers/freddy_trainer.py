@@ -227,11 +227,11 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         if val[:idx].sum() == 0:
 
             val[idx] = np.log(1 + (sampler.inertia_)) - base
-            val[idx] += np.exp(val[idx] - relevance.sum())
+            # val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 
         val[idx] = np.log(sampler.inertia_ / val[val > 0].mean()) - base
-        val[idx] += np.exp(val[idx] - relevance.sum())
+        # val[idx] += np.exp(val[idx] - relevance.sum())
         alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
             break

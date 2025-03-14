@@ -328,7 +328,7 @@ class FreddyTrainer(SubsetTrainer):
         #     relevance=self._relevance_score,
         # )
         sset = kmeans_sampler(
-            feat,
+            feat**2,
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=1.5,
@@ -337,11 +337,7 @@ class FreddyTrainer(SubsetTrainer):
 
         self.targets[epoch] += target[sset].sum(axis=0)
         p = self.targets.sum(axis=0) / len(sset)
-        score = (
-            ((target - feat) ** 2)
-            * (-(p * np.log2(1 + p)).sum())
-            / np.log2(len(dataset))
-        )
+        score = (target - feat) * (-(p * np.log2(1 + p))) / np.log2(len(dataset))
         self._relevance_score = (1 / (score + 10e-8)).sum(axis=1)
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
         self.subset = sset

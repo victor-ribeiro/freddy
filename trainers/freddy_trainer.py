@@ -412,6 +412,7 @@ class FreddyTrainer(SubsetTrainer):
         train_loss /= len(self.train_loader)
 
         if self.hist:
+            print(self.subset)
             self.hist[-1]["avg_importance"] = self._relevance_score[self.subset].mean()
 
         print(f"relative error: {self.cur_error}")

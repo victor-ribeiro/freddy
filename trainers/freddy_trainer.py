@@ -236,11 +236,6 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
-    import matplotlib.pyplot as plt
-
-    plt.plot(val)
-    plt.show()
-    exit()
     # return sampler.cluster_centers_
     return ValueError("Does not converge")
 

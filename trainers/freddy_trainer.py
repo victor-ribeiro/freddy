@@ -333,6 +333,7 @@ class FreddyTrainer(SubsetTrainer):
         score = (
             np.linalg.norm(feat) * (-(p * np.log2(1 + p))).sum() / np.log2(len(dataset))
         )
+        print(f"score {score}")
         self._relevance_score = 1 / score
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
         self.subset = sset

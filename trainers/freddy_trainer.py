@@ -332,6 +332,7 @@ class FreddyTrainer(SubsetTrainer):
             feat,
             K=self.sample_size,
             relevance=self._relevance_score,
+            alpha=1.5,
             tol=10e-3,
         )
 

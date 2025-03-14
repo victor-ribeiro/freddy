@@ -221,7 +221,7 @@ def linear_selector(r, v1, k, lambda_=0.5):
 def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
     for idx, n in enumerate(range(max_iter)):
-        base = np.log(1 + alpha)
+        base = np.log(1 + alpha)/
         sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
@@ -236,7 +236,6 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         if abs(val[:idx].min() - val[idx]) < tol:
             break
             # return sampler.cluster_centers_
-    val = val[val > 0]
 
     return sampler.cluster_centers_
     return ValueError("Does not converge")

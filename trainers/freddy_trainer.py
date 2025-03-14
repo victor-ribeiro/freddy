@@ -112,9 +112,9 @@ def freddy(
     # alpha = 0.5
     base_inc = base_inc(alpha)
     # base_inc = 0
-    # idx = np.arange(len(dataset))
-    # idx = np.random.permutation(idx)
-    # q = Queue()
+    idx = np.arange(len(dataset))
+
+    q = Queue()
 
     # idx = np.where(relevance > 0)
     # min_size = math.ceil(len(dataset) * 0.8)

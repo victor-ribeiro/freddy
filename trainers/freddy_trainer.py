@@ -218,39 +218,47 @@ def linear_selector(r, v1, k, lambda_=0.5):
     return selected_indices, cost
 
 
-def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
+def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
-    base = np.log(1 + alpha)
     for idx, n in enumerate(range(max_iter)):
-        # print(val)
+        base = np.log(1 + alpha)
         sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
 
-            val[idx] = np.log(1 + (sampler.inertia_ * alpha / base))
-            # val[idx] += np.exp(val[idx] - relevance[idx])
+            val[idx] = np.log(1 + (sampler.inertia_)) - base
+            val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 
-        val[idx] = np.log(1 + (sampler.inertia_ * alpha / val[val > 0].sum() / base))
-        # val[idx] += np.exp(val[idx] - relevance[idx])
-
+        val[idx] = np.log(sampler.inertia_ / val[val > 0].mean()) - base
+        val[idx] += np.exp(val[idx] - relevance.sum())
+        alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
-            return sampler.cluster_centers_
-    # return sampler.cluster_centers_
+            break
+            # return sampler.cluster_centers_
+    val = val[val > 0]
+    import matplotlib.pyplot as plt
+
+    plt.plot(val)
+    plt.show()
+    return sampler.cluster_centers_
     return ValueError("Does not converge")
 
 
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
-    clusters = _n_cluster(dataset, alpha, max_iter, tol, relevance)
+    clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+    dist = pairwise_distances(
+        clusters / relevance.mean(),
+        dataset / relevance.reshape(-1, 1),
+        metric="sqeuclidean",
+    ).sum(axis=0)
 
-    dist -= np.sum(dist)
-    dist = np.abs(dist)[::-1] * relevance
-    sset = np.argsort(dist, kind="heapsort")
+    dist -= np.mean(dist)
+    dist = np.log(np.abs(dist))
+    sset = np.argsort(dist, kind="heapsort")[::-1]
 
-    return sset[-K:]
-    # return sset[:K]
+    return sset[:K]
 
 
 def shannon_entropy(vector, epsilon=1e-10):
@@ -304,7 +312,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(pred - label)
+            feat.append(label - pred)
             lbl.append(label)
 
         # feat = map(np.abs, feat)
@@ -330,11 +338,9 @@ class FreddyTrainer(SubsetTrainer):
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p = self.targets.sum(axis=0) / len(sset)
         score = (
-            np.linalg.norm(feat, axis=1)
-            * (-(p * np.log2(1 + p))).sum()
-            / np.log2(len(dataset))
+            np.linalg.norm(feat) * (-(p * np.log2(1 + p))).sum() / np.log2(len(dataset))
         )
-        self._relevance_score = 1 / (score + 10e-8)
+        self._relevance_score = 1 / score
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
         self.subset = sset
         self.selected[sset] += 1

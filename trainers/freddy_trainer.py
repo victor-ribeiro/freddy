@@ -246,10 +246,10 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 
 
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
-    idx = np.where(relevance > 0)
-    min_size = math.ceil(len(dataset) * 0.8)
-    if len(idx) > min_size:
-        dataset = dataset[idx]
+    # idx = np.where(relevance > 0)
+    # min_size = math.ceil(len(dataset) * 0.8)
+    # if len(idx) > min_size:
+    #     dataset = dataset[idx]
     # else:
     #     idx = np.argsort(relevance)[::-1][:min_size]
     #     relevance = relevance[:min_size]
@@ -316,7 +316,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             tgt = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(tgt - pred)
+            feat.append(pred - tgt)
 
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])

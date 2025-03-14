@@ -236,6 +236,11 @@ def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
+    import matplotlib.pyplot as plt
+
+    plt.plot(val)
+    plt.show()
+    exit()
     # return sampler.cluster_centers_
     return ValueError("Does not converge")
 
@@ -308,16 +313,13 @@ class FreddyTrainer(SubsetTrainer):
 
         self.model.eval()
         feat = []
-        lbl = []
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             tgt = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(pred)
-            lbl.append(tgt)
+            feat.append(tgt - pred)
 
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
-        target = np.vstack([*lbl])
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,
@@ -332,12 +334,16 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=1.5,
-            tol=10e-2,
+            tol=10e-3,
         )
 
         self.targets[epoch] += target[sset].sum(axis=0)
         p = self.targets.sum(axis=0) / len(sset)
-        score = (target - feat) * (-(p * np.log2(1 + p))) / np.log2(len(dataset))
+        score = (
+            np.linalg.norm(feat, axis=1)
+            * (-(p * np.log2(1 + p))).sum()
+            / np.log2(len(dataset))
+        )
         self._relevance_score = (1 / (score + 10e-8)).sum(axis=1)
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
         self.subset = sset

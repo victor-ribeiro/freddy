@@ -313,7 +313,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             tgt = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(pred - tgt)
+            feat.append(pred)
             lbl.append(tgt)
 
         # feat = map(np.abs, feat)
@@ -333,12 +333,12 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=1.5,
-            tol=10e-3,
+            tol=10e-2,
         )
 
         self.targets[epoch] += target[sset].sum(axis=0)
         p = self.targets.sum(axis=0) / len(sset)
-        score = feat * (-(p * np.log2(1 + p)).sum()) / np.log2(len(dataset))
+        score = (target - feat) * (-(p * np.log2(1 + p)).sum()) / np.log2(len(dataset))
         self._relevance_score = (1 / (score + 10e-8)).sum(axis=1)
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
         self.subset = sset

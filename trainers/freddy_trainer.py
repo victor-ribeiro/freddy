@@ -329,7 +329,7 @@ class FreddyTrainer(SubsetTrainer):
         score = (
             np.linalg.norm(feat, axis=1)
             * (-(p * np.log2(1 + p))).sum()
-            / np.log2(len(dataset))
+            / np.log2(self.targets.sum())
         )
         print(f"score {score}")
         self._relevance_score = -1 / score

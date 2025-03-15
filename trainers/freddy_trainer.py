@@ -313,6 +313,7 @@ class FreddyTrainer(SubsetTrainer):
             self.clusters = _n_cluster(
                 feat, self.sample_size, 0.5, 500, 10e-3, self._relevance_score
             )
+        self.clusters -= self.clusters * self.grad_norm * self.lr
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,

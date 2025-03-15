@@ -241,7 +241,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
     clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").mean(axis=0)
 
     dist -= np.sum(dist)
     dist = np.abs(dist) * relevance

@@ -309,7 +309,7 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
-        if self.clusters == None:
+        if not np.all(self.clusters):
             self.clusters = _n_cluster(
                 feat, self.sample_size, 0.5, 500, 10e-3, self._relevance_score
             )

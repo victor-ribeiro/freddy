@@ -241,11 +241,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
     clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(
-        clusters / relevance.mean(),
-        dataset / relevance.reshape(-1, 1),
-        metric="sqeuclidean",
-    ).sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
 
     dist -= np.sum(dist)
     dist = np.abs(dist)
@@ -324,12 +320,12 @@ class FreddyTrainer(SubsetTrainer):
             feat,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=1,
+            alpha=1.5,
             tol=10e-3,
         )
 
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        p = self.targets.sum(axis=0) / len(sset)
+        p = self.targets.sum(axis=0) / self.targets.sum()
         score = (
             np.linalg.norm(feat, axis=1)
             * (-(p * np.log2(1 + p))).sum()

@@ -324,7 +324,7 @@ class FreddyTrainer(SubsetTrainer):
         # )
         sset = kmeans_sampler(
             feat,
-            clusters=self.clusters
+            clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=1.5,

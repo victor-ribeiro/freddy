@@ -226,11 +226,11 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
 
-            val[idx] = np.log(1 + (sampler.inertia_)) - base
+            val[idx] = np.log(1 + (sampler.inertia_) / val[val > 0].sum()) - base
             # val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 
-        val[idx] = np.log(sampler.inertia_ / val[val > 0].mean()) - base
+        val[idx] = np.log(sampler.inertia_ / val[val > 0].sum()) - base
         # val[idx] += np.exp(val[idx] - relevance.sum())
         # alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
@@ -325,12 +325,8 @@ class FreddyTrainer(SubsetTrainer):
         )
 
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        p = self.targets.sum(axis=0) / self.targets.sum()
-        score = (
-            np.linalg.norm(feat, axis=1)
-            * (-(p * np.log2(1 + p))).sum()
-            / np.log2(self.targets.sum())
-        )
+        p = self.targets.sum(axis=0) / len(sset)
+        score = np.linalg.norm(feat, axis=1) * (-(p * np.log2(1 + p))).sum()
         print(f"score {score}")
         self._relevance_score = -1 / score
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")

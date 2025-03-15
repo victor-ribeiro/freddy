@@ -232,7 +232,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 
         val[idx] = np.log(sampler.inertia_ / val[val > 0].mean()) - base
         # val[idx] += np.exp(val[idx] - relevance.sum())
-        # alpha = np.log(k + 2)
+        alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
     return ValueError("Does not converge")
@@ -244,7 +244,7 @@ def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None)
     dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").mean(axis=0)
 
     dist -= np.sum(dist)
-    dist = np.abs(dist) * relevance
+    dist = np.abs(dist) / relevance * alpha
     sset = np.argsort(dist, kind="heapsort")[::-1]
     print(sset)
     return sset[:K]
@@ -301,7 +301,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(pred - label)
+            feat.append(abs(pred - label))
             lbl.append(label)
 
         # feat = map(np.abs, feat)

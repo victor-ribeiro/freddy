@@ -238,8 +238,10 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     return ValueError("Does not converge")
 
 
-def kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, relevance=None):
-    clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
+def kmeans_sampler(
+    dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
+):
+    # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").mean(axis=0)
 
@@ -281,6 +283,7 @@ class FreddyTrainer(SubsetTrainer):
         self.lambda_ = 0.5
         self.lr = 0.1
         self.targets = np.zeros((self.args.epochs, self.args.num_classes))
+        self.clusters = None
 
     def _select_subset(self, epoch, training_step):
         self.model.eval()
@@ -303,10 +306,13 @@ class FreddyTrainer(SubsetTrainer):
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
             feat.append(abs(pred - label))
             lbl.append(label)
-
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
+        if self.clusters == None:
+            self.clusters = _n_cluster(
+                feat, self.sample_size, 0.5, 500, 10e-3, self._relevance_score
+            )
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,
@@ -318,6 +324,7 @@ class FreddyTrainer(SubsetTrainer):
         # )
         sset = kmeans_sampler(
             feat,
+            clusters=self.clusters
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=1.5,

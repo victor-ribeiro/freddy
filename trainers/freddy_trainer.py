@@ -226,7 +226,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
 
-            val[idx] = np.log(1 + (sampler.inertia_) / val[val > 0].mean()) - base
+            val[idx] = np.log(1 + sampler.inertia_) - base
             # val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 

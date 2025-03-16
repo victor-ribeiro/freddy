@@ -328,7 +328,7 @@ class FreddyTrainer(SubsetTrainer):
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=1.5,
+            alpha=0.5,
             tol=10e-3,
         )
 

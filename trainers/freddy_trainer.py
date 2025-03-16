@@ -254,7 +254,7 @@ def kmeans_sampler(
     dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").mean(axis=0)
 
     dist -= np.sum(dist)
-    dist = np.abs(dist)  # * relevance * alpha
+    dist = np.abs(dist) / (relevance * alpha)
     sset = np.argsort(dist, kind="heapsort")[::-1]
     print(sset)
     return sset[:K]
@@ -336,7 +336,7 @@ class FreddyTrainer(SubsetTrainer):
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=1,
+            alpha=1.5,
             tol=10e-3,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)

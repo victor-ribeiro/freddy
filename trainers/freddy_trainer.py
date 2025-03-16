@@ -231,7 +231,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         if val[:idx].sum() == 0:
 
             val[idx] = (
-                np.log(1 + sampler.inertia_) - base + np.log(1 + relevance.mean())
+                np.log(1 + sampler.inertia_) - base - np.log(1 + relevance.mean())
             )
             val[idx] -= np.exp(val[idx] - relevance.sum())
             continue
@@ -239,7 +239,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         val[idx] = (
             np.log(sampler.inertia_ / val[val > 0].mean())
             - base
-            + np.log(1 + relevance.mean())
+            - np.log(1 + relevance.mean())
         )
         val[idx] -= np.exp(val[idx] - relevance.sum())
         alpha = np.log(k + 2)
@@ -369,8 +369,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        if epoch % 7 == 0:
-            # if not epoch or (epoch + 1) % 5 == 0:
+        # if epoch % 7 == 0:
+        if not epoch or (epoch + 1) % 6 == 0:
             # if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             # self._update_train_loader_and_weights()

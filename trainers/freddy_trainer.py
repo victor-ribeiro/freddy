@@ -4,7 +4,11 @@ import math
 from itertools import batched
 from functools import reduce
 from sklearn.metrics import pairwise_distances
-from sklearn.cluster import BisectingKMeans, AgglomerativeClustering
+from sklearn.cluster import (
+    BisectingKMeans,
+    AgglomerativeClustering,
+    FeatureAgglomeration,
+)
 
 
 import torch
@@ -223,7 +227,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
         # sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
-        sampler = AgglomerativeClustering(n_clusters=n + 2)
+        sampler = FeatureAgglomeration(n_clusters=n + 2)
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
 

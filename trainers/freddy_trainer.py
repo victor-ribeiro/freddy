@@ -4,7 +4,7 @@ import math
 from itertools import batched
 from functools import reduce
 from sklearn.metrics import pairwise_distances
-from sklearn.cluster import BisectingKMeans, Birch
+from sklearn.cluster import BisectingKMeans, AgglomerativeClustering
 
 
 import torch
@@ -223,19 +223,24 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
         # sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
-        sampler = Birch(n_clusters=n + 2)
+        sampler = AgglomerativeClustering(n_clusters=n + 2)
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
 
-            val[idx] = np.log(1 + sampler.inertia_) - base
+            # val[idx] = np.log(1 + sampler.inertia_) - base
+            val[idx] = np.log(1 + sampler.distances_) - base
             # val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 
-        val[idx] = np.log(sampler.inertia_ / val[val > 0].mean()) - base
+        # val[idx] = np.log(sampler.inertia_ / val[val > 0].mean()) - base
+        val[idx] = np.log(sampler.distances_ / val[val > 0].mean()) - base
         # val[idx] += np.exp(val[idx] - relevance.sum())
         alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
-            return sampler.cluster_centers_
+            # return sampler.cluster_centers_
+            print(sampler.children_)
+            exit()
+            return sampler.children_
     return ValueError("Does not converge")
 
 

@@ -336,7 +336,7 @@ class FreddyTrainer(SubsetTrainer):
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=0.5,
+            alpha=1,
             tol=10e-3,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)

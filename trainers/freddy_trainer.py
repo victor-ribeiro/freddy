@@ -224,25 +224,28 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
 def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
+
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
         sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++", n_init=10)
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
-
-            val[idx] = np.log(1 + sampler.inertia_) - base + np.log(1 + relevance.std())
+            inertia = sampler.inertia_
+            val[idx] = np.log(1 + inertia) - base + np.log(1 + relevance.std())
             # val[idx] -= np.exp(val[idx] - relevance.sum())
             continue
 
         val[idx] = (
-            np.log(sampler.inertia_ / val[val > 0].mean())
-            - base
-            + np.log(1 + relevance.std())
+            np.log(inertia / val[val > 0].mean()) - base + np.log(1 + relevance.std())
         )
         # val[idx] -= np.exp(val[idx] - relevance.sum())
         alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
-            return sampler.cluster_centers_
+            # return sampler.cluster_centers_
+            import matplotlib.pyplot as plt
+
+            plt.plot(val[val > 0], label=alpha)
+
     return ValueError("Does not converge")
 
 
@@ -375,7 +378,7 @@ class FreddyTrainer(SubsetTrainer):
         if not epoch or (epoch + 1) % 8 == 0:
             # if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            # self._update_train_loader_and_weights()
+            self._update_train_loader_and_weights()
             # self.lambda_ = max(
             #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
             # )

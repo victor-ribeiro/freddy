@@ -319,9 +319,10 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
-        self.clusters = _n_cluster(
-            feat, self.sample_size, 1, 500, 10e-3, self._relevance_score
-        )
+        if epoch % 20 == 0:
+            self.clusters = _n_cluster(
+                feat, self.sample_size, 1, 500, 10e-3, self._relevance_score
+            )
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,

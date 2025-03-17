@@ -255,7 +255,8 @@ def kmeans_sampler(
 
     dist -= np.sum(dist)
     dist = np.abs(dist) / (relevance * alpha)
-    sset = np.argsort(dist, kind="heapsort")[::-1]
+    # sset = np.argsort(dist, kind="heapsort")[::-1]
+    sset = np.argsort(dist, kind="heapsort")
     print(sset)
     return sset[:K]
 

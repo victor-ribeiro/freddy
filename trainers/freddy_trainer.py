@@ -253,7 +253,7 @@ def kmeans_sampler(
     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
 ):
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
-    dataset = dataset * relevance.reshape(-1, 1)
+    dataset = dataset / relevance.reshape(-1, 1)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").mean(axis=0)
 

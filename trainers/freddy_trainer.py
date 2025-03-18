@@ -100,128 +100,6 @@ class Queue(list):
         self.append(item)
 
 
-@_register
-def freddy(
-    dataset,
-    base_inc=base_inc,
-    alpha=0.15,
-    metric="similarity",
-    K=1,
-    batch_size=128,
-    beta=1,
-    return_vals=False,
-    relevance=None,
-):
-    # basic config
-    # alpha = 0.5
-    base_inc = base_inc(alpha)
-    # base_inc = 0
-    idx = np.arange(len(dataset))
-
-    q = Queue()
-
-    # idx = np.where(relevance > 0)
-    # min_size = math.ceil(len(dataset) * 0.8)
-    # if len(idx) > min_size:
-    #     dataset = dataset[idx]
-
-    sset = []
-    vals = []
-    argmax = 0
-    for ds, V in zip(
-        batched(dataset, batch_size),
-        batched(idx, batch_size),
-    ):
-        V = list(V)
-        D = METRICS[metric](ds, batch_size=batch_size) * relevance[V]
-        # D += np.exp(D * -relevance[V])
-        size = len(D)
-        # lambda_, v1 = np.linalg.eigh(D)
-        # i = np.argmax(lambda_)
-        # v1 = v1[i]
-        # if v1 @ relevance[V] < 0:
-        # v1 = -v1
-        # v1 = np.maximum(0, v1) * relevance[V]
-        # D = np.dot(v1.reshape(-1, 1), relevance[V].reshape(1, -1))
-
-        localmax = np.amax(D, axis=1)
-        argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
-
-        while q and len(sset) < K:
-            score, idx_s = q.head
-            s = D[idx_s[1], :]
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            inc = score_s - score
-            if (inc < 0) or (not q):
-                break
-            score_t, idx_t = q.head
-            if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                localmax = np.maximum(localmax, s)
-                sset.append(idx_s[0])
-                vals.append(score)
-                alpha = min(1, alpha * 1.1)
-            else:
-                alpha = max(0.5, alpha * 0.8)
-                q.push(inc, idx_s)
-            q.push(score_t, idx_t)
-    print(f"alpha: {alpha:.6f}")
-    return sset, np.array(vals)
-    if return_vals:
-        return np.array(vals), sset
-    return np.array(sset)
-
-
-def linear_selector(r, v1, k, lambda_=0.5):
-    from scipy.optimize import linprog, minimize
-
-    """
-    Solves the LP relaxation and rounds the solution to select k items.
-    
-    Args:
-        r (np.ndarray): Relevance scores (shape: [n])
-        v1 (np.ndarray): r_i * eigenvector component (shape: [n])
-        lambda_ (float): Penalty strength
-        k (int): Number of items to select
-        
-    Returns:
-        selected_indices (list): Indices of selected items
-        cost (float): Final cost value
-    """
-    n = len(r)
-
-    # Linear program setup
-    c = np.hstack([-r, lambda_])  # Minimize -sum(r x_i) + lambda z
-    A_eq = np.hstack([np.ones(n), 0]).reshape(1, n + 1)
-    b_eq = np.array([k])
-    A_ub = np.hstack([v1, 1]).reshape(1, n + 1)
-    b_ub = np.array([0])
-    bounds = [(0, 1) for _ in range(n)] + [(0, None)]
-
-    # Solve LP
-    result = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds)
-    x = result.x[:n]
-
-    # Threshold to select top k items
-    # exit()
-    selected_indices = np.argsort(x)[-k:][::-1].tolist()
-    selected_indices.sort()
-
-    # # Compute final cost
-    # alignment = np.sum(v1[selected_indices])
-    # relevance = np.sum(r[selected_indices])
-    # penalty = lambda_ * max(0, -alignment)
-    # cost = -relevance + penalty
-    # Compute final cost
-    alignment = v1[selected_indices]
-    relevance = r[selected_indices]
-    penalty = lambda_ * np.maximum(0, -alignment)
-    cost = -relevance + penalty
-    # cost = np.log(1 + cost)
-    return selected_indices, cost
-
-
 def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
     for idx, n in enumerate(range(max_iter)):
@@ -229,7 +107,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         sampler = BisectingKMeans(
             n_clusters=n + 2, init="k-means++", bisecting_strategy="largest_cluster"
         )
-        sampler.fit(dataset)
+        sampler.fit(dataset * relevance.reshape(-1, 1))
         if val[:idx].sum() == 0:
 
             val[idx] = np.log(1 + sampler.inertia_) - base
@@ -307,6 +185,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
+        alpha = 1
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
@@ -316,7 +195,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         self.clusters = _n_cluster(
-            feat, self.sample_size, 1, 500, 10e-3, self._relevance_score
+            feat, self.sample_size, alpha, 500, 10e-3, self._relevance_score
         )
         # sset, score = freddy(
         #     feat,
@@ -334,7 +213,7 @@ class FreddyTrainer(SubsetTrainer):
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=0.5,
+            alpha=alpha,
             tol=10e-3,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)

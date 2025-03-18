@@ -106,7 +106,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     alpha = 2
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
-        sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++", n_init=10)
+        sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
         sampler.fit(dataset, sample_weight=relevance)
         inertia = 1 / (sampler.inertia_ + 10e-8)
         if val[:idx].sum() == 0:
@@ -191,7 +191,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
-        alpha = 1
+        alpha = 2
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()

@@ -350,7 +350,7 @@ class FreddyTrainer(SubsetTrainer):
         p = self.targets[epoch].sum(axis=0) / len(sset)
         score = np.linalg.norm(feat, axis=1) * (-(p * np.log2(1 + p))).sum()
         score = (score.mean() - score) / score.std()
-        self._relevance_score = score
+        self._relevance_score = 1 / (score + 10e-8)
         print(f"score {score}")
 
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")

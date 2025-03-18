@@ -316,7 +316,9 @@ class FreddyTrainer(SubsetTrainer):
         lbl = []
         # alpha: anteriores
         # 0.5
-        alpha = 0.1
+        # 0.1
+
+        alpha = 1.5
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()

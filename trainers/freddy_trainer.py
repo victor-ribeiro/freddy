@@ -103,7 +103,6 @@ class Queue(list):
 def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
     cls = np.zeros(max_iter)
-    alpha = 0.1
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
         sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
@@ -117,7 +116,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         val[idx] = np.log(inertia / val[val > 0].sum()) - base
         cls[idx] = n + 2
         # val[idx] += np.exp(val[idx] - relevance.sum())
-        alpha += np.log(k + 2)
+        # alpha += np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
             # import matplotlib.pyplot as plt
 

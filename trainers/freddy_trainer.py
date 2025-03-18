@@ -102,22 +102,28 @@ class Queue(list):
 
 def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
+    cls = np.zeros(max_iter)
+    alpha = 2
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
-        sampler = BisectingKMeans(
-            n_clusters=n + 2, init="k-means++", bisecting_strategy="largest_cluster"
-        )
-        sampler.fit(dataset * relevance.reshape(-1, 1))
+        sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++", n_init=10)
+        sampler.fit(dataset, sample_weight=relevance)
+        inertia = 1 / (sampler.inertia_ + 10e-8)
         if val[:idx].sum() == 0:
-
-            val[idx] = np.log(1 + sampler.inertia_) - base
+            val[idx] = np.log(1 + inertia) - base
             # val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 
-        val[idx] = np.log(sampler.inertia_ / val[val > 0].sum()) - base
+        val[idx] = np.log(inertia / val[val > 0].sum()) - base
+        cls[idx] = n + 2
         # val[idx] += np.exp(val[idx] - relevance.sum())
         alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
+            # import matplotlib.pyplot as plt
+
+            # plt.plot(cls[cls > 0], val[val > 0])
+            # plt.show()
+            # exit()
             return sampler.cluster_centers_
     return ValueError("Does not converge")
 
@@ -127,10 +133,10 @@ def kmeans_sampler(
 ):
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").mean(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
 
     dist -= np.sum(dist)
-    dist = np.abs(dist) / relevance * alpha
+    dist = np.abs(dist)
     sset = np.argsort(dist, kind="heapsort")[::-1]
     print(sset)
     return sset[:K]
@@ -189,14 +195,15 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(abs(pred - label))
+            feat.append(pred - label)
             lbl.append(label)
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
-        self.clusters = _n_cluster(
-            feat, self.sample_size, alpha, 500, 10e-3, self._relevance_score
-        )
+        if epoch % 10 == 0:
+            self.clusters = _n_cluster(
+                feat, self.sample_size, alpha, 500, 10e-3, self._relevance_score
+            )
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,
@@ -244,11 +251,11 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        if epoch % 5 == 0:
-            # if not epoch or (epoch + 1) % 5 == 0:
+        # if epoch % 5 == 0:
+        if not epoch or (epoch + 1) % 7 == 0:
             # if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            # self._update_train_loader_and_weights()
+            self._update_train_loader_and_weights()
             # self.lambda_ = max(
             #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
             # )

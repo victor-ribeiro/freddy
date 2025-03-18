@@ -106,17 +106,18 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
         sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
-        sampler.fit(dataset)
+        sampler.fit(dataset, sample_weight=relevance)
         inertia = sampler.inertia_ + 10e-8
         if val[:idx].sum() == 0:
             val[idx] = np.log(1 + inertia) - base
-            # val[idx] += np.exp(val[idx] - relevance.sum())
+            val[idx] += np.exp(val[idx] - relevance.sum())
+            cls[idx] = n + 2
             continue
 
         val[idx] = np.log(inertia / val[val > 0].sum()) - base
         cls[idx] = n + 2
-        # val[idx] += np.exp(val[idx] - relevance.sum())
-        # alpha += np.log(k + 2)
+        val[idx] += np.exp(val[idx] - relevance.sum())
+        alpha += np.log(k + 2) * 0.1
         if abs(val[:idx].min() - val[idx]) < tol:
             # import matplotlib.pyplot as plt
 
@@ -220,7 +221,7 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=alpha,
-            tol=10e-3,
+            tol=10e-2,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p = self.targets[epoch].sum(axis=0) / len(sset)

@@ -224,29 +224,20 @@ def linear_selector(r, v1, k, lambda_=0.5):
 
 def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     val = np.zeros(max_iter)
-
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
-        sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++", n_init=10)
+        sampler = BisectingKMeans(
+            n_clusters=n + 2, init="k-means++", bisecting_strategy="largest_cluster"
+        )
         sampler.fit(dataset)
         if val[:idx].sum() == 0:
-            inertia = sampler.inertia_
-            val[idx] = (
-                np.log(1 + inertia)
-                - base
-                # + np.log(1 + relevance.mean())
-                # - np.log(1 + relevance.std())
-            )
-            # val[idx] -= np.exp(val[idx] - relevance.sum())
+
+            val[idx] = np.log(1 + sampler.inertia_) - base
+            # val[idx] += np.exp(val[idx] - relevance.sum())
             continue
 
-        val[idx] = (
-            np.log(inertia / val[val > 0].mean())
-            - base
-            # + np.log(1 + relevance.mean())
-            # - np.log(1 + relevance.std())
-        )
-        # val[idx] -= np.exp(val[idx] - relevance.sum())
+        val[idx] = np.log(sampler.inertia_ / val[val > 0].sum()) - base
+        # val[idx] += np.exp(val[idx] - relevance.sum())
         alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
@@ -257,14 +248,12 @@ def kmeans_sampler(
     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
 ):
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
-    dataset = dataset * relevance.reshape(-1, 1)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="euclidean").sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").mean(axis=0)
 
     dist -= np.sum(dist)
-    dist = np.abs(dist)
+    dist = np.abs(dist) / relevance * alpha
     sset = np.argsort(dist, kind="heapsort")[::-1]
-    # sset = np.argsort(dist, kind="heapsort")
     print(sset)
     return sset[:K]
 
@@ -318,11 +307,6 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
-        # alpha: anteriores
-        # 0.5
-        # 0.1
-
-        alpha = 1
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
@@ -331,15 +315,9 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
-        if epoch % 20 == 0:
-            self.clusters = _n_cluster(
-                feat * self._relevance_score.reshape(-1, 1),
-                self.sample_size,
-                alpha,
-                500,
-                10e-3,
-                self._relevance_score,
-            )
+        self.clusters = _n_cluster(
+            feat, self.sample_size, 1, 500, 10e-3, self._relevance_score
+        )
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,
@@ -356,14 +334,14 @@ class FreddyTrainer(SubsetTrainer):
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=alpha,
-            tol=10e-5,
+            alpha=0.5,
+            tol=10e-3,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p = self.targets[epoch].sum(axis=0) / len(sset)
         score = np.linalg.norm(feat, axis=1) * (-(p * np.log2(1 + p))).sum()
         score = (score.mean() - score) / score.std()
-        self._relevance_score = 1 / (score + 10e-8)
+        self._relevance_score = score
         print(f"score {score}")
 
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
@@ -387,11 +365,11 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        # if epoch % 7 == 0:
-        if not epoch or (epoch + 1) % 8 == 0:
+        if epoch % 5 == 0:
+            # if not epoch or (epoch + 1) % 5 == 0:
             # if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            self._update_train_loader_and_weights()
+            # self._update_train_loader_and_weights()
             # self.lambda_ = max(
             #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
             # )

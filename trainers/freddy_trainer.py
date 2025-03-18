@@ -333,7 +333,12 @@ class FreddyTrainer(SubsetTrainer):
         tgt = np.vstack([*lbl])
         if epoch % 20 == 0:
             self.clusters = _n_cluster(
-                feat, self.sample_size, alpha, 500, 10e-3, self._relevance_score
+                feat * self._relevance_score.reshape(-1, 1),
+                self.sample_size,
+                alpha,
+                500,
+                10e-3,
+                self._relevance_score,
             )
         # sset, score = freddy(
         #     feat,

@@ -107,7 +107,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         base = np.log(1 + alpha)
         sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
         sampler.fit(dataset)
-        inertia = 1 / (sampler.inertia_ + 10e-8)
+        inertia = sampler.inertia_ + 10e-8
         if val[:idx].sum() == 0:
             val[idx] = np.log(1 + inertia) - base
             # val[idx] += np.exp(val[idx] - relevance.sum())

@@ -259,7 +259,7 @@ def kmeans_sampler(
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     dataset = dataset * relevance.reshape(-1, 1)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="cosine").sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="euclidean").sum(axis=0)
 
     dist -= np.sum(dist)
     dist = np.abs(dist)

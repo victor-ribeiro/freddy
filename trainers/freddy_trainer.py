@@ -221,7 +221,10 @@ class FreddyTrainer(SubsetTrainer):
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = np.abs(feat / np.abs(feat).sum(axis=0)).sum(axis=1)
-        p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
+        p1 *= self.targets[: epoch + 1].sum(axis=0)
+        print(f"p1 {p1}")
+        exit()
+        # p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
         # score = (tgt-feat).*-(p1 * np.log2(1 + p1)).sum()
 
         # score = np.exp(score) / (np.exp(score).sum() + 10e-8)

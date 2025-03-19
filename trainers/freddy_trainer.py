@@ -218,7 +218,7 @@ class FreddyTrainer(SubsetTrainer):
             tol=1,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        p = self.targets[epoch].sum(axis=0) / self.targets.sum()
+        p = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum()
         score = np.linalg.norm(feat, axis=1) * (-(p * np.log2(1 + p))).sum()
         score = (score.mean() - score) / score.std()
         self._relevance_score = score

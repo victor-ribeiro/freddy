@@ -225,7 +225,12 @@ class FreddyTrainer(SubsetTrainer):
         # score = (tgt-feat).*-(p1 * np.log2(1 + p1)).sum()
 
         # score = np.exp(score) / (np.exp(score).sum() + 10e-8)
-        self._relevance_score = self.grad_norm / p1 * np.log2(1 + p1)
+        self._relevance_score = (
+            self.grad_norm
+            / p1
+            * np.log2(1 + p1)
+            / np.log2(1 + np.abs(feat).sum(axis=1))
+        )
         # print(f"score {score}")
         print(f"score {p1 * np.log2(1 + p1)}")
 

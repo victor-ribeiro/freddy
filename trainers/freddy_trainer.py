@@ -190,13 +190,13 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(pred - label)
+            feat.append(label - pred)
             lbl.append(label)
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         self.clusters = _n_cluster(
-            feat, self.sample_size, alpha, 500, 10e-3, self._relevance_score
+            feat, self.sample_size, alpha, 500, 10e-2, self._relevance_score
         )
         # sset, score = freddy(
         #     feat,
@@ -218,8 +218,11 @@ class FreddyTrainer(SubsetTrainer):
             tol=1,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        p = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum()
-        score = np.linalg.norm(feat, axis=1) * (-(p * np.log2(1 + p))).sum()
+        p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
+        p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum()
+        score = np.linalg.norm(feat, axis=1) * (
+            (-(p1 * np.log2(1 + p1))).sum() - (-(p1 * np.log2(1 + p1))).sum()
+        )
         score = (score.mean() - score) / score.std()
         self._relevance_score = score
         print(f"score {score}")

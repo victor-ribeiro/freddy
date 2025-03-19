@@ -106,7 +106,8 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     for idx, n in enumerate(range(max_iter)):
         base = np.log(1 + alpha)
         sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
-        sampler.fit(dataset, sample_weight=np.abs(relevance))
+        # sampler.fit(dataset, sample_weight=np.abs(relevance))
+        sampler.fit(dataset)
         inertia = sampler.inertia_ + 10e-8
         if val[:idx].sum() == 0:
 

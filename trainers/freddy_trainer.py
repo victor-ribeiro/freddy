@@ -223,7 +223,7 @@ class FreddyTrainer(SubsetTrainer):
         p1 = np.abs(feat / np.abs(feat).sum(axis=0)).sum(axis=1)
         p1 *= (self.targets[: epoch + 1].sum(axis=0) / self.targets.sum()).mean()
         # p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
-        score = (tgt - feat) * -(p1 * np.log2(1 + p1)).sum()
+        score = (tgt - feat).sum(axis=1) * -(p1 * np.log2(1 + p1)).sum()
 
         # score = np.exp(score) / (np.exp(score).sum() + 10e-8)
         self._relevance_score = score * self.grad_norm

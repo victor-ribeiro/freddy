@@ -119,7 +119,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         cls[idx] = n + 2
 
         # if abs(val[:idx].min() - val[idx]) < tol:
-        if abs(val[:idx].mean() - val[idx]) < tol:
+        if abs(val[:idx].sum() - val[idx]) < tol:
             # import matplotlib.pyplot as plt
 
             # plt.plot(cls[cls > 0], val[val > 0])

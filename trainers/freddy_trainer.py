@@ -132,6 +132,7 @@ def kmeans_sampler(
 
     dist -= np.amax(dist)
     dist = np.abs(dist)
+    dist = np.cos(dist)
     sset = np.argsort(dist, kind="heapsort")[::-1]
     print(sset)
     return sset[:K]

@@ -115,7 +115,6 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
             continue
 
         val[idx] = np.log(inertia * val[val > 0].sum() * relevance.mean()) - base
-        print(val[:idx])
         # val[idx] += np.exp(inertia - relevance.mean())
         cls[idx] = n + 2
         # alpha += np.log(k + 2) * 0.1

@@ -119,11 +119,11 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         val[idx] += np.exp(inertia * val[idx] - relevance.sum())
         alpha += np.log(k + 2) * 0.1
         if abs(val[:idx].min() - val[idx]) < tol:
-            import matplotlib.pyplot as plt
+            # import matplotlib.pyplot as plt
 
-            plt.plot(cls[cls > 0], val[val > 0])
-            plt.show()
-            exit()
+            # plt.plot(cls[cls > 0], val[val > 0])
+            # plt.show()
+            # exit()
             return sampler.cluster_centers_
     raise ValueError("Does not converge")
 

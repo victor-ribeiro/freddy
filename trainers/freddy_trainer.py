@@ -225,13 +225,10 @@ class FreddyTrainer(SubsetTrainer):
             self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
             .detach()
             .numpy()
-            * -(p2 * np.log2(1 + p2)).sum()
         )
-        # score = (score.mean() - score) / score.std()
-        self._relevance_score = p1 * score[sset]
-        # (
-        #     np.exp(score) / (np.exp(score).sum() + 10e-8)
-        # )
+
+        # score = np.exp(score) / (np.exp(score).sum() + 10e-8)
+        self._relevance_score = -(p1 * np.log2(1 + p1)).sum() * score[sset]
         print(f"score {score}")
 
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")

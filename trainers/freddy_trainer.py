@@ -134,9 +134,10 @@ def kmeans_sampler(
 ):
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+    # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+    dist = pairwise_distances(clusters, dataset).sum(axis=0)
 
-    dist -= np.sum(dist)
+    dist -= np.amax(dist)
     dist = np.abs(dist)
     sset = np.argsort(dist, kind="heapsort")[::-1]
     print(sset)

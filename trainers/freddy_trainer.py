@@ -139,11 +139,60 @@ def kmeans_sampler(
     return sset[:K]
 
 
-def shannon_entropy(vector, epsilon=1e-10):
-    abs_vector = np.abs(vector)  # Ensure non-negative
-    total = abs_vector.sum(axis=1) + epsilon  # Avoid division by zero
-    p = abs_vector / total.reshape(-1, 1)
-    return (p * np.log2(1 + p)).sum(axis=1)
+####################################################################################################
+@_register
+def freddy(
+    dataset,
+    base_inc=base_inc,
+    alpha=0.15,
+    metric="similarity",
+    K=1,
+    batch_size=128,
+    beta=0.75,
+    return_vals=False,
+    importance=None,
+):
+    # basic config
+    base_inc = base_inc(alpha)
+    idx = np.arange(len(dataset))
+    # idx = np.random.permutation(idx)
+    q = Queue()
+    sset = []
+    vals = []
+    argmax = 0
+    inc = 0
+    for ds, V in zip(
+        batched(dataset, batch_size),
+        batched(idx, batch_size),
+    ):
+        D = METRICS[metric](ds * importance[V], batch_size=batch_size)
+        size = len(D)
+        localmax = np.amax(D, axis=1)
+        argmax += localmax.sum()
+        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        while q and len(sset) < K:
+            score, idx_s = q.head
+            s = D[:, idx_s[1]] * importance[idx_s[1]]
+            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            inc = score_s - score
+            if (inc < 0) or (not q):
+                break
+            score_t, idx_t = q.head
+            if inc > score_t:
+                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+                localmax = np.maximum(localmax, s)
+                sset.append(idx_s[0])
+                vals.append(score)
+            else:
+                q.push(inc, idx_s)
+            q.push(score_t, idx_t)
+    np.random.shuffle(sset)
+    if return_vals:
+        return np.array(vals), sset
+    return np.array(sset)
+
+
+####################################################################################################
 
 
 class FreddyTrainer(SubsetTrainer):
@@ -209,7 +258,7 @@ class FreddyTrainer(SubsetTrainer):
         #     alpha=self.args.alpha,
         #     relevance=self._relevance_score,
         # )
-        # p = self.targets.sum(axis=0) / len(sset)
+        p = self.targets.sum(axis=0) / len(sset)
 
         sset = kmeans_sampler(
             feat,
@@ -217,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=alpha,
-            tol=1,
+            tol=0.5,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = np.abs(feat / np.abs(feat).sum(axis=0)).sum(axis=1)

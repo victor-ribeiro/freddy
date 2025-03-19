@@ -191,7 +191,7 @@ class FreddyTrainer(SubsetTrainer):
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(label - pred)
+            feat.append(pred)
             lbl.append(label)
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
@@ -221,7 +221,9 @@ class FreddyTrainer(SubsetTrainer):
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
         p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum()
-        score = np.linalg.norm(feat, axis=1) * (
+        score = self.train_criterion(
+            torch.from_numpy(feat), torch.from_numpy(tgt)
+        ).detach().numpy() * (
             (-(p1 * np.log2(1 + p1))).sum() - (-(p2 * np.log2(1 + p2))).sum()
         )
         score = (score.mean() - score) / score.std()

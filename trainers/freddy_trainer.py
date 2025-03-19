@@ -225,7 +225,7 @@ class FreddyTrainer(SubsetTrainer):
             self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
             .detach()
             .numpy()
-            / (-(p1 * np.log2(1 + p1))).sum()
+            / (-(p2 * np.log2(1 + p2))).sum()
         )
         # score = (score.mean() - score) / score.std()
         self._relevance_score = np.exp(score) / np.exp(score).sum()

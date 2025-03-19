@@ -228,7 +228,8 @@ class FreddyTrainer(SubsetTrainer):
             # * (p1 * np.log2(1 + p1)).sum()
         )
         # score = (score.mean() - score) / score.std()
-        self._relevance_score = (p2 * p1 / p1) / (
+        print((p2 * p1 / p1).sum())
+        self._relevance_score = (p2 * p1 / p1).sum() / (
             np.exp(score) / (np.exp(score).sum() + 10e-8)
         )
         print(f"score {score}")

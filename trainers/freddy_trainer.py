@@ -258,7 +258,6 @@ class FreddyTrainer(SubsetTrainer):
         #     alpha=self.args.alpha,
         #     relevance=self._relevance_score,
         # )
-        p = self.targets.sum(axis=0) / len(sset)
 
         sset = kmeans_sampler(
             feat,

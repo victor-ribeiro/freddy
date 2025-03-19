@@ -228,7 +228,9 @@ class FreddyTrainer(SubsetTrainer):
             # * (p1 * np.log2(1 + p1)).sum()
         )
         # score = (score.mean() - score) / score.std()
-        self._relevance_score = np.exp(score) / np.exp(score).sum() * p1
+        self._relevance_score = (
+            p2 * p1 / (np.exp(score) / (np.exp(score).sum() + 10e-8))
+        )
         print(f"score {score}")
 
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")

@@ -120,11 +120,11 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
 
         # if abs(val[:idx].min() - val[idx]) < tol:
         if abs(val[:idx].max() - val[idx]) < tol:
-            # import matplotlib.pyplot as plt
+            import matplotlib.pyplot as plt
 
-            # plt.plot(cls[cls > 0], val[val > 0])
-            # plt.show()
-            # exit()
+            plt.plot(cls[cls > 0], val[val > 0])
+            plt.show()
+            exit()
             return sampler.cluster_centers_
     raise ValueError("Does not converge")
 
@@ -223,7 +223,7 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=alpha,
-            tol=10e-2,
+            tol=1,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p = self.targets[epoch].sum(axis=0) / len(sset)

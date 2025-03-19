@@ -119,7 +119,8 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         # val[idx] += np.exp(inertia - relevance.mean())
         cls[idx] = n + 2
         # alpha += np.log(k + 2) * 0.1
-        if abs(val[:idx].min() - val[idx]) < tol:
+        # if abs(val[:idx].min() - val[idx]) < tol:
+        if abs(val[:idx].max() - val[idx]) < tol:
             # import matplotlib.pyplot as plt
 
             # plt.plot(cls[cls > 0], val[val > 0])

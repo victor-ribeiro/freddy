@@ -132,7 +132,7 @@ def kmeans_sampler(
 
     dist -= np.amax(dist, axis=0)
     dist = np.abs(dist)
-    # dist = np.cos(dist)
+    dist = np.cos(dist)
     sset = np.argsort(dist, kind="heapsort")[::-1]
     print(sset)
     return sset[:K]
@@ -225,7 +225,7 @@ class FreddyTrainer(SubsetTrainer):
             self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
             .detach()
             .numpy()
-            * (-(p1 * np.log2(1 + p1))).sum()
+            / (-(p1 * np.log2(1 + p1))).sum()
         )
         # score = (score.mean() - score) / score.std()
         self._relevance_score = np.exp(score) / np.exp(score).sum()

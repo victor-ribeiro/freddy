@@ -110,12 +110,12 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
         inertia = sampler.inertia_ + 10e-8
         if val[:idx].sum() == 0:
             val[idx] = np.log(1 + inertia * relevance.sum()) - base
-            val[idx] += np.exp(inertia - relevance.mean())
+            # val[idx] += np.exp(inertia - relevance.mean())
             cls[idx] = n + 2
             continue
 
         val[idx] = np.log(inertia * val[val > 0].sum() * relevance.sum()) - base
-        val[idx] += np.exp(inertia - relevance.mean())
+        # val[idx] += np.exp(inertia - relevance.mean())
         cls[idx] = n + 2
 
         # if abs(val[:idx].min() - val[idx]) < tol:

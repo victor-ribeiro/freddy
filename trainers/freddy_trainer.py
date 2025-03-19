@@ -219,7 +219,7 @@ class FreddyTrainer(SubsetTrainer):
             tol=1,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        p1 = feat.sum(axis=1) / feat.sum()
+        p1 = feat[sset].sum(axis=1) / feat[sset].sum()
         p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
         score = (
             self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
@@ -228,9 +228,7 @@ class FreddyTrainer(SubsetTrainer):
             * -(p1 * np.log2(1 + p1)).sum()
         )
         # score = (score.mean() - score) / score.std()
-        print(p1)
-        exit()
-        self._relevance_score = p1.sum() * score
+        self._relevance_score = p1 * score
         # (
         #     np.exp(score) / (np.exp(score).sum() + 10e-8)
         # )

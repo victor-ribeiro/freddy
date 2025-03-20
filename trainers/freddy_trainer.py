@@ -212,7 +212,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
-        alpha = 1.5
+        alpha = 1
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
@@ -222,7 +222,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         self.clusters = _n_cluster(
-            feat, self.sample_size, alpha, 500, 10e-2, self._relevance_score
+            feat, self.sample_size, alpha, 500, 10e-4, self._relevance_score
         )
         # sset, score = freddy(
         #     feat,

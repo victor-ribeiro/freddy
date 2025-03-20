@@ -100,7 +100,7 @@ class Queue(list):
         self.append(item)
 
 
-def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
+def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-3, relevance=None):
     val = np.zeros(max_iter)
     cls = np.zeros(max_iter)
     for idx, n in enumerate(range(max_iter)):

@@ -222,7 +222,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         self.clusters = _n_cluster(
-            feat, self.sample_size, alpha, 500, 10e-4, self._relevance_score
+            feat, self.sample_size, alpha, 500, 1, self._relevance_score
         )
         # sset, score = freddy(
         #     feat,

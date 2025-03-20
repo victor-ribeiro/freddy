@@ -222,7 +222,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         self.clusters = _n_cluster(
-            feat, self.sample_size, alpha, 500, 1, self._relevance_score
+            feat, self.sample_size, alpha, 500, 10e-2, self._relevance_score
         )
         # sset, score = freddy(
         #     feat,
@@ -245,7 +245,7 @@ class FreddyTrainer(SubsetTrainer):
         score = (
             self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt)).detach().numpy()
         )
-        self._relevance_score = score * self.grad_norm
+        self._relevance_score = score
         # print(f"score {score}")
         print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")

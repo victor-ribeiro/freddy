@@ -123,6 +123,13 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-2, relevance=None):
     raise ValueError("Does not converge")
 
 
+def entropy(x):
+    x = np.abs(x)
+    total = x.sum()
+    p = x / total
+    return -(p * np.log2(p)).sum()
+
+
 def kmeans_sampler(
     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
 ):
@@ -138,60 +145,28 @@ def kmeans_sampler(
     return sset[:K]
 
 
-####################################################################################################
-@_register
-def freddy(
-    dataset,
-    base_inc=base_inc,
-    alpha=0.15,
-    metric="similarity",
-    K=1,
-    batch_size=128,
-    beta=0.75,
-    return_vals=False,
-    importance=None,
+def pmi_kmeans_sampler(
+    dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
 ):
-    # basic config
-    base_inc = base_inc(alpha)
-    idx = np.arange(len(dataset))
-    # idx = np.random.permutation(idx)
-    q = Queue()
-    sset = []
-    vals = []
-    argmax = 0
-    inc = 0
-    for ds, V in zip(
-        batched(dataset, batch_size),
-        batched(idx, batch_size),
-    ):
-        D = METRICS[metric](ds * importance[V], batch_size=batch_size)
-        size = len(D)
-        localmax = np.amax(D, axis=1)
-        argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
-        while q and len(sset) < K:
-            score, idx_s = q.head
-            s = D[:, idx_s[1]] * importance[idx_s[1]]
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            inc = score_s - score
-            if (inc < 0) or (not q):
-                break
-            score_t, idx_t = q.head
-            if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                localmax = np.maximum(localmax, s)
-                sset.append(idx_s[0])
-                vals.append(score)
-            else:
-                q.push(inc, idx_s)
-            q.push(score_t, idx_t)
-    np.random.shuffle(sset)
-    if return_vals:
-        return np.array(vals), sset
-    return np.array(sset)
+    # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
+    print(f"Found {len(clusters)} clusters, tol: {tol}")
+    # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
 
+    pmi = []
+    for p in ds:
+        tmp = []
+        for c in centroids:
+            h_pc = entropy((p + c) / c)
+            h_c = entropy(c)
+            tmp.append(h_c - h_pc)
+        pmi.append(tmp)
+    pmi = (np.array(pmi) * relevance.reshape(-1, 1)).sum(axis=1)
 
-####################################################################################################
+    pmi -= np.amax(pmi, axis=0)
+    # pmi -= np.mean(pmi)
+    pmi = np.abs(pmi)
+    sset = np.argsort(pmi, kind="heapsort")[::-1]
+    return pmi, sset[:K]
 
 
 class FreddyTrainer(SubsetTrainer):
@@ -258,7 +233,7 @@ class FreddyTrainer(SubsetTrainer):
         #     relevance=self._relevance_score,
         # )
 
-        sset = kmeans_sampler(
+        sset = pmi_kmeans_sampler(
             (tgt - feat),
             clusters=self.clusters,
             K=self.sample_size,
@@ -266,16 +241,12 @@ class FreddyTrainer(SubsetTrainer):
             alpha=alpha,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        p1 = 1 - np.abs(feat / np.abs(feat).sum(axis=0)).sum(axis=1)
-        p1 *= 1 - (np.abs(feat).sum(axis=0) / np.abs(feat).sum()).mean()
-        # p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
-        score = (tgt - feat).sum(axis=1) * -(p1 * np.log2(1 + p1)).sum()
-
-        # score = np.exp(score) / (np.exp(score).sum() + 10e-8)
+        score = (
+            self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt)).detach().numpy()
+        )
         self._relevance_score = score * self.grad_norm
         # print(f"score {score}")
-        print(f"score {p1 * np.log2(1 + p1)}")
-
+        print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")
         self.subset = sset
         self.selected[sset] += 1

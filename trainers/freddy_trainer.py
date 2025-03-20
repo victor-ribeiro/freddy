@@ -163,7 +163,7 @@ def pmi_kmeans_sampler(
     pmi = (np.array(pmi) / relevance.reshape(-1, 1)).mean(axis=1)
 
     # pmi = np.sum(pmi, axis=0)
-    pmi = np.abs(pmi)
+    # pmi = np.abs(pmi)
     print(pmi)
     # pmi -= np.mean(pmi)
     sset = np.argsort(pmi, kind="heapsort")[::-1]

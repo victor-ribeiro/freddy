@@ -237,7 +237,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
-        alpha = 1
+        alpha = 0.1
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
@@ -260,7 +260,7 @@ class FreddyTrainer(SubsetTrainer):
         # )
 
         sset = kmeans_sampler(
-            feat,
+            (tgt - feat),
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
@@ -268,7 +268,7 @@ class FreddyTrainer(SubsetTrainer):
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = 1 - np.abs(feat / np.abs(feat).sum(axis=0)).sum(axis=1)
-        p1 *= (self.targets[: epoch + 1].sum(axis=0) / self.targets.sum()).mean()
+        p1 *= 1 - (np.abs(feat).sum(axis=0) / np.abs(feat).sum()).mean()
         # p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
         score = (tgt - feat).sum(axis=1) * -(p1 * np.log2(1 + p1)).sum()
 

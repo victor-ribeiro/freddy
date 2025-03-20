@@ -160,7 +160,7 @@ def pmi_kmeans_sampler(
             h_c = entropy(c)
             tmp.append(h_c - h_pc)
         pmi.append(tmp)
-    pmi = (np.array(pmi) / relevance.reshape(-1, 1)).mean(axis=1)
+    pmi = (np.array(pmi) * relevance.reshape(-1, 1)).sum(axis=1)
 
     # pmi = np.sum(pmi, axis=0)
     # pmi = np.abs(pmi)

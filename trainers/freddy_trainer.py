@@ -235,7 +235,8 @@ class FreddyTrainer(SubsetTrainer):
         # )
 
         sset = pmi_kmeans_sampler(
-            (tgt - feat),
+            # (tgt - feat),
+            feat,
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,

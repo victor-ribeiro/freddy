@@ -153,6 +153,8 @@ def pmi_kmeans_sampler(
     # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
 
     pmi = []
+    print(entropy(clusters))
+    print(entropy(dataset))
     for p in dataset:
         tmp = []
         for c in clusters:
@@ -244,10 +246,12 @@ class FreddyTrainer(SubsetTrainer):
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         score = (
-            self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt)).detach().numpy()
+            self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
+            .detach()
+            .numpy()
         )
         score = (score.mean() - score) / score.std()
-        self._relevance_score = score
+        self._relevance_score[sset] = score
         # print(f"score {score}")
         print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")

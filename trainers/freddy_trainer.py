@@ -167,7 +167,7 @@ def pmi_kmeans_sampler(
     print(pmi)
     # pmi -= np.mean(pmi)
     sset = np.argsort(pmi, kind="heapsort")[::-1]
-    return pmi, sset[:K]
+    return sset[:K]
 
 
 class FreddyTrainer(SubsetTrainer):

@@ -153,9 +153,9 @@ def pmi_kmeans_sampler(
     # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
 
     pmi = []
-    for p in ds:
+    for p in dataset:
         tmp = []
-        for c in centroids:
+        for c in clusters:
             h_pc = entropy((p + c) / c)
             h_c = entropy(c)
             tmp.append(h_c - h_pc)

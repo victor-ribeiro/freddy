@@ -237,7 +237,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
-        alpha = 2
+        alpha = 1
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
@@ -265,7 +265,6 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             relevance=self._relevance_score,
             alpha=alpha,
-            tol=0.5,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = np.abs(feat / np.abs(feat).sum(axis=0)).sum(axis=1)

@@ -245,6 +245,7 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
             alpha=alpha,
         )
+        print(self.targets[epoch])
         print(tgt[sset].sum(axis=0))
         exit()
         self.targets[epoch] += tgt[sset].sum(axis=0)

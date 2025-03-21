@@ -167,7 +167,7 @@ def pmi_kmeans_sampler(
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
     pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
-    pmi = np.log(pmi)
+    pmi = np.exp(pmi)
 
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     return sset[:K]
@@ -224,7 +224,7 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
-        if not epoch or (epoch + 1) % 21 == 0:
+        if not epoch or (epoch + 1) % 14 == 0:
             self.clusters = _n_cluster(
                 feat,
                 self.sample_size,
@@ -253,7 +253,10 @@ class FreddyTrainer(SubsetTrainer):
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
         score = (
-            self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
+            (
+                self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
+                * self.train_weights[sset]
+            )
             .detach()
             .numpy()
         )
@@ -284,7 +287,7 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         # if epoch % 5 == 0:
-        if not epoch or (epoch + 1) % 7 == 0:
+        if not epoch or (epoch + 1) % 14 == 0:
             # if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()

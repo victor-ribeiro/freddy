@@ -249,7 +249,7 @@ class FreddyTrainer(SubsetTrainer):
         score = (
             self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
             .detach()
-            .numpy(),
+            .numpy()
         )
         # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()

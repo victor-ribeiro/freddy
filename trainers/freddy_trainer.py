@@ -224,7 +224,7 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         self.clusters = _n_cluster(
-            np.abs(tgt - feat),
+            feat,
             self.sample_size,
             alpha,
             500,

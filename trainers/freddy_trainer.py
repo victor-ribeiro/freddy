@@ -162,7 +162,7 @@ def pmi_kmeans_sampler(
             tmp.append(h_p - h_pc)
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
-    pmi = (pmi * relevance.reshape(-1, 1)).sum(axis=1)
+    pmi = (pmi / relevance.reshape(-1, 1)).sum(axis=1)
 
     # pmi = np.sum(pmi, axis=0)
     # pmi = np.abs(pmi)
@@ -224,7 +224,12 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         self.clusters = _n_cluster(
-            feat, self.sample_size, alpha, 500, 10e-2, self._relevance_score
+            np.abs(tgt - feat),
+            self.sample_size,
+            alpha,
+            500,
+            10e-2,
+            self._relevance_score,
         )
         # sset, score = freddy(
         #     feat,

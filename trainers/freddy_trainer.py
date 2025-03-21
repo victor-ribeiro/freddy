@@ -245,6 +245,8 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
             alpha=alpha,
         )
+        print(sset)
+        exit()
         self.targets[epoch] += tgt[sset].sum(axis=0)
         score = 1 / np.maximum(
             10e-8,

@@ -163,7 +163,7 @@ def pmi_kmeans_sampler(
             tmp.append(h_p - h_pc)
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
-    pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).mean(axis=1)
+    pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
 
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     return sset[:K]
@@ -225,7 +225,7 @@ class FreddyTrainer(SubsetTrainer):
             self.sample_size,
             alpha,
             500,
-            10e-3,
+            10e-2,
             self._relevance_score,
         )
         # sset, score = freddy(

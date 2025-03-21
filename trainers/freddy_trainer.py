@@ -151,19 +151,19 @@ def pmi_kmeans_sampler(
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
-    p_x = dataset.sum(axis=0)
 
-    pmi = []
     for p in dataset:
         tmp = []
+        d_ = []
         for c in clusters:
-            h_pc = entropy(((p * c) / p))
+            h_pc = entropy(((p - c) / p))
             h_c = entropy(c)
             h_p = entropy(p)
+            d = np.linalg.norm(p - c)
             tmp.append(h_p - h_pc)
+            d_.append(d)
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
-    pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
 
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     return sset[:K]

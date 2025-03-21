@@ -151,7 +151,7 @@ def pmi_kmeans_sampler(
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
-
+    pmi = []
     for p in dataset:
         tmp = []
         d_ = []

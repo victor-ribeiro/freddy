@@ -256,7 +256,7 @@ class FreddyTrainer(SubsetTrainer):
             self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
             .detach()
             .numpy()
-        ) * self.train_weights.cpu().detach().numpy()
+        ) * self.train_weights.cpu().detach().numpy()[sset]
         # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()
         self._relevance_score[sset] = score

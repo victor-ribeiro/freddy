@@ -126,7 +126,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-3, relevance=None):
 def entropy(x):
     x = np.abs(x)
     total = x.sum()
-    p = 1 - (x / total)
+    p = x / total
     return -(p * np.log2(p)).sum()
 
 
@@ -162,7 +162,7 @@ def pmi_kmeans_sampler(
             tmp.append(h_p + h_c - h_pc)
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
-    pmi = (pmi / relevance.reshape(-1, 1)).mean(axis=1)
+    pmi = (pmi / relevance.reshape(-1, 1)).sum(axis=1)
 
     # pmi = np.sum(pmi, axis=0)
     # pmi = np.abs(pmi)
@@ -214,7 +214,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
-        alpha = 2.0
+        alpha = 1 / self.lr
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
@@ -228,7 +228,7 @@ class FreddyTrainer(SubsetTrainer):
             self.sample_size,
             alpha,
             500,
-            self.lr,
+            10e-3,
             self._relevance_score,
         )
         # sset, score = freddy(
@@ -255,7 +255,8 @@ class FreddyTrainer(SubsetTrainer):
             .detach()
             .numpy()
         )
-        score = (score.max() - score) / (score.max() - score.min())
+        # score = (score.max() - score) / (score.max() - score.min())
+        score = (score.mean() - score) / score.std()
         self._relevance_score[sset] = score
         # print(f"score {score}")
         print(f"score {score}")

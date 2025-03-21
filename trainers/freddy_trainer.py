@@ -126,7 +126,7 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-3, relevance=None):
 def entropy(x):
     x = np.abs(x)
     total = x.sum()
-    p = x / total
+    p = 1 - (x / total)
     return -(p * np.log2(p)).sum()
 
 

@@ -159,7 +159,7 @@ def pmi_kmeans_sampler(
             h_pc = entropy(((p * c) / c))
             h_c = entropy(c)
             h_p = entropy(p)
-            tmp.append(h_p + h_c - h_pc)
+            tmp.append(h_c - h_pc)
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
     pmi = (pmi / relevance.reshape(-1, 1)).sum(axis=1)

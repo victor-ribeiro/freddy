@@ -160,7 +160,7 @@ def pmi_kmeans_sampler(
     for p in dataset:
         tmp = []
         for c in clusters:
-            h_pc = entropy((p / (p * c)))
+            h_pc = entropy(((p - c) / p) * c)
             h_c = entropy(c)
             h_p = entropy(p)
             tmp.append(h_p - h_pc)
@@ -168,7 +168,6 @@ def pmi_kmeans_sampler(
     pmi = np.maximum(0, np.array(pmi))
     pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
     pmi = np.log(pmi)
-    # pairwise_distances(dataset, clusters, metric=)
 
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     return sset[:K]
@@ -256,7 +255,7 @@ class FreddyTrainer(SubsetTrainer):
             self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
             .detach()
             .numpy()
-        ) * self.train_weights.cpu().detach().numpy()[sset]
+        )
         # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()
         self._relevance_score[sset] = score

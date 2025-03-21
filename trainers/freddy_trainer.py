@@ -119,6 +119,11 @@ def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-3, relevance=None):
         # val[idx] += np.exp(val[idx] - relevance.sum())
         # alpha = np.log(k + 2)
         if abs(val[:idx].min() - val[idx]) < tol:
+            # import matplotlib.pyplot as plt
+
+            # plt.plot(val[:idx])
+            # plt.show()
+            # exit()
             return sampler.cluster_centers_
     raise ValueError("Does not converge")
 
@@ -155,7 +160,7 @@ def pmi_kmeans_sampler(
     for p in dataset:
         tmp = []
         for c in clusters:
-            h_pc = entropy(((p - c) / p))
+            h_pc = entropy(((p - c) * p / p))
             h_c = entropy(c)
             h_p = entropy(p)
             tmp.append(h_p - h_pc)
@@ -163,6 +168,7 @@ def pmi_kmeans_sampler(
     pmi = np.maximum(0, np.array(pmi))
     pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
     pmi = np.log(pmi)
+    # pairwise_distances(dataset, clusters, metric=)
 
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     return sset[:K]

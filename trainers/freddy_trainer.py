@@ -247,10 +247,11 @@ class FreddyTrainer(SubsetTrainer):
             alpha=alpha,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        score = (
+        score = 1 / np.maximum(
+            10e-8,
             self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
             .detach()
-            .numpy()
+            .numpy(),
         )
         # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()

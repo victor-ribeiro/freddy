@@ -214,7 +214,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.eval()
         feat = []
         lbl = []
-        alpha = 1
+        alpha = 2.0
         for data, target in dataset:
             pred = self.model.cpu()(data).detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
@@ -228,7 +228,7 @@ class FreddyTrainer(SubsetTrainer):
             self.sample_size,
             alpha,
             500,
-            10e-2,
+            self.lr,
             self._relevance_score,
         )
         # sset, score = freddy(

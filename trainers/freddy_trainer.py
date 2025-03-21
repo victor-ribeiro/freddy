@@ -245,12 +245,8 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
             alpha=alpha,
         )
-        print(self.targets[epoch])
-        print(tgt[sset].sum(axis=0))
-        exit()
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        score = 1 / np.maximum(
-            10e-8,
+        score = (
             self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
             .detach()
             .numpy(),

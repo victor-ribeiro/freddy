@@ -256,7 +256,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()
-        self._relevance_score[sset] = score
+        self._relevance_score = score
         # print(f"score {score}")
         print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch]}")

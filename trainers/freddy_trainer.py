@@ -251,16 +251,28 @@ class FreddyTrainer(SubsetTrainer):
             relevance=self._relevance_score,
             alpha=alpha,
         )
+        ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
+        p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
+        p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
         score = (
-            self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
-            .cpu()
+            self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
             .detach()
             .numpy()
+            * -(p1 * np.log2(1 + p1)).sum()
         )
-
-        # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()
+        ##########################################
+        # self.targets[epoch] += tgt[sset].sum(axis=0)
+        # score = (
+        #     self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
+        #     .cpu()
+        #     .detach()
+        #     .numpy()
+        # )
+
+        # # score = (score.max() - score) / (score.max() - score.min())
+        # score = (score.mean() - score) / score.std()
         self._relevance_score = score
         # print(f"score {score}")
         print(f"score {score}")

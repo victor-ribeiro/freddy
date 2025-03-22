@@ -168,7 +168,7 @@ def pmi_kmeans_sampler(
     pmi = np.maximum(0, np.array(pmi))
     # pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
     pmi = (pmi.max() - pmi).max(axis=1)
-    pmi = np.exp(pmi)
+    pmi = np.log(pmi)
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     return sset[:K]
 

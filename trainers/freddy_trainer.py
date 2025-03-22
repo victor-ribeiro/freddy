@@ -166,9 +166,9 @@ def pmi_kmeans_sampler(
             tmp.append(h_p - h_pc)
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
-    pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
+    # pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)
+    pmi = (pmi.max() - pmi).max(axis=1)
     pmi = np.exp(pmi)
-
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     return sset[:K]
 
@@ -224,15 +224,15 @@ class FreddyTrainer(SubsetTrainer):
         # feat = map(np.abs, feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
-        if not epoch or (epoch + 1) % 14 == 0:
-            self.clusters = _n_cluster(
-                feat,
-                self.sample_size,
-                alpha,
-                500,
-                self.lr,
-                self._relevance_score,
-            )
+        # if not epoch or (epoch + 1) % 14 == 0:
+        self.clusters = _n_cluster(
+            feat,
+            self.sample_size,
+            alpha,
+            500,
+            self.lr,
+            self._relevance_score,
+        )
         # sset, score = freddy(
         #     feat,
         #     # lambda_=self.lambda_,
@@ -252,9 +252,8 @@ class FreddyTrainer(SubsetTrainer):
             alpha=alpha,
         )
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        score = (
-            self.train_criterion(torch.Tensor(feat[sset]), torch.Tensor(tgt[sset]))
-        ) * self.train_weights.cpu().detach().numpy()[sset]
+        score = self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
+
         # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()
         self._relevance_score[sset] = score

@@ -159,7 +159,7 @@ def pmi_kmeans_sampler(
     pmi = []
     for p in dataset:
         tmp = []
-        for c in clusters:
+        for c in clusters.T:
             # h_pc = entropy(((p - c) * c / p))
             h_pc = entropy(((p + c) / c))
             h_c = entropy(c)

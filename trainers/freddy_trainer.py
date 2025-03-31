@@ -160,10 +160,11 @@ def pmi_kmeans_sampler(
     for p in dataset:
         tmp = []
         for c in clusters:
-            h_pc = entropy(((p - c) * c / p))
+            # h_pc = entropy(((p - c) * c / p))
+            h_pc = entropy(((p + c) / c))
             h_c = entropy(c)
             h_p = entropy(p)
-            tmp.append((h_p - h_pc) / K)
+            tmp.append((h_p + h_c - h_pc))
         pmi.append(tmp)
     pmi = np.maximum(0, np.array(pmi))
     # pmi = pmi.max() - (pmi * relevance.reshape(-1, 1)).max(axis=1)

@@ -266,7 +266,7 @@ class FreddyTrainer(SubsetTrainer):
             .numpy()
         )
 
-        score = (score.mean() - score) / score.std()
+        # score = (score.mean() - score) / score.std()
         # score = 1 / (score + 10e-8)
         ##########################################
         # self.targets[epoch] += tgt[sset].sum(axis=0)

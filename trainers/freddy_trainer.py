@@ -160,7 +160,8 @@ def pmi_kmeans_sampler(
     h_pc = entropy(np.dot(dataset, clusters.T))
     h_c = entropy(clusters)
     h_p = entropy(dataset)
-    pmi = np.log2(K) - (h_p + h_c - h_pc)
+    # pmi = np.log2(K) - (h_p + h_c - h_pc)
+    pmi = np.log2(K) - (h_p - h_pc)
     pmi = (np.array(pmi) * relevance.reshape(-1, 1)).sum(axis=1)
 
     pmi -= np.max(pmi, axis=0) - np.min(pmi, axis=0)

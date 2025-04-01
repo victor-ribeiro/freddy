@@ -222,7 +222,7 @@ class FreddyTrainer(SubsetTrainer):
         tgt = np.vstack([*lbl])
         # if not epoch or (epoch + 1) % 14 == 0:
         self.clusters = _n_cluster(
-            feat,
+            (tgt - feat),
             self.sample_size,
             alpha,
             500,

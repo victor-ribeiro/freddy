@@ -160,13 +160,13 @@ def pmi_kmeans_sampler(
     h_pc = entropy(np.dot(dataset, clusters.T))
     h_c = entropy(clusters)
     h_p = entropy(dataset)
-    pmi = h_p + h_c - h_pc
+    pmi = np.log2(K) - (h_p + h_c - h_pc)
     pmi = (np.array(pmi) * relevance.reshape(-1, 1)).sum(axis=1)
 
     pmi -= np.max(pmi, axis=0) - np.min(pmi, axis=0)
     pmi = np.abs(pmi)
     sset = np.argsort(pmi, kind="heapsort")[::-1]
-    return pmi, sset[:K]
+    return sset[:K]
 
 
 class FreddyTrainer(SubsetTrainer):

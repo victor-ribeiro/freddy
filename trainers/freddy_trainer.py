@@ -165,7 +165,6 @@ def pmi_kmeans_sampler(
     pmi = (h_c - h_pc) / h_p
     pmi = dist * pmi
     # sset = np.argsort(pmi, kind="heapsort")[::-1]
-    import matplotlib.pyplot as plt
 
     sset = np.argsort(pmi, kind="heapsort")
     return sset[:K]

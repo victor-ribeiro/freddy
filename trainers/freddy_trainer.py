@@ -153,20 +153,20 @@ def kmeans_sampler(
 def pmi_kmeans_sampler(
     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
 ):
+    # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    pmi = []
-    for p in dataset:
-        h_pc = entropy(np.dot(p, clusters.T))
-        h_c = entropy(clusters)
-        h_p = entropy(p)
-        pmi.append(h_p - h_pc)
+    # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+
+    h_pc = entropy(np.dot(dataset, clusters.T))
+    h_c = entropy(clusters)
+    h_p = entropy(dataset)
+    pmi = h_p + h_c - h_pc
     pmi = (np.array(pmi) * relevance.reshape(-1, 1)).sum(axis=1)
 
-    # pmi -= np.max(pmi, axis=0) - np.min(pmi, axis=0)
-    # pmi -= np.max(pmi, axis=0) - np.min(pmi, axis=0)
-    # pmi = np.abs(pmi)
+    pmi -= np.max(pmi, axis=0) - np.min(pmi, axis=0)
+    pmi = np.abs(pmi)
     sset = np.argsort(pmi, kind="heapsort")[::-1]
-    return sset[:K]
+    return pmi, sset[:K]
 
 
 class FreddyTrainer(SubsetTrainer):

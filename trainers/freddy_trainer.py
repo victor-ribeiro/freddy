@@ -226,7 +226,7 @@ class FreddyTrainer(SubsetTrainer):
             (tgt - feat),
             self.sample_size,
             alpha,
-            500,
+            300,
             self.lr,
             self._relevance_score,
         )
@@ -246,7 +246,8 @@ class FreddyTrainer(SubsetTrainer):
             clusters=self.clusters,
             K=self.sample_size,
             relevance=self._relevance_score,
-            alpha=alpha,
+            # alpha=alpha,
+            alpha=0.01,
         )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)

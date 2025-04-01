@@ -157,7 +157,7 @@ def pmi_kmeans_sampler(
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(
         axis=0
-    ) * relevance.reshape(-1, 1).sum(axis=1)
+    )  # * relevance.reshape(-1, 1).sum(axis=1)
 
     h_pc = entropy(np.dot(dataset, clusters.T))
     h_c = entropy(clusters)

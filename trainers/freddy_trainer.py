@@ -163,9 +163,9 @@ def pmi_kmeans_sampler(
     # pmi = (h_c - h_pc) / h_p
     pmi = (h_p + h_c) / h_pc
     pmi = dist * pmi * relevance.reshape(-1, 1).sum(axis=1)
-    # sset = np.argsort(pmi, kind="heapsort")[::-1]
+    sset = np.argsort(pmi, kind="heapsort")[::-1]
+    # sset = np.argsort(pmi, kind="heapsort")
 
-    sset = np.argsort(pmi, kind="heapsort")
     return sset[:K]
 
 

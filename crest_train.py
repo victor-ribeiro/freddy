@@ -68,7 +68,7 @@ logger.addHandler(ch)
 args.logger = logger
 
 # Print arguments
-args.logger.info("Arguments: {}".format(args))
+# args.logger.info("Arguments: {}".format(args))
 args.logger.info("Time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
 
 
@@ -83,14 +83,18 @@ def main(args):
         pin_memory=True,
     )
 
-    if args.arch == "resnet20":
-        model = ResNet20(num_classes=args.num_classes)
-    elif args.arch == "resnet18":
-        model = ResNet18(num_classes=args.num_classes)
-    elif args.arch == "resnet50":
-        model = torchvision.models.resnet50(num_classes=args.num_classes)
-    else:
-        raise NotImplementedError(f"Architecture {args.arch} not implemented.")
+    match args.arch:
+        case "convnet":
+            model = Convnet(num_classes=args.num_classes)
+        case "resnet20":
+            model = ResNet20(num_classes=args.num_classes)
+        case "resnet18":
+            model = ResNet18(num_classes=args.num_classes)
+        case "resnet50":
+            model = torchvision.models.resnet50(num_classes=args.num_classes)
+        case _:
+            raise NotImplementedError(f"Architecture {args.arch} not implemented.")
+
     match args.selection_method:
         case "craig":
             from trainers import SubsetTrainer

@@ -155,14 +155,16 @@ def pmi_kmeans_sampler(
 ):
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean")
+    dist = pairwise_distances(clusters, dataset).sum(axis=0)
 
     h_pc = entropy(np.dot(dataset, clusters.T))
     h_c = entropy(clusters)
     h_p = entropy(dataset)
-    pmi = (h_c - h_pc) / h_p
-    # pmi = (h_p + h_c) - h_pc
+    # pmi = (h_c - h_pc) / h_p
+    # pmi = (h_p + h_c) / h_pc
+    pmi = h_pc / h_p
     pmi = (dist * pmi).sum(axis=0) * relevance.reshape(-1, 1).sum(axis=1)
+    # pmi = dist * pmi * (relevance + 10e-8)
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     # sset = np.argsort(pmi, kind="heapsort")
 
@@ -279,8 +281,8 @@ class FreddyTrainer(SubsetTrainer):
         # )
 
         # # score = (score.max() - score) / (score.max() - score.min())
-        # score = (score.mean() - score) / score.std()
-        self._relevance_score[sset] = score
+        score = (score.mean() - score) / score.std()
+        self._relevance_score[sset] += score
         # print(f"score {score}")
         print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")

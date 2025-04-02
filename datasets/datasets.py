@@ -19,11 +19,11 @@ def get_dataset(args, train=True, train_transform=True):
         if train and train_transform:
             transform = transforms.Compose(
                 [
+                    transforms.RandomGrayscale(),
                     transforms.RandomCrop(32, padding=4),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
                     transforms.Normalize(mean, std),
-                    transforms.RandomGrayscale(p=0.2),
                 ]
             )
         else:

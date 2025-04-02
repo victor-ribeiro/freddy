@@ -45,7 +45,7 @@ class Convnet(nn.Module):
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
         x = self.fc3(x)
-        return F.softmax(x, dim=1)
+        # return F.softmax(x, dim=1)
         return x
 
 

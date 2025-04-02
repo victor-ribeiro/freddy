@@ -31,19 +31,18 @@ class Convnet(nn.Module):
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.flat = nn.Flatten()
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        # self.pool = nn.AvgPool2d(kernel_size=2, stride=2)
         self.fc1 = nn.Linear(64 * 8 * 8, 128)
         self.fc2 = nn.Linear(128, 64)
-        # self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.pool = nn.AvgPool2d(kernel_size=2, stride=2)
-        self.relu = nn.ReLU()
         self.fc3 = nn.Linear(64, num_classes)
 
     def forward(self, x):
         x = self.pool(self.conv1(x))
         x = self.pool(self.conv2(x))
         x = self.flat(x)
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
         x = self.fc3(x)
         # return F.softmax(x, dim=1)
         return x

@@ -18,8 +18,8 @@ def get_args():
     # General options
     parser.add_argument(
         "--arch",
-        default="resnet20",
-        choices=["resnet20", "resnet18", "resnet50"],
+        default="convnet",
+        choices=["convnet", "resnet20", "resnet18", "resnet50"],
         help="model architecture",
     )
     parser.add_argument("--data_dir", default="~/data")

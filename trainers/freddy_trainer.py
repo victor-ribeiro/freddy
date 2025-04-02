@@ -155,14 +155,14 @@ def pmi_kmeans_sampler(
 ):
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
+    dist = pairwise_distances(clusters, dataset, metric="sqeuclidean")
 
     h_pc = entropy(np.dot(dataset, clusters.T))
     h_c = entropy(clusters)
     h_p = entropy(dataset)
     # pmi = (h_c - h_pc) / h_p
-    pmi = (h_p + h_c) / h_pc
-    pmi = dist * pmi * relevance.reshape(-1, 1).sum(axis=1)
+    pmi = (h_p + h_c) - h_pc
+    pmi = (dist * pmi).sum(axis=0) * relevance.reshape(-1, 1).sum(axis=1)
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     # sset = np.argsort(pmi, kind="heapsort")
 
@@ -222,11 +222,12 @@ class FreddyTrainer(SubsetTrainer):
         tgt = np.vstack([*lbl])
         # if not epoch or (epoch + 1) % 14 == 0:
         self.clusters = _n_cluster(
-            (tgt - feat),
+            # (tgt - feat),
+            feat,
             self.sample_size,
-            alpha,
+            0.5,
             300,
-            self.lr,
+            10e-3,
             self._relevance_score,
         )
         # sset, score = freddy(

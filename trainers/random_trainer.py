@@ -14,7 +14,7 @@ class RandomTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_steps):
         # select a subset of the data
-        if not epoch or (epoch + 1) % 7 == 0:
+        if not epoch or (epoch + 1) % 9 == 0:
             print(f"selecting on epoch: {epoch}")
             self.num_selection += 1
             self.subset = np.random.choice(

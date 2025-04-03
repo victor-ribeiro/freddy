@@ -3,7 +3,7 @@ from .subset_trainer import *
 
 class RandomTrainer(SubsetTrainer):
     def __init__(
-        self, 
+        self,
         args: argparse.Namespace,
         model: nn.Module,
         train_dataset: IndexedDataset,
@@ -14,11 +14,13 @@ class RandomTrainer(SubsetTrainer):
 
     def _select_subset(self, epoch, training_steps):
         # select a subset of the data
-        self.num_selection += 1
-        self.subset = np.random.choice(
-            len(self.train_dataset), 
-            size=int(len(self.train_dataset) * self.args.train_frac),
-            replace=False
-        )
-        self.subset_weights = np.ones(len(self.subset))
-    
+        if not epoch or (epoch + 1) % 7 == 0:
+            print(f"selecting on epoch: {epoch}")
+            self.num_selection += 1
+            self.subset = np.random.choice(
+                len(self.train_dataset),
+                size=int(len(self.train_dataset) * self.args.train_frac),
+                replace=False,
+            )
+            self.subset_weights = np.ones(len(self.subset))
+            self._update_train_loader_and_weights()

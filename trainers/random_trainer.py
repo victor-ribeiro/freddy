@@ -23,4 +23,3 @@ class RandomTrainer(SubsetTrainer):
                 replace=False,
             )
             self.subset_weights = np.ones(len(self.subset))
-            self._update_train_loader_and_weights()

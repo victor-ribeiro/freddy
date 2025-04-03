@@ -168,7 +168,7 @@ def pmi_kmeans_sampler(
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     # sset = np.argsort(pmi, kind="heapsort")
 
-    return sset[:K]
+    return pmi[sset], sset[:K]
 
 
 class FreddyTrainer(SubsetTrainer):
@@ -242,7 +242,7 @@ class FreddyTrainer(SubsetTrainer):
         #     relevance=self._relevance_score,
         # )
 
-        sset = pmi_kmeans_sampler(
+        score, sset = pmi_kmeans_sampler(
             np.abs(tgt - feat),
             # feat,
             clusters=self.clusters,
@@ -261,13 +261,13 @@ class FreddyTrainer(SubsetTrainer):
         #     .numpy()
         #     * -(p1 * np.log2(1 + p1)).sum()
         # )
-        score = (
-            self.train_criterion(
-                torch.from_numpy(feat[sset]), torch.from_numpy(tgt[sset])
-            )
-            .detach()
-            .numpy()
-        )
+        # score = (
+        #     self.train_criterion(
+        #         torch.from_numpy(feat[sset]), torch.from_numpy(tgt[sset])
+        #     )
+        #     .detach()
+        #     .numpy()
+        # )
 
         # score = (score.mean() - score) / score.std()
         # score = 1 / (score + 10e-8)
@@ -282,7 +282,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # # score = (score.max() - score) / (score.max() - score.min())
         score = (score.mean() - score) / score.std()
-        self._relevance_score[sset] += score
+        self._relevance_score[sset] += score[sset] * self.lr
         # print(f"score {score}")
         print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")

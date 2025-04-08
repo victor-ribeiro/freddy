@@ -284,7 +284,7 @@ class FreddyTrainer(SubsetTrainer):
             10e-3,
             self._relevance_score,
         )
-        score = freddy(
+        sset = freddy(
             feat,
             # lambda_=self.lambda_,
             batch_size=256,

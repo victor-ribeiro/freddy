@@ -291,7 +291,7 @@ class FreddyTrainer(SubsetTrainer):
             K=self.sample_size,
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
-            # relevance=self._relevance_score,
+            importance=self._relevance_score,
         )
 
         # score, sset = pmi_kmeans_sampler(

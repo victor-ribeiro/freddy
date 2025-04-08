@@ -203,7 +203,7 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]] * importance[idx_s[1]]
+            s = D[:, idx_s[1]]  # * importance[idx_s[1]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -334,9 +334,8 @@ class FreddyTrainer(SubsetTrainer):
 
         # # score = (score.max() - score) / (score.max() - score.min())
         # score = (score.mean() - score) / score.std()
-        self._relevance_score[sset] += score[sset] * self.lr
+        # self._relevance_score[sset] += score[sset] * self.lr
         # print(f"score {score}")
-        print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
         self.subset = sset
         self.selected[sset] += 1

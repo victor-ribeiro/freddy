@@ -361,9 +361,9 @@ class FreddyTrainer(SubsetTrainer):
 
             # self.model.train()
             #### fim
-        self.clusters -= (
-            self.clusters * self.grad_norm * self.lr / len(self.train_loader)
-        )
+        # self.clusters -= (
+        #     self.clusters * self.grad_norm * self.lr / len(self.train_loader)
+        # )
         self._val_epoch(epoch)
 
         train_loss /= len(self.train_loader)

@@ -209,6 +209,7 @@ class FreddyTrainer(SubsetTrainer):
             batch_size=self.args.batch_size,
             shuffle=False,
             num_workers=self.args.num_workers,
+            pin_memory=True,
         )
 
         self.model.eval()
@@ -216,7 +217,7 @@ class FreddyTrainer(SubsetTrainer):
         lbl = []
         alpha = 1 / self.lr
         for data, target in dataset:
-            pred = self.model.cpu()(data).detach().numpy()
+            pred = self.model(data).cpu().detach().numpy()
             label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
             feat.append(pred)
             lbl.append(label)

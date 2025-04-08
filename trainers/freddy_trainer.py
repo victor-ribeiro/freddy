@@ -218,7 +218,12 @@ class FreddyTrainer(SubsetTrainer):
         alpha = 1 / self.lr
         for data, target in dataset:
             pred = self.model(data).cpu().detach().numpy()
-            label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
+            label = (
+                one_hot_coding(target.cpu(), self.args.num_classes)
+                .cpu()
+                .detach()
+                .numpy()
+            )
             feat.append(pred)
             lbl.append(label)
         # feat = map(np.abs, feat)

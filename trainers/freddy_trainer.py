@@ -281,7 +281,7 @@ class FreddyTrainer(SubsetTrainer):
         # )
 
         # # score = (score.max() - score) / (score.max() - score.min())
-        score = (score.mean() - score) / score.std()
+        # score = (score.mean() - score) / score.std()
         self._relevance_score[sset] += score[sset] * self.lr
         # print(f"score {score}")
         print(f"score {score}")

@@ -260,18 +260,21 @@ class FreddyTrainer(SubsetTrainer):
             batch_size=self.args.batch_size,
             shuffle=False,
             num_workers=self.args.num_workers,
-            pin_memory=True,
         )
 
         self.model.eval()
         feat = []
         lbl = []
-        for data, target in dataset:
-            pred = self.model.cpu()(data).detach().numpy()
-            label = one_hot_coding(target, self.args.num_classes).cpu().detach().numpy()
-            feat.append(pred)
-            lbl.append(label)
-        # feat = map(np.abs, feat)
+        self.model.eval()
+        feat = map(
+            lambda x: (
+                self.model.cpu()(x[0]).detach().numpy(),
+                one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+            ),
+            dataset,
+        )
+
+        feat = map(lambda x: x[1] - x[0], feat)
         feat = np.vstack([*feat])
         tgt = np.vstack([*lbl])
         # if not epoch or (epoch + 1) % 14 == 0:
@@ -295,7 +298,7 @@ class FreddyTrainer(SubsetTrainer):
         # )
 
         score, sset = pmi_kmeans_sampler(
-            np.abs(tgt - feat),
+            feat,
             # feat,
             clusters=self.clusters,
             K=self.sample_size,

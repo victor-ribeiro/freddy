@@ -276,7 +276,6 @@ class FreddyTrainer(SubsetTrainer):
 
         feat = map(lambda x: x[1] - x[0], feat)
         feat = np.vstack([*feat])
-        tgt = np.vstack([*lbl])
         # if not epoch or (epoch + 1) % 14 == 0:
         self.clusters = _n_cluster(
             # (tgt - feat),

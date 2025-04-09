@@ -140,8 +140,6 @@ def kmeans_sampler(
 ):
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
-    # dist = pairwise_distances(clusters, dataset, metric="sqeuclidean").sum(axis=0)
-    # dist = pairwise_distances(dataset, clusters) * relevance.reshape(-1, 1)
     dist = pairwise_distances(dataset, clusters)
 
     dist -= np.amax(dist, axis=0)
@@ -157,20 +155,39 @@ def pmi_kmeans_sampler(
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).sum(axis=0)
-
-    # h_pc = entropy(np.dot(dataset, clusters.T))
-    h_pc = entropy(dist)
-    h_c = entropy(clusters)
+    h_pc = entropy(np.dot(dataset, clusters.T))
+    # h_pc = entropy(dist)
     h_p = entropy(dataset)
-    # pmi = (h_c - h_pc) / h_p
-    # pmi = (h_p + h_c) / h_pc
     pmi = h_p - h_pc
-    pmi = (dist * pmi).sum(axis=0) * relevance.reshape(-1, 1).sum(axis=1)
-    # pmi = dist * pmi * (relevance + 10e-8)
+    print(dist.shape)
+    pmi = dist * pmi * relevance.reshape(-1, 1).sum(axis=1)
+    pmi = np.abs(pmi) ** -1
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     # sset = np.argsort(pmi, kind="heapsort")
 
     return pmi[sset], sset[:K]
+
+
+# def pmi_kmeans_sampler(
+#     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
+# ):
+#     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
+#     print(f"Found {len(clusters)} clusters, tol: {tol}")
+#     dist = pairwise_distances(clusters, dataset).sum(axis=0)
+
+#     # h_pc = entropy(np.dot(dataset, clusters.T))
+#     h_pc = entropy(dist)
+#     h_c = entropy(clusters)
+#     h_p = entropy(dataset)
+#     # pmi = (h_c - h_pc) / h_p
+#     # pmi = (h_p + h_c) / h_pc
+#     pmi = h_p - h_pc
+#     pmi = (dist * pmi).sum(axis=0) * relevance.reshape(-1, 1).sum(axis=1)
+#     # pmi = dist * pmi * (relevance + 10e-8)
+#     sset = np.argsort(pmi, kind="heapsort")[::-1]
+#     # sset = np.argsort(pmi, kind="heapsort")
+
+#     return pmi[sset], sset[:K]
 
 
 def freddy(
@@ -251,7 +268,7 @@ class FreddyTrainer(SubsetTrainer):
         self.clusters = None
 
     def _select_subset(self, epoch, training_step):
-        self.model.eval()
+
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
 
@@ -263,9 +280,6 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
 
-        self.model.eval()
-        feat = []
-        lbl = []
         self.model.eval()
         feat = map(
             lambda x: self.model.cpu()(x[0]).detach().numpy(),
@@ -341,6 +355,7 @@ class FreddyTrainer(SubsetTrainer):
         # # score = (score.max() - score) / (score.max() - score.min())
         # score = (score.mean() - score) / score.std()
         self._relevance_score[sset] = score[sset]
+        # self._relevance_score[sset] += score[sset] * self.lr
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
         print(sset)
         print(self.subset)

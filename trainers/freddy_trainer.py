@@ -337,6 +337,7 @@ class FreddyTrainer(SubsetTrainer):
         # self._relevance_score[sset] += score[sset] * self.lr
         # print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
+        print(np.isin(sset, self.subset))
         self.subset = sset
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected

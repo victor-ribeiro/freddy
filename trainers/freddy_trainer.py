@@ -163,8 +163,8 @@ def pmi_kmeans_sampler(
     h_p = entropy(dataset)
     # pmi = (h_c - h_pc) / h_p
     # pmi = (h_p + h_c) / h_pc
-    pmi = h_pc / h_p
-    pmi = (dist * pmi).sum(axis=0)  # * relevance.reshape(-1, 1).sum(axis=1)
+    pmi = h_p - h_pc
+    pmi = (dist * pmi).sum(axis=0) * relevance.reshape(-1, 1).sum(axis=1)
     # pmi = dist * pmi * (relevance + 10e-8)
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     # sset = np.argsort(pmi, kind="heapsort")
@@ -284,35 +284,35 @@ class FreddyTrainer(SubsetTrainer):
             10e-3,
             self._relevance_score,
         )
-        sset = freddy(
-            feat,
-            # lambda_=self.lambda_,
-            batch_size=256,
-            K=self.sample_size,
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            importance=self._relevance_score,
-        )
-
-        # score, sset = pmi_kmeans_sampler(
-        #     np.abs(tgt - feat),
-        #     # feat,
-        #     clusters=self.clusters,
+        # sset = freddy(
+        #     feat,
+        #     # lambda_=self.lambda_,
+        #     batch_size=256,
         #     K=self.sample_size,
-        #     relevance=self._relevance_score,
-        #     # alpha=alpha,
-        #     alpha=0.01,
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
+        #     importance=self._relevance_score,
         # )
+
+        score, sset = pmi_kmeans_sampler(
+            np.abs(tgt - feat),
+            # feat,
+            clusters=self.clusters,
+            K=self.sample_size,
+            relevance=self._relevance_score,
+            # alpha=alpha,
+            alpha=0.01,
+        )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
         p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
-        # score = (
-        #     self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
-        #     .detach()
-        #     .numpy()
-        #     * -(p1 * np.log2(1 + p1)).sum()
-        # )
+        score = (
+            self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
+            .detach()
+            .numpy()
+            * -(p1 * np.log2(1 + p1)).sum()
+        )
         # score = (
         #     self.train_criterion(
         #         torch.from_numpy(feat[sset]), torch.from_numpy(tgt[sset])

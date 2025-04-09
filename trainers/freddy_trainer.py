@@ -344,6 +344,7 @@ class FreddyTrainer(SubsetTrainer):
         # print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
         print(sset)
+        print(self.subset)
         print(np.isin(sset, self.subset).sum())
         print(np.isin(self.subset, sset).sum())
         self.subset = sset

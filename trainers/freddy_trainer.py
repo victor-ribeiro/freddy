@@ -330,7 +330,7 @@ class FreddyTrainer(SubsetTrainer):
         # score = (score.mean() - score) / score.std()
         # score = 1 / (score + 10e-8)
         ##########################################
-        # self.targets[epoch] += tgt[sset].sum(axis=0)
+        self.targets[epoch] += tgt[sset].sum(axis=0)
         # score = (
         #     self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
         #     .cpu()
@@ -340,8 +340,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # # score = (score.max() - score) / (score.max() - score.min())
         # score = (score.mean() - score) / score.std()
-        self._relevance_score[sset] += score[sset] * self.lr
-        # print(f"score {score}")
+        self._relevance_score[sset] = score[sset]
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
         print(sset)
         print(self.subset)

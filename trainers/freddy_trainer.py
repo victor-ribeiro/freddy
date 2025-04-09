@@ -344,7 +344,7 @@ class FreddyTrainer(SubsetTrainer):
         # score = (score.mean() - score) / score.std()
         # score = 1 / (score + 10e-8)
         ##########################################
-        self.targets[epoch] += tgt[sset].sum(axis=0)
+
         # score = (
         #     self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
         #     .cpu()

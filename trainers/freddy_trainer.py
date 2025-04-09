@@ -158,7 +158,8 @@ def pmi_kmeans_sampler(
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).sum(axis=0)
 
-    h_pc = entropy(np.dot(dataset, clusters.T))
+    # h_pc = entropy(np.dot(dataset, clusters.T))
+    h_pc = entropy(dist)
     h_c = entropy(clusters)
     h_p = entropy(dataset)
     # pmi = (h_c - h_pc) / h_p
@@ -342,6 +343,7 @@ class FreddyTrainer(SubsetTrainer):
         self._relevance_score[sset] += score[sset] * self.lr
         # print(f"score {score}")
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
+        print(sset)
         print(np.isin(sset, self.subset).sum())
         print(np.isin(self.subset, sset).sum())
         self.subset = sset

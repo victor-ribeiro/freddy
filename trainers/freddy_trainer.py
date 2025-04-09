@@ -267,19 +267,22 @@ class FreddyTrainer(SubsetTrainer):
         lbl = []
         self.model.eval()
         feat = map(
-            lambda x: (
-                self.model.cpu()(x[0]).detach().numpy(),
-                one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
+            lambda x: self.model.cpu()(x[0]).detach().numpy(),
+            dataset,
+        )
+        tgt = map(
+            lambda x: one_hot_coding(
+                x[1].cpu().detach().numpy(), self.args.num_classes
             ),
             dataset,
         )
 
-        feat = map(lambda x: x[1] - x[0], feat)
+        # feat = map(lambda x: x[1] - x[0], feat)
         feat = np.vstack([*feat])
+        tgt = np.vstack([*tgt])
         # if not epoch or (epoch + 1) % 14 == 0:
         self.clusters = _n_cluster(
-            # (tgt - feat),
-            feat,
+            (tgt - feat),
             self.sample_size,
             0.5,
             300,

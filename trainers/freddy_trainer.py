@@ -273,7 +273,7 @@ class FreddyTrainer(SubsetTrainer):
 
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        self.train_frac = max(self.min_train_frac, self.train_frac - 0.05)
+        self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
         self.sample_size = int(len(self.train_dataset) * self.train_frac)
 
         dataset = self.train_dataset.dataset

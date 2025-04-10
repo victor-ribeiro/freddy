@@ -298,15 +298,15 @@ class FreddyTrainer(SubsetTrainer):
         feat = np.vstack([*feat])
         tgt = np.vstack([*tgt])
         # if not epoch or (epoch + 1) % 14 == 0:
-        self.clusters = _n_cluster(
-            (tgt - feat),
-            # self.sample_size,
-            self.args.train_frac,
-            0.5,
-            300,
-            10e-3,
-            self._relevance_score,
-        )
+        # self.clusters = _n_cluster(
+        #     (tgt - feat),
+        #     # self.sample_size,
+        #     self.args.train_frac,
+        #     0.5,
+        #     300,
+        #     10e-3,
+        #     self._relevance_score,
+        # )
         sset = freddy(
             feat,
             # lambda_=self.lambda_,
@@ -386,7 +386,8 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        if (epoch + 1) % 19 == 0:
+        # if (epoch + 1) % 19 == 0:
+        if (epoch) % 5 == 0:
             self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
             self.sample_size = int(len(self.train_dataset) * self.train_frac)
             print(self.sample_size)

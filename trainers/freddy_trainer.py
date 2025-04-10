@@ -305,7 +305,7 @@ class FreddyTrainer(SubsetTrainer):
         # )
         self._get_train_output()
         sset = freddy(
-            self.train_output - self.train_softmax,
+            tgt - self.train_softmax,
             # lambda_=self.lambda_,
             batch_size=512,
             # K=self.sample_size,

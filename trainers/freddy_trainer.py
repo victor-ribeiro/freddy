@@ -274,12 +274,12 @@ class FreddyTrainer(SubsetTrainer):
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
 
-        dataset = self.train_dataset.dataset
-        dataset = DataLoader(
-            dataset,
+        self.train_val_loader = DataLoader(
+            Subset(self.train_dataset, indices=self.subset),
             batch_size=self.args.batch_size,
-            shuffle=False,
+            shuffle=True,
             num_workers=self.args.num_workers,
+            pin_memory=True,
         )
 
         # self.model.eval()

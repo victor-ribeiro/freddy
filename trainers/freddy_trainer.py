@@ -282,21 +282,21 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
         )
 
-        self.model.eval()
-        feat = map(
-            lambda x: self.model.cpu()(x[0]).detach().numpy(),
-            dataset,
-        )
-        tgt = map(
-            lambda x: one_hot_coding(
-                x[1].cpu().detach().numpy(), self.args.num_classes
-            ),
-            dataset,
-        )
+        # self.model.eval()
+        # feat = map(
+        #     lambda x: self.model.cpu()(x[0]).detach().numpy(),
+        #     dataset,
+        # )
+        # tgt = map(
+        #     lambda x: one_hot_coding(
+        #         x[1].cpu().detach().numpy(), self.args.num_classes
+        #     ),
+        #     dataset,
+        # )
 
         # feat = map(lambda x: x[1] - x[0], feat)
-        feat = np.vstack([*feat])
-        tgt = np.vstack([*tgt])
+        # feat = np.vstack([*feat])
+        # tgt = np.vstack([*tgt])
         # if not epoch or (epoch + 1) % 14 == 0:
         # self.clusters = _n_cluster(
         #     (tgt - feat),
@@ -307,8 +307,9 @@ class FreddyTrainer(SubsetTrainer):
         #     10e-3,
         #     self._relevance_score,
         # )
+        self._get_train_output()
         sset = freddy(
-            feat,
+            self.train_output - self.train_softmax,
             # lambda_=self.lambda_,
             batch_size=512,
             # K=self.sample_size,

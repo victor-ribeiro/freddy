@@ -288,9 +288,7 @@ class FreddyTrainer(SubsetTrainer):
         #     dataset,
         # )
         tgt = map(
-            lambda x: one_hot_coding(
-                x[1].cpu().detach().numpy(), self.args.num_classes
-            ),
+            lambda x: one_hot_coding(x[1], self.args.num_classes),
             self.train_dataset.dataset,
         )
 

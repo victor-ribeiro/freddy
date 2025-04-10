@@ -56,7 +56,7 @@ class CRESTTrainer(SubsetTrainer):
                 self._check_approx_error(epoch, training_step)
 
             if training_step == self.reset_step:
-                print(f"select step {training_step} : {epoch}")
+                # print(f"select step {training_step} : {epoch}")
                 self._select_subset(epoch, training_step)
                 self._update_train_loader_and_weights()
                 self.train_iter = iter(self.train_loader)
@@ -379,7 +379,7 @@ class CRESTTrainer(SubsetTrainer):
 
         for random_set in self.random_sets:
             preds = self.train_softmax[random_set]
-            print(f"Epoch [{epoch}] [Greedy], pred size: {np.shape(preds)}")
+            # print(f"Epoch [{epoch}] [Greedy], pred size: {np.shape(preds)}")
             if np.shape(preds)[-1] == self.args.num_classes:
                 preds -= np.eye(self.args.num_classes)[self.train_target[random_set]]
 

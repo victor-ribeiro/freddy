@@ -294,36 +294,36 @@ class FreddyTrainer(SubsetTrainer):
         # tgt = np.vstack([*tgt])
         tgt = one_hot_coding(tgt, self.args.num_classes).cpu().detach().numpy()
         # if not epoch or (epoch + 1) % 14 == 0:
-        # self.clusters = _n_cluster(
-        #     (tgt - feat),
-        #     # self.sample_size,
-        #     self.args.train_frac,
-        #     0.5,
-        #     300,
-        #     10e-3,
-        #     self._relevance_score,
-        # )
-        self._get_train_output()
-        sset = freddy(
-            tgt - self.train_softmax,
-            # lambda_=self.lambda_,
-            batch_size=512,
-            # K=self.sample_size,
-            K=int(self.args.train_frac * len(self.train_dataset)),
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            importance=self._relevance_score,
+        self.clusters = _n_cluster(
+            (tgt - feat),
+            # self.sample_size,
+            self.args.train_frac,
+            0.5,
+            300,
+            10e-3,
+            self._relevance_score,
         )
-
-        # score, sset = pmi_kmeans_sampler(
-        #     feat,
-        #     # feat,
-        #     clusters=self.clusters,
-        #     K=self.sample_size,
-        #     relevance=self._relevance_score,
-        #     # alpha=alpha,
-        #     alpha=0.01,
+        self._get_train_output()
+        # sset = freddy(
+        #     tgt - self.train_softmax,
+        #     # lambda_=self.lambda_,
+        #     batch_size=512,
+        #     # K=self.sample_size,
+        #     K=int(self.args.train_frac * len(self.train_dataset)),
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
+        #     importance=self._relevance_score,
         # )
+
+        score, sset = pmi_kmeans_sampler(
+            tgt - self.train_softmax,
+            # feat,
+            clusters=self.clusters,
+            K=self.sample_size,
+            relevance=self._relevance_score,
+            # alpha=alpha,
+            alpha=0.01,
+        )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()

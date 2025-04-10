@@ -295,7 +295,7 @@ class FreddyTrainer(SubsetTrainer):
         tgt = one_hot_coding(tgt, self.args.num_classes).cpu().detach().numpy()
         # if not epoch or (epoch + 1) % 14 == 0:
         self.clusters = _n_cluster(
-            (tgt - feat),
+            tgt - self.train_softmax,
             # self.sample_size,
             self.args.train_frac,
             0.5,
@@ -319,7 +319,7 @@ class FreddyTrainer(SubsetTrainer):
             tgt - self.train_softmax,
             # feat,
             clusters=self.clusters,
-            K=self.sample_size,
+            K=int(self.args.train_frac * len(self.train_dataset)),
             relevance=self._relevance_score,
             # alpha=alpha,
             alpha=0.01,

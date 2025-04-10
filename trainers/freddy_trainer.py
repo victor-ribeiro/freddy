@@ -252,11 +252,13 @@ class FreddyTrainer(SubsetTrainer):
         grad_freddy=False,
     ):
         super().__init__(args, model, train_dataset, val_loader, train_weights)
-        self.sample_size = int(len(self.train_dataset) * self.args.train_frac)
         self.grad_freddy = grad_freddy
         self.selected = np.zeros(len(train_dataset))
         #
         n = len(train_dataset)
+        self.train_frac = 1
+        self.min_train_frac = self.args.train_frac
+        self.sample_size = int(len(self.train_dataset) * self.train_frac)
         self.epoch_selection = []
         self.delta = np.random.normal(0, 1, (n, self.args.num_classes))
         self._relevance_score = np.ones(n)
@@ -271,6 +273,8 @@ class FreddyTrainer(SubsetTrainer):
 
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
+        self.train_frac = max(self.min_train_frac, self.train_frac - 0.05)
+        self.sample_size = int(len(self.train_dataset) * self.train_frac)
 
         dataset = self.train_dataset.dataset
         dataset = DataLoader(
@@ -304,25 +308,25 @@ class FreddyTrainer(SubsetTrainer):
             10e-3,
             self._relevance_score,
         )
-        # sset = freddy(
-        #     feat,
-        #     # lambda_=self.lambda_,
-        #     batch_size=256,
-        #     K=self.sample_size,
-        #     metric=self.args.freddy_similarity,
-        #     alpha=self.args.alpha,
-        #     importance=self._relevance_score,
-        # )
-
-        score, sset = pmi_kmeans_sampler(
+        sset = freddy(
             feat,
-            # feat,
-            clusters=self.clusters,
+            # lambda_=self.lambda_,
+            batch_size=256,
             K=self.sample_size,
-            relevance=self._relevance_score,
-            # alpha=alpha,
-            alpha=0.01,
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
+            importance=self._relevance_score,
         )
+
+        # score, sset = pmi_kmeans_sampler(
+        #     feat,
+        #     # feat,
+        #     clusters=self.clusters,
+        #     K=self.sample_size,
+        #     relevance=self._relevance_score,
+        #     # alpha=alpha,
+        #     alpha=0.01,
+        # )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
@@ -384,7 +388,7 @@ class FreddyTrainer(SubsetTrainer):
 
         # if epoch % 5 == 0:
         # if not epoch or (epoch + 1) % 9 == 0:
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % 20 == 0:
             # if not epoch or (epoch + 1) % 5 == 0:
             self._select_subset(epoch, len(self.train_loader) * epoch)
             # self.lambda_ = max(

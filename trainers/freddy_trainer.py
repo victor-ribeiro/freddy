@@ -288,10 +288,11 @@ class FreddyTrainer(SubsetTrainer):
         #     dataset,
         # )
         tgt = [x[1] for x in self.train_dataset.dataset]
+        tgt = np.array(tgt)
 
         # feat = map(lambda x: x[1] - x[0], feat)
         # feat = np.vstack([*feat])
-        tgt = np.vstack([*tgt])
+        # tgt = np.vstack([*tgt])
         tgt = one_hot_coding(tgt, self.args.num_classes)
         # if not epoch or (epoch + 1) % 14 == 0:
         # self.clusters = _n_cluster(

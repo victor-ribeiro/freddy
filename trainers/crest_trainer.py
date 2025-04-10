@@ -95,6 +95,7 @@ class CRESTTrainer(SubsetTrainer):
                         "train_acc": train_acc,
                     }
                 )
+        size = 0
 
     def _forward_and_backward(self, data, target, data_idx):
         self.optimizer.zero_grad()

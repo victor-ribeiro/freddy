@@ -388,9 +388,9 @@ class FreddyTrainer(SubsetTrainer):
 
         # if (epoch + 1) % 19 == 0:
         if (epoch) % 5 == 0:
-            self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
-            self.sample_size = int(len(self.train_dataset) * self.train_frac)
-            print(self.sample_size)
+            # self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
+            # # self.sample_size = int(len(self.train_dataset) * self.train_frac)
+            # print(self.sample_size)
             self._select_subset(epoch, len(self.train_loader) * epoch)
 
         data_start = time.time()

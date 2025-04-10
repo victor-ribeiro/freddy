@@ -300,7 +300,8 @@ class FreddyTrainer(SubsetTrainer):
         # if not epoch or (epoch + 1) % 14 == 0:
         self.clusters = _n_cluster(
             (tgt - feat),
-            self.sample_size,
+            # self.sample_size,
+            self.args.sample_size,
             0.5,
             300,
             10e-3,
@@ -309,7 +310,7 @@ class FreddyTrainer(SubsetTrainer):
         sset = freddy(
             feat,
             # lambda_=self.lambda_,
-            batch_size=256,
+            batch_size=512,
             K=self.sample_size,
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
@@ -384,7 +385,7 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        if (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 19 == 0:
             self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
             self.sample_size = int(len(self.train_dataset) * self.train_frac)
             print(self.sample_size)

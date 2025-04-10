@@ -301,7 +301,7 @@ class FreddyTrainer(SubsetTrainer):
         self.clusters = _n_cluster(
             (tgt - feat),
             # self.sample_size,
-            self.args.sample_size,
+            self.args.train_frac,
             0.5,
             300,
             10e-3,
@@ -311,7 +311,8 @@ class FreddyTrainer(SubsetTrainer):
             feat,
             # lambda_=self.lambda_,
             batch_size=512,
-            K=self.sample_size,
+            # K=self.sample_size,
+            K=self.args.train_frac,
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             importance=self._relevance_score,

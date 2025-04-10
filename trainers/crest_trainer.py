@@ -348,7 +348,7 @@ class CRESTTrainer(SubsetTrainer):
             )
             indices.append(indices_per_class)
         indices = np.concatenate(indices)
-
+        print(f"Random subset size: {len(indices)}")
         return indices
 
     def _select_subset(self, epoch: int, training_step: int):

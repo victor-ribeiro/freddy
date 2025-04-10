@@ -312,7 +312,7 @@ class FreddyTrainer(SubsetTrainer):
             # lambda_=self.lambda_,
             batch_size=512,
             # K=self.sample_size,
-            K=self.args.train_frac,
+            K=int(self.args.train_frac * len(self.train_dataset)),
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             importance=self._relevance_score,

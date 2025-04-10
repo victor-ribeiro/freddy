@@ -74,8 +74,8 @@ class CRESTTrainer(SubsetTrainer):
                     self._update_train_loader_and_weights()
                 self.train_iter = iter(self.train_loader)
                 batch = next(self.train_iter)
-            print(f"epoch [{epoch}] batch size: {len(batch)}")
             data, target, data_idx = batch
+            print(f"epoch [{epoch}] data size: {len(data)}")
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)

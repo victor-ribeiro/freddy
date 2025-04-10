@@ -287,7 +287,7 @@ class FreddyTrainer(SubsetTrainer):
         #     lambda x: self.model.cpu()(x[0]).detach().numpy(),
         #     dataset,
         # )
-        tgt = [x[1] for x in self.train_dataset.dataset]
+        tgt = np.concatenate([x[1] for x in self.train_dataset.dataset])
         tgt = one_hot_coding(tgt, self.args.num_classes)
 
         # feat = map(lambda x: x[1] - x[0], feat)

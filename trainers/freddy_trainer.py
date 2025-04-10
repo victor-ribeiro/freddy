@@ -273,8 +273,6 @@ class FreddyTrainer(SubsetTrainer):
 
         print(f"selecting subset on epoch {epoch}")
         self.epoch_selection.append(epoch)
-        self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
-        self.sample_size = int(len(self.train_dataset) * self.train_frac)
 
         dataset = self.train_dataset.dataset
         dataset = DataLoader(
@@ -386,14 +384,11 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        # if epoch % 5 == 0:
-        # if not epoch or (epoch + 1) % 9 == 0:
-        if (epoch + 1) % 20 == 0:
-            # if not epoch or (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 5 == 0:
+            self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
+            self.sample_size = int(len(self.train_dataset) * self.train_frac)
+            print(self.sample_size)
             self._select_subset(epoch, len(self.train_loader) * epoch)
-            # self.lambda_ = max(
-            #     0.5, self.lambda_ + (self._relevance_score[self.subset].mean()) * lr
-            # )
 
         data_start = time.time()
         pbar = tqdm(

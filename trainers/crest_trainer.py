@@ -46,6 +46,7 @@ class CRESTTrainer(SubsetTrainer):
         lr = self.lr_scheduler.get_last_lr()[0]
         self.args.logger.info(f"Epoch {epoch} LR {lr:.6f}")
         print(f"epoch [{epoch}]: subset size {len(self.subset)}")
+        size = 0
 
         for training_step in range(
             self.steps_per_epoch * epoch, self.steps_per_epoch * (epoch + 1)
@@ -75,7 +76,8 @@ class CRESTTrainer(SubsetTrainer):
                 self.train_iter = iter(self.train_loader)
                 batch = next(self.train_iter)
             data, target, data_idx = batch
-            print(f"epoch [{epoch}] data size: {len(data)}")
+            size += len(data)
+            print(f"epoch [{epoch}] data size: {size}")
             data, target = data.to(self.args.device), target.to(self.args.device)
             data_time = time.time() - data_start
             self.batch_data_time.update(data_time)

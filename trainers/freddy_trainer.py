@@ -288,12 +288,11 @@ class FreddyTrainer(SubsetTrainer):
         #     dataset,
         # )
         tgt = [x[1] for x in self.train_dataset.dataset]
-        tgt = np.array(tgt)
 
         # feat = map(lambda x: x[1] - x[0], feat)
         # feat = np.vstack([*feat])
         # tgt = np.vstack([*tgt])
-        tgt = one_hot_coding(tgt, self.args.num_classes)
+        tgt = one_hot_coding(tgt, self.args.num_classes).cpu().detach().numpy()
         # if not epoch or (epoch + 1) % 14 == 0:
         # self.clusters = _n_cluster(
         #     (tgt - feat),
@@ -326,8 +325,6 @@ class FreddyTrainer(SubsetTrainer):
         #     alpha=0.01,
         # )
         ##########################################
-        print(tgt[sset].sum(axis=0))
-        print(tgt)
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
         p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8

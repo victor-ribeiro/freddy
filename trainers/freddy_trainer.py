@@ -155,10 +155,11 @@ def pmi_kmeans_sampler(
     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).sum(axis=0)
-    h_pc = entropy(np.dot(dataset, clusters.T))
-    # h_pc = entropy(dist)
+    # h_pc = entropy(np.dot(dataset, clusters.T))
+    h_pc = entropy(dist)
+    h_c = entropy(clusters)
     h_p = entropy(dataset)
-    pmi = h_p - h_pc
+    pmi = h_p + h_c - h_pc
     print(dist.shape)
     pmi = dist * pmi  # * relevance.reshape(-1, 1).sum(axis=1)
     # pmi = np.abs(pmi) ** -1

@@ -160,8 +160,8 @@ def pmi_kmeans_sampler(
     h_c = entropy(clusters)
     h_p = entropy(dataset)
     pmi = h_p + h_c - h_pc
-    print(dist.shape)
-    pmi = dist * pmi  # * relevance.reshape(-1, 1).sum(axis=1)
+
+    pmi = dist * pmi * relevance.reshape(-1, 1).sum(axis=1)
     # pmi = np.abs(pmi) ** -1
     sset = np.argsort(pmi, kind="heapsort")[::-1]
     # sset = np.argsort(pmi, kind="heapsort")

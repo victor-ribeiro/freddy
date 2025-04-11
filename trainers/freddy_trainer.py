@@ -205,7 +205,8 @@ def freddy(
     # basic config
     base_inc = base_inc(alpha)
     idx = np.arange(len(dataset))
-    # idx = np.random.permutation(idx)
+    idx = np.random.permutation(idx)
+    dataset = dataset[idx]
     q = Queue()
     sset = []
     vals = []
@@ -306,37 +307,32 @@ class FreddyTrainer(SubsetTrainer):
             10e-3,
             self._relevance_score,
         )
-        # sset = freddy(
-        #     tgt - self.train_softmax,
-        #     # lambda_=self.lambda_,
-        #     batch_size=512,
-        #     # K=self.sample_size,
-        #     K=int(self.args.train_frac * len(self.train_dataset)),
-        #     metric=self.args.freddy_similarity,
-        #     alpha=self.args.alpha,
-        #     importance=self._relevance_score,
-        # )
-
-        _, sset = pmi_kmeans_sampler(
-            tgt - self.train_softmax,
-            # feat,
-            clusters=self.clusters,
+        sset = freddy(
+            tgt - self.train_output,
+            # lambda_=self.lambda_,
+            batch_size=512,
+            # K=self.sample_size,
             K=int(self.args.train_frac * len(self.train_dataset)),
-            # relevance=1 / (self._relevance_score + 10e-8),
-            relevance=self._relevance_score,
-            # alpha=alpha,
-            alpha=0.01,
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
+            importance=self._relevance_score,
         )
+
+        # _, sset = pmi_kmeans_sampler(
+        #     tgt - self.train_softmax,
+        #     # feat,
+        #     clusters=self.clusters,
+        #     K=int(self.args.train_frac * len(self.train_dataset)),
+        #     # relevance=1 / (self._relevance_score + 10e-8),
+        #     relevance=self._relevance_score,
+        #     # alpha=alpha,
+        #     alpha=0.01,
+        # )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
         p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
-        # score = (
-        #     self.train_criterion(torch.from_numpy(feat), torch.from_numpy(tgt))
-        #     .detach()
-        #     .numpy()
-        #     # * -(p1 * np.log2(1 + p1)).sum()
-        # )
+
         # score = (
         #     self.train_criterion(
         #         torch.from_numpy(feat[sset]), torch.from_numpy(tgt[sset])
@@ -354,7 +350,7 @@ class FreddyTrainer(SubsetTrainer):
             .cpu()
             .detach()
             .numpy()
-        )
+        )  # * -(p1 * np.log2(1 + p1)).sum()
 
         # # score = (score.max() - score) / (score.max() - score.min())
         # score = (score.mean() - score) / score.std()

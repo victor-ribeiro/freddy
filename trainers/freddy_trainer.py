@@ -316,7 +316,7 @@ class FreddyTrainer(SubsetTrainer):
         #     importance=self._relevance_score,
         # )
 
-        score, sset = pmi_kmeans_sampler(
+        _, sset = pmi_kmeans_sampler(
             tgt - self.train_softmax,
             # feat,
             clusters=self.clusters,
@@ -347,12 +347,12 @@ class FreddyTrainer(SubsetTrainer):
         # score = 1 / (score + 10e-8)
         ##########################################
 
-        # score = (
-        #     self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
-        #     .cpu()
-        #     .detach()
-        #     .numpy()
-        # )
+        score = (
+            self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
+            .cpu()
+            .detach()
+            .numpy()
+        )
 
         # # score = (score.max() - score) / (score.max() - score.min())
         # score = (score.mean() - score) / score.std()

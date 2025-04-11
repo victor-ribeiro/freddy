@@ -276,8 +276,8 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection.append(epoch)
 
         self.train_val_loader = DataLoader(
-            # Subset(self.train_dataset, indices=self.subset),
-            self.val_loader.dataset,
+            Subset(self.train_dataset, indices=self.subset),
+            # self.val_loader.dataset,
             batch_size=self.args.batch_size,
             shuffle=True,
             num_workers=self.args.num_workers,

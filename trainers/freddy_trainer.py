@@ -163,7 +163,7 @@ def pmi_kmeans_sampler(
 
     pmi = dist * pmi * relevance.reshape(-1, 1).sum(axis=1)
     # pmi = np.abs(pmi) ** -1
-    sset = np.argsort(pmi, kind="heapsort")[::-1]
+    sset = np.argsort(pmi, kind="heapsort")  # [::-1]
     # sset = np.argsort(pmi, kind="heapsort")
 
     return pmi[sset], sset[:K]
@@ -360,7 +360,7 @@ class FreddyTrainer(SubsetTrainer):
         # score = (score.mean() - score) / score.std()
         # self._relevance_score[sset] += 1
         # self._relevance_score /= self._relevance_score.sum()
-        self._relevance_score = score
+        self._relevance_score[sset] = score[sset]
         # self._relevance_score[sset] += score[sset] * self.lr
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
         print(sset)

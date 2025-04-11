@@ -321,7 +321,8 @@ class FreddyTrainer(SubsetTrainer):
             # feat,
             clusters=self.clusters,
             K=int(self.args.train_frac * len(self.train_dataset)),
-            relevance=1 / (self._relevance_score + 10e-8),
+            # relevance=1 / (self._relevance_score + 10e-8),
+            relevance=self._relevance_score,
             # alpha=alpha,
             alpha=0.01,
         )
@@ -358,7 +359,7 @@ class FreddyTrainer(SubsetTrainer):
         # score = (score.mean() - score) / score.std()
         # self._relevance_score[sset] += 1
         # self._relevance_score /= self._relevance_score.sum()
-        self._relevance_score = score / self._relevance_score.sum()
+        self._relevance_score = score
         # self._relevance_score[sset] += score[sset] * self.lr
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
         print(sset)

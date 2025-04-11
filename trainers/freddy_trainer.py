@@ -348,7 +348,7 @@ class FreddyTrainer(SubsetTrainer):
         ##########################################
 
         score = (
-            self.train_criterion(torch.Tensor(feat), torch.Tensor(tgt))
+            self.train_criterion(self.train_output, torch.Tensor(tgt))
             .cpu()
             .detach()
             .numpy()

@@ -100,38 +100,31 @@ class Queue(list):
         self.append(item)
 
 
-def _n_cluster(dataset, k=1, alpha=1, max_iter=100, tol=10e-3, relevance=None):
+def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
     val = np.zeros(max_iter)
-    cls = np.zeros(max_iter)
+    base = np.log(1 + alpha)
     for idx, n in enumerate(range(max_iter)):
-        base = np.log(1 + alpha)
-        sampler = BisectingKMeans(n_clusters=n + 2, init="k-means++")
-        # sampler.fit(dataset, sample_weight=np.abs(relevance))
+        # print(val)
+        sampler = BisectingKMeans(n_clusters=n + 2)
         sampler.fit(dataset)
-        inertia = sampler.inertia_ + 10e-8
         if val[:idx].sum() == 0:
 
-            val[idx] = np.log(1 + sampler.inertia_) - base
-            # val[idx] += np.exp(val[idx] - relevance.std())
+            val[idx] = np.log(1 + sampler.inertia_ * alpha / base)
             continue
 
-        val[idx] = np.log(sampler.inertia_ / val[val > 0].sum()) - base
-        # val[idx] += np.exp(val[idx] - relevance.sum())
-        # alpha = np.log(k + 2)
-        if abs(val[:idx].min() - val[idx]) < tol:
-            # import matplotlib.pyplot as plt
+        val[idx] = np.log(1 + sampler.inertia_ * alpha / val[val > 0].max() / base)
 
-            # plt.plot(val[:idx])
-            # plt.show()
-            # exit()
+        if abs(val[:idx].min() - val[idx]) < tol:
             return sampler.cluster_centers_
-    raise ValueError("Does not converge")
+    # return sampler.cluster_centers_
+    return ValueError("Does not converge")
 
 
 def entropy(x):
     x = np.abs(x)
     total = x.sum()
     p = x / total
+    p = p[p > 0]
     return -(p * np.log2(p)).sum()
 
 
@@ -150,23 +143,24 @@ def kmeans_sampler(
 
 
 def pmi_kmeans_sampler(
-    dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
+    dataset,
+    K,
+    alpha=1,
+    tol=10e-3,
+    max_iter=500,
 ):
-    # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
+    clusters = _n_cluster(dataset, alpha, max_iter, tol)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).sum(axis=0)
     h_pc = entropy(np.dot(dataset, clusters.T))
-    # h_pc = entropy(dist)
     h_c = entropy(clusters)
     h_p = entropy(dataset)
-    pmi = h_p + h_c - h_pc
+    pmi = (h_p - h_c) / h_pc
 
-    pmi = dist * pmi * relevance.reshape(-1, 1).sum(axis=1)
-    # pmi = np.abs(pmi) ** -1
-    sset = np.argsort(pmi, kind="heapsort")  # [::-1]
-    # sset = np.argsort(pmi, kind="heapsort")
+    pmi = dist * pmi
+    sset = np.argsort(pmi, kind="heapsort")[::-1]
 
-    return pmi[sset], sset[:K]
+    return sset[:K]
 
 
 # def pmi_kmeans_sampler(

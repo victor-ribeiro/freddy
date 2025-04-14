@@ -292,15 +292,15 @@ class FreddyTrainer(SubsetTrainer):
         self._get_train_output()
         tgt = one_hot_coding(tgt, self.args.num_classes).cpu().detach().numpy()
         # if not epoch or (epoch + 1) % 14 == 0:
-        self.clusters = _n_cluster(
-            tgt - self.train_softmax,
-            # self.sample_size,
-            self.args.train_frac,
-            0.5,
-            300,
-            10e-3,
-            self._relevance_score,
-        )
+        # self.clusters = _n_cluster(
+        #     tgt - self.train_softmax,
+        #     # self.sample_size,
+        #     self.args.train_frac,
+        #     0.5,
+        #     300,
+        #     10e-3,
+        #     self._relevance_score,
+        # )
         sset = freddy(
             tgt - self.train_output,
             # lambda_=self.lambda_,

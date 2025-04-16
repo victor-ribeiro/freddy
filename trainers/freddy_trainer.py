@@ -246,7 +246,7 @@ class FreddyTrainer(SubsetTrainer):
         self.selected = np.zeros(len(train_dataset))
         #
         n = len(train_dataset)
-        # self.train_frac = 1
+        self.train_frac = 1
         self.min_train_frac = self.args.train_frac
         self.sample_size = int(len(self.train_dataset) * self.min_train_frac)
         self.epoch_selection = []
@@ -299,8 +299,8 @@ class FreddyTrainer(SubsetTrainer):
             tgt - self.train_output,
             # lambda_=self.lambda_,
             batch_size=512,
-            # K=self.sample_size,
-            K=int(self.args.train_frac * len(self.train_dataset)),
+            K=self.sample_size,
+            # K=int(self.train_frac * len(self.train_dataset)),
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
             importance=self._relevance_score,
@@ -368,8 +368,8 @@ class FreddyTrainer(SubsetTrainer):
 
         # if (epoch + 1) % 19 == 0:
         if (epoch) % 20 == 0:
-            # self.train_frac = max(self.min_train_frac, self.train_frac - 0.1)
-            # # self.sample_size = int(len(self.train_dataset) * self.train_frac)
+            self.train_frac = max(self.min_train_frac, self.train_frac - 0.2)
+            self.sample_size = int(len(self.train_dataset) * self.train_frac)
             # print(self.sample_size)
             self._select_subset(epoch, len(self.train_loader) * epoch)
             self._update_train_loader_and_weights()

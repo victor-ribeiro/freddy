@@ -142,13 +142,7 @@ def kmeans_sampler(
     return sset[:K]
 
 
-def pmi_kmeans_sampler(
-    dataset,
-    K,
-    alpha=1,
-    tol=10e-3,
-    max_iter=500,
-):
+def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500):
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).sum(axis=0)
@@ -271,8 +265,8 @@ class FreddyTrainer(SubsetTrainer):
         self.epoch_selection.append(epoch)
 
         self.train_val_loader = DataLoader(
-            Subset(self.train_dataset, indices=self.subset),
-            # self.val_loader.dataset,
+            # Subset(self.train_dataset, indices=self.subset),
+            self.val_loader.dataset,
             batch_size=self.args.batch_size,
             shuffle=True,
             num_workers=self.args.num_workers,
@@ -301,27 +295,21 @@ class FreddyTrainer(SubsetTrainer):
         #     10e-3,
         #     self._relevance_score,
         # )
-        sset = freddy(
-            tgt - self.train_output,
-            # lambda_=self.lambda_,
-            batch_size=512,
-            # K=self.sample_size,
-            K=int(self.args.train_frac * len(self.train_dataset)),
-            metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
-            importance=self._relevance_score,
-        )
-
-        # _, sset = pmi_kmeans_sampler(
-        #     tgt - self.train_softmax,
-        #     # feat,
-        #     clusters=self.clusters,
+        # sset = freddy(
+        #     tgt - self.train_output,
+        #     # lambda_=self.lambda_,
+        #     batch_size=512,
+        #     # K=self.sample_size,
         #     K=int(self.args.train_frac * len(self.train_dataset)),
-        #     # relevance=1 / (self._relevance_score + 10e-8),
-        #     relevance=self._relevance_score,
-        #     # alpha=alpha,
-        #     alpha=0.01,
+        #     metric=self.args.freddy_similarity,
+        #     alpha=self.args.alpha,
+        #     importance=self._relevance_score,
         # )
+
+        sset = pmi_kmeans_sampler(
+            tgt - self.train_softmax,
+            K=int(self.args.train_frac * len(self.train_dataset)),
+        )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()

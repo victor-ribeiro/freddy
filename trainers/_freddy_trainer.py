@@ -102,6 +102,7 @@ def freddy(
     batch_size=128,
     beta=0.75,
     return_vals=False,
+    importance=None,
 ):
     # basic config
     base_inc = base_inc(alpha)
@@ -123,59 +124,7 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]]
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            inc = score_s - score
-            if (inc < 0) or (not q):
-                break
-            score_t, idx_t = q.head
-            if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-                localmax = np.maximum(localmax, s)
-                sset.append(idx_s[0])
-                vals.append(score)
-            else:
-                q.push(inc, idx_s)
-            q.push(score_t, idx_t)
-    np.random.shuffle(sset)
-    if return_vals:
-        return np.array(vals), sset
-    return np.array(sset)
-
-
-@_register
-def grad_freddy(
-    dataset,
-    base_inc=base_inc,
-    alpha=0.15,
-    metric="similarity",
-    K=1,
-    batch_size=32,
-    beta=0.75,
-    return_vals=False,
-):
-    # basic config
-    base_inc = base_inc(alpha)
-    idx = np.arange(len(dataset))
-    q = Queue()
-    sset = []
-    vals = []
-    argmax = 0
-    inc = 0
-    for ds, V in zip(
-        batched(dataset, batch_size),
-        batched(idx, batch_size),
-    ):
-        D = METRICS[metric](ds, batch_size=batch_size)
-        size = len(D)
-        # localmax = np.median(D, axis=0)
-        localmax = np.amax(D, axis=1)
-        argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
-        while q and len(sset) < K:
-            score, idx_s = q.head
-            s = D[:, idx_s[1]]
-            s = score + (s * inc) + (np.gradient(s) * (inc**2) * 0.5)
+            s = D[:, idx_s[1]] * importance[idx_s[1]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -214,9 +163,10 @@ class FreddyTrainer(SubsetTrainer):
         self.importance_score = np.ones(len(train_dataset))
         # self.importance_score = np.zeros(len(train_dataset))
         self.select_flag = True
-        self.cur_error = 10e-3
+        self.cur_error = 1
 
     def _select_subset(self, epoch, training_step):
+        self.model.eval()
         print(f"selecting subset on epoch {epoch}")
         if self.epoch_selection:
             print(f"RESELECTING: {self.epoch_selection[-1]}")
@@ -232,40 +182,33 @@ class FreddyTrainer(SubsetTrainer):
 
             feat = map(
                 lambda x: (
-                    self.model.cpu()(x[0]).detach().numpy(),
+                    self.model.cpu()(x[0]).softmax(dim=1).detach().numpy(),
                     one_hot_coding(x[1].cpu().detach().numpy(), self.args.num_classes),
                 ),
                 dataset,
             )
 
             feat = map(lambda x: x[1] - x[0], feat)
-            feat = np.vstack([*feat]) * self.importance_score.reshape(-1, 1)
+            feat = np.vstack([*feat])
 
-        if self.grad_freddy:
-            sset = grad_freddy(
-                feat,
-                K=self.sample_size,
-                metric=self.args.freddy_similarity,
-                alpha=self.args.alpha,
-                beta=self.args.beta,
-            )
-        else:
             sset = freddy(
                 feat,
                 K=self.sample_size,
                 metric=self.args.freddy_similarity,
                 alpha=self.args.alpha,
                 beta=self.args.beta,
+                importance=self.importance_score,
             )
-        self.subset = sset
-        self.selected[sset] += 1
-        self.train_checkpoint["selected"] = self.selected
-        self.train_checkpoint["importance"] = self.importance_score
-        self.train_checkpoint["epoch_selection"] = self.epoch_selection
-        self.subset_weights = np.ones(self.sample_size)
+            self.subset = sset
+            self.selected[sset] += 1
+            self.train_checkpoint["selected"] = self.selected
+            self.train_checkpoint["importance"] = self.importance_score
+            self.train_checkpoint["epoch_selection"] = self.epoch_selection
+            self.subset_weights = np.ones(self.sample_size)
         # self.subset_weights = self.importance_score[self.subset]
 
         self.select_flag = False
+        self.model.train()
 
     def _train_epoch(self, epoch):
         if not epoch:
@@ -278,7 +221,7 @@ class FreddyTrainer(SubsetTrainer):
         try:
             modules = [*self.model.to(self.args.device).modules()]
             grad1 = modules[-1]
-            grad1 = grad1.weight.grad.data.norm(2).item()
+            grad1 = grad1.weight.grad.data
         except:
             grad1 = 0
         importance = self.importance_score.mean()
@@ -324,29 +267,28 @@ class FreddyTrainer(SubsetTrainer):
 
         modules = [*self.model.to(self.args.device).modules()]
         grad2 = modules[-1]
-        grad2 = grad2.weight.grad.data.norm(2).item()
-        # # error = abs(grad2 - grad1) / self.importance_score[self.subset].mean()
-        # error = grad2 - grad1 / self.importance_score[self.subset].mean()
-        # error = self.importance_score[self.subset].mean() / (
-        #     self.importance_score.mean() - importance
-        # )
-        error = grad2 - grad1
-        # error = abs(error)
-        # error = np.log(error)
-        print(f"relative error [{abs(self.cur_error-error)}]")
-        # if not epoch or abs(self.cur_error - error) < 10e-2:
-        # if not epoch or abs(self.cur_error / error) > 1:
-        # if not epoch or abs(self.cur_error - error) < 10e-2:
-        # if abs(self.cur_error - error) < 10e-2:
+        grad2 = grad2.weight.grad.data
+        # error = (grad2 - grad1).norm(2).item() / self.cur_error # -> esse teste aqui é o próximo
+        error = (grad2 - grad1).norm(2).item()
+        # print(f"relative error [{self.importance_score[self.subset].mean()}]")
+        # print(f"relative error [{abs(self.cur_error-error)}]")
+        print(f"relative error [{abs(self.cur_error - error)}]")
+        # if abs(self.cur_error) < 10e-2:
         if abs(self.cur_error - error) < 10e-2:
+            # if self.importance_score[self.subset].mean() > 1:
             self._select_subset(epoch, len(self.train_loader) * epoch)
-        self.cur_error = error
         if self.hist:
             self.hist[-1]["reaL_error"] = error
+        self.cur_error = error
 
     def _forward_and_backward(self, data, target, data_idx):
+        self.model.eval()
         with torch.no_grad():
             pred = self.model.to(self.args.device)(data)
+            pred = torch.argmax(pred, dim=1).float()
+            pred = torch.nn.functional.one_hot(
+                pred.to(torch.int64), self.args.num_classes
+            ).float()
             loss_t1 = self.train_criterion(pred, target).cpu().detach().numpy()
 
         loss, train_acc = super()._forward_and_backward(data, target, data_idx)
@@ -356,10 +298,13 @@ class FreddyTrainer(SubsetTrainer):
 
         # importance = np.abs(loss_t2 - loss_t1)
         # importance = (loss_t2 - loss_t1) / (loss_t2.max() - loss_t1.max())
-        importance = loss_t2 - loss_t1
-        self.importance_score[data_idx] += importance
+        # importance = (loss_t2 - loss_t1) / self.importance_score[self.subset].mean()
+        importance = loss_t2 - loss_t1  # / self.importance_score[data_idx].mean()
+        importance /= importance.max()
+        self.importance_score[data_idx] = importance
+        # self.importance_score[data_idx] -= importance
         # self.importance_score[data_idx] += importance
-
+        self.model.train()
         return loss, train_acc
 
     # def train(self):

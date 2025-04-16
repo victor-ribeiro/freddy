@@ -211,7 +211,7 @@ def freddy(
         _ = [q.push(base_inc, i) for i in zip(V, range(size))]
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]] * importance[idx_s[1]]
+            s = D[:, idx_s[1]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
             inc = score_s - score
             if (inc < 0) or (not q):
@@ -295,22 +295,22 @@ class FreddyTrainer(SubsetTrainer):
         #     10e-3,
         #     self._relevance_score,
         # )
-        # sset = freddy(
-        #     tgt - self.train_output,
-        #     # lambda_=self.lambda_,
-        #     batch_size=512,
-        #     # K=self.sample_size,
-        #     K=int(self.args.train_frac * len(self.train_dataset)),
-        #     metric=self.args.freddy_similarity,
-        #     alpha=self.args.alpha,
-        #     importance=self._relevance_score,
-        # )
-
-        sset = pmi_kmeans_sampler(
-            tgt - self.train_softmax,
+        sset = freddy(
+            tgt - self.train_output,
+            # lambda_=self.lambda_,
+            batch_size=512,
+            # K=self.sample_size,
             K=int(self.args.train_frac * len(self.train_dataset)),
+            metric=self.args.freddy_similarity,
+            alpha=self.args.alpha,
             importance=self._relevance_score,
         )
+
+        # sset = pmi_kmeans_sampler(
+        #     tgt - self.train_softmax,
+        #     K=int(self.args.train_frac * len(self.train_dataset)),
+        #     importance=self._relevance_score,
+        # )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
         p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
@@ -328,18 +328,18 @@ class FreddyTrainer(SubsetTrainer):
         # score = 1 / (score + 10e-8)
         ##########################################
 
-        score = (
-            self.train_criterion(torch.Tensor(self.train_output), torch.Tensor(tgt))
-            .cpu()
-            .detach()
-            .numpy()
-        )  # * -(p1 * np.log2(1 + p1)).sum()
+        # score = (
+        #     self.train_criterion(torch.Tensor(self.train_output), torch.Tensor(tgt))
+        #     .cpu()
+        #     .detach()
+        #     .numpy()
+        # )  # * -(p1 * np.log2(1 + p1)).sum()
 
         # # score = (score.max() - score) / (score.max() - score.min())
         # score = (score.mean() - score) / score.std()
         # self._relevance_score[sset] += 1
         # self._relevance_score /= self._relevance_score.sum()
-        self._relevance_score = score
+        # self._relevance_score = score
         # self._relevance_score[sset] += score[sset] * self.lr
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
         print(sset)

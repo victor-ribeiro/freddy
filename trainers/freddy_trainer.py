@@ -372,6 +372,7 @@ class FreddyTrainer(SubsetTrainer):
             # # self.sample_size = int(len(self.train_dataset) * self.train_frac)
             # print(self.sample_size)
             self._select_subset(epoch, len(self.train_loader) * epoch)
+            self._update_train_loader_and_weights()
 
         data_start = time.time()
         pbar = tqdm(
@@ -440,4 +441,3 @@ class FreddyTrainer(SubsetTrainer):
         # print(self._relevance_score[self.subset])
         self.lr = self.lr_scheduler.get_last_lr()[0]
         # self.cur_error = self._relevance_score[self.subset].mean()
-        self._update_train_loader_and_weights()

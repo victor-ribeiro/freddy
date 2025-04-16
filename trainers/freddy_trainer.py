@@ -367,7 +367,7 @@ class FreddyTrainer(SubsetTrainer):
         self._reset_metrics()
 
         # if (epoch + 1) % 19 == 0:
-        if (epoch) % 20 == 0:
+        if (epoch + 1) % 20 == 0:
             self.train_frac = max(self.min_train_frac, self.train_frac - 0.2)
             self.sample_size = int(len(self.train_dataset) * self.train_frac)
             # print(self.sample_size)

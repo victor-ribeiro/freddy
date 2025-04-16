@@ -82,7 +82,6 @@ class BaseTrainer:
         # self.optimizer = torch.optim.Adam(
         #     self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay
         # )
-
         lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
             self.optimizer,
             milestones=args.lr_milestones,
@@ -110,6 +109,8 @@ class BaseTrainer:
         self.batch_backward_time = AverageMeter()
         self.hist = []
         self.train_checkpoint = {}
+        self.select_time = np.zeros(self.args.epochs)
+        self.train_time = np.zeros(self.args.epochs)
 
     @property
     def device(self):
@@ -125,7 +126,9 @@ class BaseTrainer:
             self._load_checkpoint(self.args.resume_from_epoch)
 
         for epoch in range(self.args.resume_from_epoch, self.args.epochs):
+            train_init = time.perf_counter()
             self._train_epoch(epoch)
+            train_end = time.perf_counter()
             self._val_epoch(epoch)
 
             grad_norm = [*self.model.to(self.args.device).modules()]
@@ -142,6 +145,7 @@ class BaseTrainer:
                 "epoch": epoch,
             }
             self.hist.append(hist)
+            self.train_time[epoch] = train_end - train_init
 
             self._log_epoch(epoch)
 

@@ -1,4 +1,5 @@
 from utils import Adahessian
+import time
 
 from .subset_trainer import *
 
@@ -47,7 +48,7 @@ class CRESTTrainer(SubsetTrainer):
         self.args.logger.info(f"Epoch {epoch} LR {lr:.6f}")
         print(f"epoch [{epoch}]: subset size {len(self.subset)}")
         size = 0
-
+        cur_time = 0
         for training_step in range(
             self.steps_per_epoch * epoch, self.steps_per_epoch * (epoch + 1)
         ):
@@ -59,7 +60,9 @@ class CRESTTrainer(SubsetTrainer):
 
             if training_step == self.reset_step:
                 # print(f"select step {training_step} : {epoch}")
+                t_init = time.perf_counter()
                 self._select_subset(epoch, training_step)
+                cur_time += time.perf_counter()
                 self._update_train_loader_and_weights()
                 self.train_iter = iter(self.train_loader)
                 self._get_quadratic_approximation(epoch, training_step)
@@ -96,6 +99,7 @@ class CRESTTrainer(SubsetTrainer):
                     }
                 )
         size = 0
+        self.select_time[epoch] = cur_time
 
     def _forward_and_backward(self, data, target, data_idx):
         self.optimizer.zero_grad()

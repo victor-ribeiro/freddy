@@ -2,6 +2,7 @@
 from .base_trainer import *
 from torch.utils.data import Subset, DataLoader
 from datasets import SubsetGenerator
+import time
 
 
 class SubsetTrainer(BaseTrainer):
@@ -18,6 +19,7 @@ class SubsetTrainer(BaseTrainer):
         self.num_selection = 0
         self.subset = np.arange(len(train_dataset))
         self.subset_weights = np.ones(len(train_dataset))
+        self.select_time = np.zeros(self.args.epochs)
 
     def _update_train_loader_and_weights(self):
         self.args.logger.info(
@@ -51,7 +53,10 @@ class SubsetTrainer(BaseTrainer):
 
     def _train_epoch(self, epoch):
         # select a subset of the data
+        selection_init = time.perf_counter()
         self._select_subset(epoch, len(self.train_loader) * epoch)
+        selection_end = time.perf_counter()
+        self.select_time[epoch] = selection_end - selection_init
         self._update_train_loader_and_weights()
 
         self.model.train()

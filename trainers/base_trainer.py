@@ -265,6 +265,7 @@ class BaseTrainer:
         self.train_checkpoint["val_acc"] = self.val_acc
         self.train_checkpoint["hist"] = self.hist
         self.train_checkpoint["args"] = self.args
+        self.train_checkpoint["train_time"] = self.train_time
         torch.save(self.train_checkpoint, save_path)
         # torch.save(
         #     {

@@ -94,6 +94,7 @@ class SubsetTrainer(BaseTrainer):
                     train_acc,
                 )
             )
+        self.train_checkpoint["selection_time"] = self.select_time
 
         if self.args.cache_dataset and self.args.clean_cache_iteration:
             self.train_dataset.clean()

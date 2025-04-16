@@ -142,7 +142,7 @@ def kmeans_sampler(
     return sset[:K]
 
 
-def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500):
+def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, importance=None):
     clusters = _n_cluster(dataset, alpha, max_iter, tol)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(clusters, dataset).sum(axis=0)
@@ -151,7 +151,7 @@ def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500):
     h_p = entropy(dataset)
     pmi = (h_p - h_c) / h_pc
 
-    pmi = dist * pmi
+    pmi = dist * pmi * importance
     sset = np.argsort(pmi, kind="heapsort")[::-1]
 
     return sset[:K]
@@ -309,6 +309,7 @@ class FreddyTrainer(SubsetTrainer):
         sset = pmi_kmeans_sampler(
             tgt - self.train_softmax,
             K=int(self.args.train_frac * len(self.train_dataset)),
+            importance=self._relevance_score,
         )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)

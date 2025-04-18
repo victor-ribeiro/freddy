@@ -189,10 +189,10 @@ def freddy(
                 break
             score_t, idx_t = q.head
             if inc > score_t:
-                score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+                # score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
-                vals.append(score)
+                vals.append(score_s)
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)

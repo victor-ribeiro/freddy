@@ -100,6 +100,7 @@ class CRESTTrainer(SubsetTrainer):
                 )
         size = 0
         self.select_time[epoch] = cur_time
+        self.train_checkpoint["selection_time"] = self.select_time
 
     def _forward_and_backward(self, data, target, data_idx):
         self.optimizer.zero_grad()

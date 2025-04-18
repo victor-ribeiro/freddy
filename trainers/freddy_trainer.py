@@ -2,15 +2,10 @@ import numpy as np
 import heapq
 import math
 from itertools import batched
-from functools import reduce
 from sklearn.metrics import pairwise_distances
-from sklearn.cluster import (
-    BisectingKMeans,
-    AgglomerativeClustering,
-    FeatureAgglomeration,
-)
+from sklearn.cluster import BisectingKMeans
 
-
+import time
 import torch
 
 from .subset_trainer import *
@@ -131,13 +126,11 @@ def entropy(x):
 def kmeans_sampler(
     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
 ):
-    # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
     print(f"Found {len(clusters)} clusters, tol: {tol}")
     dist = pairwise_distances(dataset, clusters)
 
     dist -= np.amax(dist, axis=0)
     dist = np.abs(dist).sum(axis=1)
-    # dist = np.cos(dist)
     sset = np.argsort(dist, kind="heapsort")[::-1]
     return sset[:K]
 
@@ -155,28 +148,6 @@ def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, importance=
     sset = np.argsort(pmi, kind="heapsort")[::-1]
 
     return sset[:K]
-
-
-# def pmi_kmeans_sampler(
-#     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
-# ):
-#     # clusters = _n_cluster(dataset, K, alpha, max_iter, tol, relevance)
-#     print(f"Found {len(clusters)} clusters, tol: {tol}")
-#     dist = pairwise_distances(clusters, dataset).sum(axis=0)
-
-#     # h_pc = entropy(np.dot(dataset, clusters.T))
-#     h_pc = entropy(dist)
-#     h_c = entropy(clusters)
-#     h_p = entropy(dataset)
-#     # pmi = (h_c - h_pc) / h_p
-#     # pmi = (h_p + h_c) / h_pc
-#     pmi = h_p - h_pc
-#     pmi = (dist * pmi).sum(axis=0) * relevance.reshape(-1, 1).sum(axis=1)
-#     # pmi = dist * pmi * (relevance + 10e-8)
-#     sset = np.argsort(pmi, kind="heapsort")[::-1]
-#     # sset = np.argsort(pmi, kind="heapsort")
-
-#     return pmi[sset], sset[:K]
 
 
 def freddy(
@@ -272,29 +243,9 @@ class FreddyTrainer(SubsetTrainer):
             num_workers=self.args.num_workers,
             pin_memory=True,
         )
-
-        # self.model.eval()
-        # feat = map(
-        #     lambda x: self.model.cpu()(x[0]).detach().numpy(),
-        #     dataset,
-        # )
         tgt = [x[1] for x in self.train_dataset.dataset]
-
-        # feat = map(lambda x: x[1] - x[0], feat)
-        # feat = np.vstack([*feat])
-        # tgt = np.vstack([*tgt])
         self._get_train_output()
         tgt = one_hot_coding(tgt, self.args.num_classes).cpu().detach().numpy()
-        # if not epoch or (epoch + 1) % 14 == 0:
-        # self.clusters = _n_cluster(
-        #     tgt - self.train_softmax,
-        #     # self.sample_size,
-        #     self.args.train_frac,
-        #     0.5,
-        #     300,
-        #     10e-3,
-        #     self._relevance_score,
-        # )
         sset = freddy(
             tgt - self.train_output,
             # lambda_=self.lambda_,
@@ -306,6 +257,7 @@ class FreddyTrainer(SubsetTrainer):
             importance=self._relevance_score,
         )
 
+        ##########################################
         # sset = pmi_kmeans_sampler(
         #     tgt - self.train_softmax,
         #     K=int(self.args.train_frac * len(self.train_dataset)),
@@ -313,39 +265,10 @@ class FreddyTrainer(SubsetTrainer):
         # )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
-        p1 = self.targets[epoch].sum(axis=0) / self.targets[epoch].sum()
-        p2 = self.targets[: epoch + 1].sum(axis=0) / self.targets.sum() + 10e-8
 
-        # score = (
-        #     self.train_criterion(
-        #         torch.from_numpy(feat[sset]), torch.from_numpy(tgt[sset])
-        #     )
-        #     .detach()
-        #     .numpy()
-        # )
-
-        # score = (score.mean() - score) / score.std()
-        # score = 1 / (score + 10e-8)
-        ##########################################
-
-        # score = (
-        #     self.train_criterion(torch.Tensor(self.train_output), torch.Tensor(tgt))
-        #     .cpu()
-        #     .detach()
-        #     .numpy()
-        # )  # * -(p1 * np.log2(1 + p1)).sum()
-
-        # # score = (score.max() - score) / (score.max() - score.min())
-        # score = (score.mean() - score) / score.std()
-        # self._relevance_score[sset] += 1
-        # self._relevance_score /= self._relevance_score.sum()
-        # self._relevance_score = score
-        # self._relevance_score[sset] += score[sset] * self.lr
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
-        print(sset)
-        print(self.subset)
-        print(np.isin(sset, self.subset).sum())
-        print(np.isin(self.subset, sset).sum())
+        # print(np.isin(sset, self.subset).sum())
+        # print(np.isin(self.subset, sset).sum())
         self.subset = sset
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
@@ -371,8 +294,14 @@ class FreddyTrainer(SubsetTrainer):
             self.train_frac = max(self.min_train_frac, self.train_frac - 0.2)
             self.sample_size = int(len(self.train_dataset) * self.train_frac)
             # print(self.sample_size)
+            ##############################
+            selection_init = time.perf_counter()
             self._select_subset(epoch, len(self.train_loader) * epoch)
+            selection_end = time.perf_counter()
+            self.select_time[epoch] = selection_end - selection_init
+            ##############################
             self._update_train_loader_and_weights()
+            self.train_checkpoint["selection_time"] = self.select_time
 
         data_start = time.time()
         pbar = tqdm(
@@ -401,26 +330,6 @@ class FreddyTrainer(SubsetTrainer):
                     train_acc,
                 )
             )
-            # if self._relevance_score[data_idx].mean() < 0:
-            #     self._relevance_score[data_idx] -= loss.item() * self.lr
-            #     # self._relevance_score[data_idx] -= self.grad_norm * self.lr
-            # else:
-            #     self._relevance_score[data_idx] += loss.item() * self.lr
-            # self._relevance_score[data_idx] += self.grad_norm * self.lr
-            # self.model.eval()
-            # with torch.no_grad():
-            #     #     #### teste a rodar
-            #     pred = self.model(data).cpu().detach().numpy()
-            #     self._relevance_score[data_idx] = shannon_entropy(pred)
-            #     # self._relevance_score[data_idx] = (
-            #     #     self.train_criterion(pred, target).cpu().detach().numpy()
-            #     # )
-
-            # self.model.train()
-            #### fim
-        # self.clusters -= (
-        #     self.clusters * self.grad_norm * self.lr / len(self.train_loader)
-        # )
         self._val_epoch(epoch)
 
         train_loss /= len(self.train_loader)
@@ -433,11 +342,5 @@ class FreddyTrainer(SubsetTrainer):
         if self.hist:
             self.hist[-1]["reaL_error"] = self.cur_error
 
-        # self._relevance_score += self._relevance_score * lr
         self.cur_error = abs(self.cur_error - train_loss)
-        # print(shannon_entropy(self.delta[self.subset].mean()).shape)
-        # if not epoch or not (1.5 > self.cur_error > 10e-4):
-        # self._relevance_score +=  (shannon_entropy(self.delta) + 10e-8)
-        # print(self._relevance_score[self.subset])
         self.lr = self.lr_scheduler.get_last_lr()[0]
-        # self.cur_error = self._relevance_score[self.subset].mean()

@@ -54,19 +54,17 @@ def similarity(dataset, metric="euclidean", batch_size=1):
     return d.max(axis=1) - d
 
 
-def base_inc(alpha=1):
+def _base_inc(alpha=1):
     alpha = abs(alpha)
     return math.log(1 + alpha)
 
 
 def utility_score(e, sset, /, acc=0, alpha=0.1, beta=1.1):
-    gamma = (alpha + beta) / 2
-    norm = 1 / base_inc(alpha)
+    norm = 1 / _base_inc(alpha)
     argmax = np.maximum(e, sset)
-    f_norm = alpha / (sset.sum() + acc + 1)
-    # f_norm = min(0, f_norm)
+    f_norm = entropy(sset)
     util = norm * math.log(1 + (argmax.sum() + acc) * f_norm)
-    return util + (math.log(1 + (sset.sum() + acc)) * beta)
+    return util
 
 
 class Queue(list):
@@ -162,7 +160,7 @@ def freddy(
     importance=None,
 ):
     # basic config
-    base_inc = base_inc(alpha)
+    base_inc = _base_inc(alpha)
     idx = np.arange(len(dataset))
     idx = np.random.permutation(idx)
     dataset = dataset[idx]
@@ -175,7 +173,8 @@ def freddy(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
-        D = METRICS[metric](ds, batch_size=batch_size)
+        D = pairwise_distances(ds)
+        D = (D.max() - D) * ((entropy(dataset) - entropy(dataset[sset])) / np.log2(K))
         size = len(D)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
@@ -189,10 +188,9 @@ def freddy(
                 break
             score_t, idx_t = q.head
             if inc > score_t:
-                # score = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
                 localmax = np.maximum(localmax, s)
                 sset.append(idx_s[0])
-                vals.append(score_s)
+                vals.append(score)
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)

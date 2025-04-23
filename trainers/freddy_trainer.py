@@ -215,8 +215,8 @@ class FreddyTrainer(SubsetTrainer):
         self.selected = np.zeros(len(train_dataset))
         #
         n = len(train_dataset)
-        self.train_frac = 0.5
-        # self.train_frac = self.args.train_frac
+        # self.train_frac = 0.5
+        self.train_frac = self.args.train_frac
         self.min_train_frac = self.args.train_frac
         self.sample_size = int(len(self.train_dataset) * self.min_train_frac)
         self.epoch_selection = []
@@ -288,11 +288,11 @@ class FreddyTrainer(SubsetTrainer):
         self.model.train()
         self._reset_metrics()
 
-        if (epoch + 1) % 19 == 0:
-            # if (epoch + 1) % 20 == 0:
-            # if epoch % 20 == 0:
-            self.train_frac = max(self.min_train_frac, self.train_frac - 0.2)
-            self.sample_size = int(len(self.train_dataset) * self.train_frac)
+        # if (epoch + 1) % 19 == 0:
+        # if (epoch + 1) % 20 == 0:
+        if epoch % 20 == 0:
+            # self.train_frac = max(self.min_train_frac, self.train_frac - 0.2)
+            # self.sample_size = int(len(self.train_dataset) * self.train_frac)
             # print(self.sample_size)
             ##############################
             selection_init = time.perf_counter()

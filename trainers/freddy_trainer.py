@@ -150,7 +150,6 @@ def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, importance=
 
 def freddy(
     dataset,
-    base_inc=base_inc,
     alpha=0.15,
     metric="similarity",
     K=1,

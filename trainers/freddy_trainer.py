@@ -62,8 +62,8 @@ def _base_inc(alpha=1):
 def utility_score(e, sset, /, acc=0, alpha=0.1, beta=1.1):
     norm = 1 / _base_inc(alpha)
     argmax = np.maximum(e, sset)
-    f_norm = entropy(sset)
-    util = norm * math.log(1 + (argmax.sum() + acc) * f_norm)
+    f_norm = alpha / (sset.sum() + acc + 1)
+    util = norm * math.log(1 + (argmax.sum()) * f_norm)
     return util
 
 
@@ -150,13 +150,13 @@ def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, importance=
 
 def freddy(
     dataset,
+    base_inc=_base_inc,
     alpha=0.15,
     metric="similarity",
     K=1,
-    batch_size=128,
+    batch_size=1000,
     beta=0.75,
     return_vals=False,
-    importance=None,
 ):
     # basic config
     base_inc = _base_inc(alpha)
@@ -167,32 +167,42 @@ def freddy(
     sset = []
     vals = []
     argmax = 0
-    inc = 0
+    for V in batched(idx, batch_size):
+        _ = [q.push(base_inc, i) for i in zip(V, range(len(V)))]
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
+        ds = np.array(ds)
+        base_inc = _base_inc(alpha)
         D = pairwise_distances(ds)
-        D = (D.max() - D) * ((entropy(dataset) - entropy(dataset[sset])) / np.log2(K))
-        size = len(D)
+        _sset = []
+        D = D.max() - D * (entropy(dataset) - entropy(dataset[sset]))
+        # size = len(D)
         localmax = np.amax(D, axis=1)
         argmax += localmax.sum()
-        _ = [q.push(base_inc, i) for i in zip(V, range(size))]
+        n = len(sset)
+
         while q and len(sset) < K:
             score, idx_s = q.head
-            s = D[:, idx_s[1]]
+            s = D[idx_s[1]]
             score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
+            # score_s *= entropy(ds[_sset + [idx_s[1]]]) / entropy(ds[_sset])
             inc = score_s - score
             if (inc < 0) or (not q):
-                break
+                # break
+                continue
             score_t, idx_t = q.head
             if inc > score_t:
-                localmax = np.maximum(localmax, s)
+                _sset.append(idx_s[1])
+                vals.append(score_s)
                 sset.append(idx_s[0])
-                vals.append(score)
             else:
                 q.push(inc, idx_s)
             q.push(score_t, idx_t)
+        else:
+            break
+
     np.random.shuffle(sset)
     if return_vals:
         return np.array(vals), sset
@@ -252,7 +262,7 @@ class FreddyTrainer(SubsetTrainer):
             # K=int(self.train_frac * len(self.train_dataset)),
             metric=self.args.freddy_similarity,
             alpha=self.args.alpha,
-            importance=self._relevance_score,
+            # importance=self._relevance_score,
         )
 
         ##########################################

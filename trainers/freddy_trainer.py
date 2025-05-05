@@ -59,11 +59,11 @@ def _base_inc(alpha=1):
     return math.log(1 + alpha)
 
 
-def utility_score(e, sset, /, acc=0, alpha=0.1, beta=1.1):
+def utility_score(e, sset, /, alpha=0.1, beta=1.1):
     norm = 1 / _base_inc(alpha)
     argmax = np.maximum(e, sset)
-    f_norm = alpha / (sset.sum() + acc + 1)
-    util = norm * math.log(1 + (argmax.sum()) * f_norm)
+    f_norm = alpha / (sset.sum(axis=0) + 1)
+    util = norm * np.log(1 + (argmax.sum(axis=0)) * f_norm)
     return util
 
 

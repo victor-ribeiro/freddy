@@ -161,41 +161,31 @@ def freddy(
     # basic config
     base_inc = _base_inc(alpha)
     idx = np.arange(len(dataset))
-    idx = np.random.permutation(idx)
     dataset = dataset[idx]
     q = Queue()
     sset = []
     vals = []
-    argmax = 0
-    for V in batched(idx, batch_size):
-        _ = [q.push(base_inc, i) for i in zip(V, range(len(V)))]
+    _ = [q.push(base_inc, (V, V % batch_size)) for V in range(len(dataset))]
+    h_ = entropy(dataset)
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
         ds = np.array(ds)
-        base_inc = _base_inc(alpha)
         D = pairwise_distances(ds)
-        _sset = []
-        D = D.max() - D * (entropy(dataset) - entropy(dataset[sset]))
-        # size = len(D)
+        D = D.max() - D * (h_ - entropy(dataset[sset]))
         localmax = np.amax(D, axis=1)
-        argmax += localmax.sum()
-        n = len(sset)
-
+        score_s = utility_score(D, localmax, alpha=alpha, beta=beta)
         while q and len(sset) < K:
+
             score, idx_s = q.head
-            s = D[idx_s[1]]
-            score_s = utility_score(s, localmax, acc=argmax, alpha=alpha, beta=beta)
-            # score_s *= entropy(ds[_sset + [idx_s[1]]]) / entropy(ds[_sset])
             inc = score_s - score
-            if (inc < 0) or (not q):
+            if np.all(inc < 0) or (not q):
                 # break
                 continue
             score_t, idx_t = q.head
-            if inc > score_t:
-                _sset.append(idx_s[1])
-                vals.append(score_s)
+            if inc[idx_s[1]] > score_t:
+                vals.append(score_s[idx_s[1]])
                 sset.append(idx_s[0])
             else:
                 q.push(inc, idx_s)
@@ -256,12 +246,12 @@ class FreddyTrainer(SubsetTrainer):
         tgt = one_hot_coding(tgt, self.args.num_classes).cpu().detach().numpy()
         sset = freddy(
             tgt - self.train_output,
-            # lambda_=self.lambda_,
             batch_size=512,
             K=self.sample_size,
             # K=int(self.train_frac * len(self.train_dataset)),
             metric=self.args.freddy_similarity,
-            alpha=self.args.alpha,
+            # alpha=self.args.alpha,
+            alpha=0.5,
             # importance=self._relevance_score,
         )
 

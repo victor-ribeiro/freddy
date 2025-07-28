@@ -93,24 +93,110 @@ class Queue(list):
         self.append(item)
 
 
-def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
-    val = np.zeros(max_iter)
-    base = np.log(1 + alpha)
-    for idx, n in enumerate(range(max_iter)):
-        # print(val)
-        sampler = BisectingKMeans(n_clusters=n + 2)
-        sampler.fit(dataset)
-        if val[:idx].sum() == 0:
+# def _n_cluster(dataset, alpha=1, max_iter=100, tol=10e-2):
+#     val = np.zeros(max_iter)
+#     base = np.log(1 + alpha)
+#     for idx, n in enumerate(range(max_iter)):
+#         # print(val)
+#         sampler = BisectingKMeans(n_clusters=n + 2)
+#         sampler.fit(dataset)
+#         if val[:idx].sum() == 0:
 
-            val[idx] = np.log(1 + sampler.inertia_ * alpha / base)
-            continue
+#             val[idx] = np.log(1 + sampler.inertia_ * alpha / base)
+#             continue
 
-        val[idx] = np.log(1 + sampler.inertia_ * alpha / val[val > 0].max() / base)
+#         val[idx] = np.log(1 + sampler.inertia_ * alpha / val[val > 0].max() / base)
 
-        if abs(val[:idx].min() - val[idx]) < tol:
-            return sampler.cluster_centers_
-    # return sampler.cluster_centers_
-    return ValueError("Does not converge")
+#         if abs(val[:idx].min() - val[idx]) < tol:
+#             return sampler.cluster_centers_
+#     # return sampler.cluster_centers_
+#     return ValueError("Does not converge")
+
+
+# def entropy(x):
+#     x = np.abs(x)
+#     total = x.sum()
+#     p = x / total
+#     p = p[p > 0]
+#     return -(p * np.log2(p)).sum()
+
+
+# def kmeans_sampler(
+#     dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
+# ):
+#     print(f"Found {len(clusters)} clusters, tol: {tol}")
+#     dist = pairwise_distances(dataset, clusters)
+
+#     dist -= np.amax(dist, axis=0)
+#     dist = np.abs(dist).sum(axis=1)
+#     sset = np.argsort(dist, kind="heapsort")[::-1]
+#     return sset[:K]
+
+
+# def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, importance=None):
+#     clusters = _n_cluster(dataset, alpha, max_iter, tol)
+#     print(f"Found {len(clusters)} clusters, tol: {tol}")
+#     dist = pairwise_distances(clusters, dataset).sum(axis=0)
+#     h_pc = entropy(np.dot(dataset, clusters.T))
+#     h_c = entropy(clusters)
+#     h_p = entropy(dataset)
+#     pmi = (h_p - h_c) / h_pc
+
+#     pmi = dist * pmi * importance
+#     sset = np.argsort(pmi, kind="heapsort")[::-1]
+
+#     return sset[:K]
+
+
+# def freddy(
+#     dataset,
+#     base_inc=_base_inc,
+#     alpha=0.15,
+#     metric="similarity",
+#     K=1,
+#     batch_size=1000,
+#     beta=0.75,
+#     return_vals=False,
+# ):
+#     # basic config
+#     base_inc = _base_inc(alpha)
+#     idx = np.arange(len(dataset))
+#     dataset = dataset[idx]
+#     q = Queue()
+#     sset = []
+#     vals = []
+#     _ = [q.push(base_inc, (V, V % batch_size)) for V in range(len(dataset))]
+#     h_ = entropy(dataset)
+#     for ds, V in zip(
+#         batched(dataset, batch_size),
+#         batched(idx, batch_size),
+#     ):
+#         ds = np.array(ds)
+#         D = pairwise_distances(ds)
+#         D = D.max() - D * (h_ - entropy(dataset[sset]))
+#         localmax = np.amax(D, axis=1)
+#         score_s = utility_score(D, localmax, alpha=alpha, beta=beta)
+#         while q and len(sset) < K:
+
+#             score, idx_s = q.head
+#             inc = score_s - score
+#             if np.all(inc < 0) or (not q):
+#                 # break
+#                 continue
+#             score_t, idx_t = q.head
+#             if inc[idx_s[1]] > score_t:
+#                 vals.append(score_s[idx_s[1]])
+#                 sset.append(idx_s[0])
+#             else:
+#                 q.push(inc, idx_s)
+#             q.push(score_t, idx_t)
+#         else:
+#             break
+
+#     np.random.shuffle(sset)
+#     if return_vals:
+#         return np.array(vals), sset
+#     return np.array(sset)
 
 
 def entropy(x):
@@ -121,31 +207,12 @@ def entropy(x):
     return -(p * np.log2(p)).sum()
 
 
-def kmeans_sampler(
-    dataset, K, clusters, alpha=1, tol=10e-3, max_iter=500, relevance=None
-):
-    print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(dataset, clusters)
-
-    dist -= np.amax(dist, axis=0)
-    dist = np.abs(dist).sum(axis=1)
-    sset = np.argsort(dist, kind="heapsort")[::-1]
-    return sset[:K]
-
-
-def pmi_kmeans_sampler(dataset, K, alpha=1, tol=10e-3, max_iter=500, importance=None):
-    clusters = _n_cluster(dataset, alpha, max_iter, tol)
-    print(f"Found {len(clusters)} clusters, tol: {tol}")
-    dist = pairwise_distances(clusters, dataset).sum(axis=0)
-    h_pc = entropy(np.dot(dataset, clusters.T))
-    h_c = entropy(clusters)
-    h_p = entropy(dataset)
-    pmi = (h_p - h_c) / h_pc
-
-    pmi = dist * pmi * importance
-    sset = np.argsort(pmi, kind="heapsort")[::-1]
-
-    return sset[:K]
+def utility_score(e, sset, /, acc=0, alpha=0.1, beta=1.1):
+    norm = 1 / _base_inc(alpha)
+    argmax = np.maximum(e, sset)
+    f_norm = alpha / (sset.sum() + 1)
+    util = norm * math.log(1 + (argmax.sum()) * f_norm)
+    return util
 
 
 def freddy(
@@ -166,26 +233,34 @@ def freddy(
     sset = []
     vals = []
     _ = [q.push(base_inc, (V, V % batch_size)) for V in range(len(dataset))]
-    h_ = entropy(dataset)
+    alpha = alpha  # * h_ / (K * base_inc)
+    argmax = 0
+    # h_ = entropy(dataset)
     for ds, V in zip(
         batched(dataset, batch_size),
         batched(idx, batch_size),
     ):
         ds = np.array(ds)
         D = pairwise_distances(ds)
-        D = D.max() - D * (h_ - entropy(dataset[sset]))
+        D = D.max() - D  # * (h_ - entropy(dataset[sset]))
         localmax = np.amax(D, axis=1)
-        score_s = utility_score(D, localmax, alpha=alpha, beta=beta)
-        while q and len(sset) < K:
+        argmax += localmax.sum()
+        n = len(sset)
 
+        h_ = entropy(ds)
+        while q and len(sset) < K:
             score, idx_s = q.head
+            s = D[idx_s[1]]
+            score_s = utility_score(
+                s, localmax, acc=argmax, alpha=alpha * h_, beta=beta
+            )
             inc = score_s - score
-            if np.all(inc < 0) or (not q):
+            if (inc < 0) or (not q):
                 # break
                 continue
             score_t, idx_t = q.head
-            if inc[idx_s[1]] > score_t:
-                vals.append(score_s[idx_s[1]])
+            if inc > score_t:
+                vals.append(score_s)
                 sset.append(idx_s[0])
             else:
                 q.push(inc, idx_s)
@@ -248,25 +323,14 @@ class FreddyTrainer(SubsetTrainer):
             tgt - self.train_output,
             batch_size=512,
             K=self.sample_size,
-            # K=int(self.train_frac * len(self.train_dataset)),
             metric=self.args.freddy_similarity,
-            # alpha=self.args.alpha,
             alpha=0.5,
-            # importance=self._relevance_score,
         )
 
-        ##########################################
-        # sset = pmi_kmeans_sampler(
-        #     tgt - self.train_softmax,
-        #     K=int(self.args.train_frac * len(self.train_dataset)),
-        #     importance=self._relevance_score,
-        # )
         ##########################################
         self.targets[epoch] += tgt[sset].sum(axis=0)
 
         print(f"selected ({len(sset)}) [{epoch}]: {self.targets[epoch].astype(int)}")
-        # print(np.isin(sset, self.subset).sum())
-        # print(np.isin(self.subset, sset).sum())
         self.subset = sset
         self.selected[sset] += 1
         self.train_checkpoint["selected"] = self.selected
@@ -286,19 +350,14 @@ class FreddyTrainer(SubsetTrainer):
     def _train_epoch(self, epoch):
         self.model.train()
         self._reset_metrics()
-
-        # if (epoch + 1) % 19 == 0:
-        # if epoch % 20 == 0:
         if (epoch + 1) % 20 == 0:
-            # self.train_frac = max(self.min_train_frac, self.train_frac - 0.2)
-            # self.sample_size = int(len(self.train_dataset) * self.train_frac)
-            # print(self.sample_size)
-            ##############################
+
+            ############################################################
             selection_init = time.perf_counter()
             self._select_subset(epoch, len(self.train_loader) * epoch)
             selection_end = time.perf_counter()
             self.select_time[epoch] = selection_end - selection_init
-            ##############################
+            ############################################################
             self._update_train_loader_and_weights()
             self.train_checkpoint["selection_time"] = self.select_time
 
